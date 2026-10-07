@@ -1,0 +1,20 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: techmatch
+      POSTGRES_PASSWORD: techmatch
+      POSTGRES_DB: techmatch
+    ports:
+      - '${DB_PORT:-5434}:5432'
+    volumes:
+      - techmatch-db:/var/lib/postgresql/data
+      - ./docker/init-test-db.sql:/docker-entrypoint-initdb.d/init-test-db.sql:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U techmatch']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  techmatch-db:

@@ -1,0 +1,64 @@
+import { Router, type Request } from 'express';
+import multer from 'multer';
+import type { CvService } from '../application/cv-service.js';
+import { AppError } from '../application/errors.js';
+import type { QueryService } from '../application/query-service.js';
+import { toCvStatusDto, toJobDetailDto, toRecommendationDto } from './dto.js';
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function idParam(req: Request, name: string, notFound: AppError): string {
+  const value = req.params[name];
+  // Malformed ids cannot exist, so they are reported as not found.
+  if (typeof value !== 'string' || !UUID.test(value)) throw notFound;
+  return value;
+}
+
+const cvNotFound = () => new AppError('CV_NOT_FOUND', 'No se encontró el CV solicitado.');
+const jobNotFound = () => new AppError('JOB_NOT_FOUND', 'No se encontró la oferta solicitada.');
+
+export interface RouteDeps {
+  cvService: CvService;
+  queries: QueryService;
+  maxUploadBytes: number;
+}
+
+export function createRoutes({ cvService, queries, maxUploadBytes }: RouteDeps): Router {
+  const router = Router();
+  const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: maxUploadBytes, files: 1, fields: 0, parts: 2 },
+  });
+
+  router.post('/cvs', upload.single('file'), async (req, res) => {
+    if (!req.file) {
+      throw new AppError('INVALID_FILE', 'Debe enviarse un archivo PDF en el campo "file".');
+    }
+    const result = await cvService.upload({
+      originalName: req.file.originalname,
+      declaredMimeType: req.file.mimetype,
+      content: req.file.buffer,
+    });
+    res.status(201).json({ data: { cvId: result.cvId, status: toCvStatusDto(result.status) } });
+  });
+
+  router.get('/cvs/:cvId', async (req, res) => {
+    const cvId = idParam(req, 'cvId', cvNotFound());
+    const status = await cvService.getStatus(cvId);
+    res.json({ data: { id: cvId, status: toCvStatusDto(status) } });
+  });
+
+  router.get('/recommendations/:cvId', async (req, res) => {
+    const cvId = idParam(req, 'cvId', cvNotFound());
+    const recommendations = await queries.getRecommendations(cvId);
+    res.json({ data: { cvId, recommendations: recommendations.map(toRecommendationDto) } });
+  });
+
+  router.get('/jobs/:jobId', async (req, res) => {
+    const jobId = idParam(req, 'jobId', jobNotFound());
+    const job = await queries.getJob(jobId);
+    res.json({ data: toJobDetailDto(job) });
+  });
+
+  return router;
+}

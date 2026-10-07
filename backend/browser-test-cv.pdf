@@ -1,0 +1,52 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+5 0 obj
+<< /Length 1333 >>
+stream
+BT /F1 10 Tf 50 800 Td (María Fernández) Tj ET
+BT /F1 10 Tf 50 786 Td (Desarrolladora Backend Semi Senior) Tj ET
+BT /F1 10 Tf 50 772 Td (maria.fernandez@example.com | +54 11 5555-5555 | Capital Federal, Buenos Aires) Tj ET
+BT /F1 10 Tf 50 758 Td (Perfil) Tj ET
+BT /F1 10 Tf 50 744 Td (Desarrolladora backend con foco en APIs REST y microservicios.) Tj ET
+BT /F1 10 Tf 50 730 Td (Experiencia laboral) Tj ET
+BT /F1 10 Tf 50 716 Td (Desarrolladora Backend Semi Senior - Acme S.A.) Tj ET
+BT /F1 10 Tf 50 702 Td (Marzo 2021 - Actualidad) Tj ET
+BT /F1 10 Tf 50 688 Td (Desarrollo de microservicios con Java, Spring Boot y PostgreSQL.) Tj ET
+BT /F1 10 Tf 50 674 Td (Despliegues con Docker en AWS.) Tj ET
+BT /F1 10 Tf 50 660 Td (Desarrolladora Junior | Globant) Tj ET
+BT /F1 10 Tf 50 646 Td (Enero 2019 - Febrero 2021) Tj ET
+BT /F1 10 Tf 50 632 Td (Mantenimiento de aplicaciones Node.js y MySQL.) Tj ET
+BT /F1 10 Tf 50 618 Td (Educación) Tj ET
+BT /F1 10 Tf 50 604 Td (Ingeniería en Sistemas de Información - Universidad Tecnológica Nacional) Tj ET
+BT /F1 10 Tf 50 590 Td (2013 - 2019) Tj ET
+BT /F1 10 Tf 50 576 Td (Idiomas) Tj ET
+BT /F1 10 Tf 50 562 Td (Inglés: avanzado \(C1\)) Tj ET
+BT /F1 10 Tf 50 548 Td (Portugués: básico) Tj ET
+BT /F1 10 Tf 50 534 Td (Habilidades) Tj ET
+BT /F1 10 Tf 50 520 Td (Java, Spring, SQL, Git, JS, Scrum) Tj ET
+endstream
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000241 00000 n 
+0000000338 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+1723
+%%EOF
