@@ -133,6 +133,7 @@ export function AdaptCvPage() {
   const [document, setDocument] = useState<CvDocument | null>(null);
   const [view, setView] = useState<'edit' | 'preview'>('edit');
   const [confirmReset, setConfirmReset] = useState(false);
+  const [nameMissing, setNameMissing] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -159,6 +160,7 @@ export function AdaptCvPage() {
   function update(next: CvDocument) {
     setDocument(next);
     save(key, next);
+    if (next.personal.fullName.trim()) setNameMissing(false);
   }
 
   const back = (
@@ -191,6 +193,23 @@ export function AdaptCvPage() {
 
   const { draft } = state;
   const doc = document;
+
+  /**
+   * Exports the Harvard preview through the browser's print dialog ("Guardar como PDF").
+   * The print stylesheet hides everything else; the page title becomes the file name.
+   */
+  function downloadPdf() {
+    const name = doc.personal.fullName.trim();
+    if (!name) {
+      setNameMissing(true);
+      return;
+    }
+    const page = window.document;
+    const previousTitle = page.title;
+    page.title = `CV - ${name} - ${draft.job.company}`;
+    window.addEventListener('afterprint', () => (page.title = previousTitle), { once: true });
+    window.print();
+  }
   return (
     <Page>
       <nav className="detail-nav">{back}</nav>
@@ -203,6 +222,10 @@ export function AdaptCvPage() {
           </p>
         </div>
         <div className="adapt-header__actions">
+          <button type="button" className="button button--filled" onClick={downloadPdf}>
+            <Icon name="file" size={18} />
+            Descargar PDF
+          </button>
           {confirmReset ? (
             <span className="suggestion__confirm">
               ¿Descartar tus cambios?
@@ -236,6 +259,13 @@ export function AdaptCvPage() {
           )}
         </div>
       </header>
+
+      {nameMissing && (
+        <p className="banner banner--warning adapt-banner" role="alert">
+          <Icon name="alert" size={18} />
+          Completá tu nombre en "Datos personales" antes de descargar el CV.
+        </p>
+      )}
 
       <section
         className="card card--outlined adapt-suggestions"
@@ -279,7 +309,7 @@ export function AdaptCvPage() {
         <div className="adapt-layout__editor">
           <CvEditor document={doc} onChange={update} />
         </div>
-        <div className="adapt-layout__preview">
+        <div className="adapt-layout__preview print-target">
           <CvPreview document={doc} />
         </div>
       </div>
