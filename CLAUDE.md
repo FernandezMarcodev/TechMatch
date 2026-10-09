@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-TechMatch: anonymous web app. User uploads a CV (PDF) → structured `CandidateProfile` → deterministic matching against job offers synced from source APIs (the Get on Board public API — no scraping; see `docs/05-FUENTES-DE-OFERTAS.md`) → only MEDIUM/HIGH recommendations, sorted by score, each with explanations. Specs (Spanish) live in `docs/` and are the functional source of truth; `docs/13-DECISIONES-TECNICAS.md` explains the non-obvious design decisions and their rationale — read it before changing matching, schema or job-source behavior. `docs/08-Claude.md` holds the agent rules (summarized here).
+TechMatch: anonymous web app. User uploads a CV (PDF) → structured `CandidateProfile` → deterministic matching against job offers synced from source APIs (the Get on Board public API — no scraping; see `docs/05-FUENTES-DE-OFERTAS.md`) → only MEDIUM/HIGH recommendations, sorted by score, each with explanations. Specs (Spanish) live in `docs/` and are the functional source of truth; `docs/13-DECISIONES-TECNICAS.md` explains the non-obvious design decisions and their rationale — read it before changing matching, schema or job-source behavior. `docs/08-Claude.md` holds the agent rules (summarized here). `docs/14-PLAN-DE-DESARROLLO.md` is the version/branch plan after the MVP (`v1.0.0`).
 
 ## Commands
 
@@ -50,9 +50,13 @@ Dependency direction: `api` → `application` → `domain`/`matching`; infrastru
 
 Frontend (`frontend/src`): Material Design 3 look — color/shape/elevation tokens in `styles/tokens.css` (light + dark via `prefers-color-scheme`), components in `styles/app.css`, inline SVG icons in `components/Icon.tsx` (no icon/UI library). `api/client.ts` (typed fetch, `ApiError`); pages Home (hero + drag & drop upload) → Processing (polls status) → Recommendations (signal-bar level meter — the numeric score is internal and never sent by the API —, client-side level/remote filters, expandable reasons, "show more") → Job detail. UI text is Spanish.
 
+## Git workflow
+
+`main` is always green and only receives Pull Requests (squash merge, one tag per version). One branch per ticket from the plan (`feat/…`, `fix/…`, `chore/…`, `docs/…`); Conventional Commits; each branch ships code + tests + docs.
+
 ## Rules that must hold
 
-- MVP scope only: no auth/registration/sessions/profiles/visible history, no auto-apply, no CV generation/adaptation, no LLM in scoring (`docs/12-FUTURE-ROADMAP.md` is out of scope).
+- Scope: the MVP plus only what `docs/14-PLAN-DE-DESARROLLO.md` assigns to the current ticket/branch. Accounts are optional (the anonymous flow must keep working). Never auto-apply to jobs, never use an LLM for scoring, and an adapted CV never adds data the CV doesn't contain (missing items are suggestions only).
 - Never invent candidate data: unknown → `null`/`UNKNOWN`/empty. UNKNOWN is neither match nor mismatch.
 - LOW and inactive offers are never recommended; order is score DESC.
 - Never log CV contents (pino redacts `*.text`/`*.extractedText`; log metadata only). Uploaded files are private, named `<uuid>.pdf`.
