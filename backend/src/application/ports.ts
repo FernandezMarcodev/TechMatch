@@ -13,6 +13,8 @@ export interface CvRepository {
   create(cv: Cv): Promise<void>;
   findById(id: string): Promise<Cv | null>;
   updateStatus(id: string, status: CvStatus, extractedText?: string | null): Promise<void>;
+  /** Marks CVs left UPLOADED/PROCESSING by an interrupted process as FAILED. Returns how many. */
+  failInterrupted(): Promise<number>;
 }
 
 export interface CandidateProfileRepository {

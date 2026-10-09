@@ -73,7 +73,7 @@ Los valores concretos están en `03-MATCHING-SPEC.md` y en `matching-config.ts`.
 * Extracción heurística y conservadora: secciones por títulos conocidos, rangos de fechas para experiencias, palabras explícitas para seniority, educación e idiomas. El seniority no se deduce de los años.
 * Compresión: paso no-op (archivos chicos y privados).
 * OCR: puerto `OcrProvider` deshabilitado. Requiere renderizar páginas con canvas nativo y un motor OCR. Un PDF sin texto termina en `failed` con un mensaje claro.
-* Procesamiento asíncrono en el proceso del backend (`TaskRunner`); el cliente consulta el estado.
+* Procesamiento asíncrono en el proceso del backend (`TaskRunner`); el cliente consulta el estado. Al iniciar, los CVs interrumpidos por un reinicio pasan a `FAILED` para no quedar "procesando" indefinidamente. Es suficiente para una instancia; escalar a varias requiere una cola persistente.
 * Las recomendaciones se calculan al procesar el CV, contra las ofertas activas en ese momento.
 
 ## Frontend

@@ -21,7 +21,7 @@ npm run typecheck                  # both workspaces
 npm run lint                       # ESLint (flat config at root)
 npm run format                     # Prettier
 npm test                           # backend unit + integration, then frontend
-npm run test:e2e                   # Playwright: starts backend :3100 + frontend :5174, DB techmatch_e2e
+npm run test:e2e                   # Playwright: own backend :3199 + frontend :5199, DB techmatch_e2e
 ```
 
 Single tests:
