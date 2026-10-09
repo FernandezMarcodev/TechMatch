@@ -124,3 +124,61 @@ describe('GET /api/cvs/:cvId/adaptations/:jobId', () => {
     expect(malformed.status).toBe(404);
   });
 });
+
+describe('POST /api/cvs/:cvId/adaptations/:jobId/evaluation', () => {
+  async function draftFor(cvId: string, jobId: string) {
+    const res = await request(app).get(`/api/cvs/${cvId}/adaptations/${jobId}`);
+    return res.body.data.document;
+  }
+
+  it('evaluates the unchanged draft like the original CV, without a numeric score', async () => {
+    const cvId = await processedCv();
+    const jobId = await offerId();
+    const document = await draftFor(cvId, jobId);
+
+    const res = await request(app)
+      .post(`/api/cvs/${cvId}/adaptations/${jobId}/evaluation`)
+      .send(document);
+    expect(res.status).toBe(200);
+    expect(res.body.data.adapted.level).toBe(res.body.data.original.level);
+    expect(res.body.data.adapted.reasons).toHaveLength(7);
+    expect(JSON.stringify(res.body)).not.toContain('score');
+  });
+
+  it('reflects confirmed edits in the technologies reason', async () => {
+    const cvId = await processedCv();
+    const jobId = await offerId();
+    const document = await draftFor(cvId, jobId);
+    const edited = {
+      ...document,
+      skills: [...document.skills, { name: 'Kubernetes', highlighted: true }],
+    };
+
+    const res = await request(app)
+      .post(`/api/cvs/${cvId}/adaptations/${jobId}/evaluation`)
+      .send(edited);
+    const skills = res.body.data.adapted.reasons.find(
+      (r: { criterion: string }) => r.criterion === 'skills',
+    );
+    expect(skills.message).toContain('Coinciden 3 de 3 tecnologías requeridas');
+  });
+
+  it('works without personal data and rejects malformed documents', async () => {
+    const cvId = await processedCv();
+    const jobId = await offerId();
+    const document = await draftFor(cvId, jobId);
+    const { headline, location } = document.personal;
+
+    const withoutPersonal = await request(app)
+      .post(`/api/cvs/${cvId}/adaptations/${jobId}/evaluation`)
+      .send({ ...document, personal: { headline, location } });
+    expect(withoutPersonal.status).toBe(200);
+
+    const malformed = await request(app)
+      .post(`/api/cvs/${cvId}/adaptations/${jobId}/evaluation`)
+      .send({ ...document, experiences: 'no es una lista' });
+    expect(malformed.status).toBe(400);
+    expect(malformed.body.error.code).toBe('INVALID_CV_DOCUMENT');
+    expect(malformed.body.error.details.issues[0].path).toBe('experiences');
+  });
+});

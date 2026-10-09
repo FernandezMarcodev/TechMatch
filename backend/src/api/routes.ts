@@ -3,8 +3,15 @@ import multer from 'multer';
 import type { AdaptationService } from '../application/adaptation-service.js';
 import type { CvService } from '../application/cv-service.js';
 import { AppError } from '../application/errors.js';
+import { evaluationDocumentSchema } from '../cv-adaptation/document-schema.js';
 import type { QueryService } from '../application/query-service.js';
-import { toAdaptedDraftDto, toCvStatusDto, toJobDetailDto, toRecommendationDto } from './dto.js';
+import {
+  toAdaptationEvaluationDto,
+  toAdaptedDraftDto,
+  toCvStatusDto,
+  toJobDetailDto,
+  toRecommendationDto,
+} from './dto.js';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -67,6 +74,22 @@ export function createRoutes({
     const jobId = idParam(req, 'jobId', jobNotFound());
     const draft = await adaptation.getDraft(cvId, jobId);
     res.json({ data: toAdaptedDraftDto(draft) });
+  });
+
+  router.post('/cvs/:cvId/adaptations/:jobId/evaluation', async (req, res) => {
+    const cvId = idParam(req, 'cvId', cvNotFound());
+    const jobId = idParam(req, 'jobId', jobNotFound());
+    const parsed = evaluationDocumentSchema.safeParse(req.body);
+    if (!parsed.success) {
+      throw new AppError('INVALID_CV_DOCUMENT', 'El CV enviado no tiene un formato válido.', {
+        issues: parsed.error.issues.slice(0, 10).map((i) => ({
+          path: i.path.join('.'),
+          message: i.message,
+        })),
+      });
+    }
+    const evaluation = await adaptation.evaluate(cvId, jobId, parsed.data);
+    res.json({ data: toAdaptationEvaluationDto(evaluation) });
   });
 
   router.get('/jobs/:jobId', async (req, res) => {

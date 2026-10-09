@@ -1,3 +1,4 @@
+import type { AdaptationEvaluation } from '../application/adaptation-service.js';
 import type { Recommendation } from '../application/ports.js';
 import type { AdaptationSuggestion, AdaptedDraft, CvDocument } from '../cv-adaptation/types.js';
 import type { JobOffer, MatchReason } from '../domain/entities.js';
@@ -97,5 +98,25 @@ export function toAdaptedDraftDto(draft: AdaptedDraft & { job: JobOffer }): Adap
       message: s.message,
       ...(s.skill ? { skill: s.skill } : {}),
     })),
+  };
+}
+
+export interface AdaptationEvaluationDto {
+  original: { level: MatchLevel };
+  adapted: { level: MatchLevel; reasons: MatchReason[] };
+}
+
+/** Levels and reasons only: the numeric score is internal. */
+export function toAdaptationEvaluationDto(e: AdaptationEvaluation): AdaptationEvaluationDto {
+  return {
+    original: { level: e.original.level },
+    adapted: {
+      level: e.adapted.level,
+      reasons: e.adapted.reasons.map((r) => ({
+        criterion: r.criterion,
+        status: r.status,
+        message: r.message,
+      })),
+    },
   };
 }
