@@ -172,6 +172,24 @@ Borrador del CV adaptado a una oferta, más sugerencias. Detalle del documento y
 }
 ```
 
+## POST /api/cvs/{cvId}/adaptations/{jobId}/evaluation
+
+Evalúa el CV editado contra la oferta con el mismo motor de matching y lo compara con el CV original. No guarda nada.
+
+Request: el `document` del borrador editado. Los datos personales identificatorios (nombre, email, teléfono, links) no se envían; si llegan, se descartan. Límites: 30 experiencias, 15 viñetas por experiencia, 20 estudios, 100 tecnologías, 15 idiomas, textos de hasta 2.000 caracteres; fechas `YYYY-MM` o `YYYY`.
+
+```json
+{
+  "data": {
+    "original": { "level": "MEDIUM" },
+    "adapted": {
+      "level": "HIGH",
+      "reasons": [{ "criterion": "skills", "status": "positive", "message": "Coinciden 3 de 3 tecnologías requeridas (…)" }]
+    }
+  }
+}
+```
+
 ## Error contract
 
 Todos los errores:
@@ -195,6 +213,7 @@ Todos los errores:
 | `CV_NOT_FOUND` | 404 | CV inexistente o id inválido |
 | `JOB_NOT_FOUND` | 404 | oferta inexistente o id inválido |
 | `CV_NOT_PROCESSED` | 409 | el CV todavía no terminó de procesarse o falló (adaptación) |
+| `INVALID_CV_DOCUMENT` | 400 | el CV editado no cumple el formato o los límites (`details.issues`) |
 | `INTERNAL_ERROR` | 500 | error inesperado |
 
 HTTP utilizados:
