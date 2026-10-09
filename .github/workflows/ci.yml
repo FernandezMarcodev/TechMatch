@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: 24
+  # Same database layout as docker-compose.yml (port 5434).
+  DATABASE_URL: postgres://techmatch:techmatch@localhost:5434/techmatch
+  TEST_DATABASE_URL: postgres://techmatch:techmatch@localhost:5434/techmatch_test
+  E2E_DATABASE_URL: postgres://techmatch:techmatch@localhost:5434/techmatch_e2e
+
+jobs:
+  checks:
+    name: Lint, types, tests and build
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: techmatch
+          POSTGRES_PASSWORD: techmatch
+          POSTGRES_DB: techmatch_test
+        ports:
+          - 5434:5432
+        options: >-
+          --health-cmd "pg_isready -U techmatch"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+  e2e:
+    name: End-to-end (Playwright)
+    runs-on: ubuntu-latest
+    needs: checks
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: techmatch
+          POSTGRES_PASSWORD: techmatch
+          POSTGRES_DB: techmatch
+        ports:
+          - 5434:5432
+        options: >-
+          --health-cmd "pg_isready -U techmatch"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
