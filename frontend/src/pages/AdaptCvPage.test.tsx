@@ -229,6 +229,38 @@ describe('re-evaluating the adapted CV', () => {
   });
 });
 
+describe('PDF download', () => {
+  it('asks for the name before printing', async () => {
+    const print = vi.fn();
+    vi.stubGlobal('print', print);
+    mockDraft();
+    renderAdapt();
+    await userEvent.click(await screen.findByRole('button', { name: 'Descargar PDF' }));
+    expect(screen.getByRole('alert')).toHaveTextContent('Completá tu nombre');
+    expect(print).not.toHaveBeenCalled();
+
+    await userEvent.type(screen.getByLabelText('Nombre y apellido'), 'María');
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it('prints the CV with a file name built from the name and the company', async () => {
+    let titleWhilePrinting = '';
+    const print = vi.fn(() => {
+      titleWhilePrinting = window.document.title;
+      window.dispatchEvent(new Event('afterprint'));
+    });
+    vi.stubGlobal('print', print);
+    window.document.title = 'TechMatch';
+    mockDraft();
+    renderAdapt();
+    await userEvent.type(await screen.findByLabelText('Nombre y apellido'), 'María Fernández');
+    await userEvent.click(screen.getByRole('button', { name: 'Descargar PDF' }));
+    expect(print).toHaveBeenCalledTimes(1);
+    expect(titleWhilePrinting).toBe('CV - María Fernández - Empresa X');
+    expect(window.document.title).toBe('TechMatch');
+  });
+});
+
 describe('entry points', () => {
   it('offers "Adaptar mi CV" on each recommendation', async () => {
     vi.stubGlobal(

@@ -98,6 +98,15 @@
 * [x] Error handling.
 * [x] Documentation.
 
+## Fase 10 — Adaptación de CV (v2.0)
+
+* [x] Especificación.
+* [x] Borrador adaptado determinístico y sugerencias.
+* [x] Editor con vista previa Harvard.
+* [x] Recálculo con el motor de matching.
+* [x] Exportación a PDF.
+* [x] Tests unitarios, de integración, de frontend y E2E.
+
 ## Pendiente
 
 * [ ] Production configuration (despliegue, HTTPS, almacenamiento de archivos).
