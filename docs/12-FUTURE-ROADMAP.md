@@ -1,31 +1,10 @@
 # Roadmap futuro
 
-Estas funcionalidades están explícitamente fuera del MVP.
+Estas funcionalidades están fuera del MVP (`v1.0.0`). Las que ya tienen versión y rama asignadas están detalladas en `14-PLAN-DE-DESARROLLO.md`.
 
-## V2 — Usuarios
+## Planificado
 
-* Registro.
-* Login.
-* Autenticación.
-* Perfil.
-* Historial de CVs.
-* Historial de recomendaciones.
-
-## V2 — Más fuentes y ofertas
-
-* Nuevos conectores a fuentes con API pública o feed autorizado, priorizando ofertas con sede en Argentina.
-* Acuerdos de acceso con portales que hoy no habilitan acceso automatizado.
-* Recalcular recomendaciones de CVs procesados cuando se sincronizan ofertas nuevas.
-* OCR para CVs escaneados.
-* Opción "disponible para mudarme": permitir recomendar ofertas presenciales o híbridas en otras regiones o países.
-
-## V2 — CV Harvard
-
-Permitir generar un CV utilizando una plantilla basada en formato Harvard.
-
-El CV deberá ser editable.
-
-## V3 — Adaptación de CV
+### v2.0 — CV adaptado a una oferta
 
 Cuando exista un match MEDIUM o HIGH:
 
@@ -36,16 +15,46 @@ Adaptar CV
  ↓
 Analizar requisitos
  ↓
-Proponer modificaciones
+Proponer modificaciones (sin inventar)
  ↓
-Generar CV
+Generar CV (formato Harvard)
  ↓
 Editar
  ↓
-Exportar
+Recalcular compatibilidad
+ ↓
+Exportar PDF
 ```
 
-## V3+ — IA asistiva
+### v2.1 — Usuarios (opcionales)
+
+* Registro.
+* Login.
+* Autenticación.
+* Historial de CVs.
+* CVs adaptados guardados.
+* Borrado de datos y de la cuenta.
+
+### v2.2 — Extras
+
+* Opción "disponible para mudarme" y modalidad preferida.
+* Recalcular recomendaciones cuando se sincronizan ofertas nuevas.
+* Recuperación de contraseña por email.
+
+## Próximos pasos posibles
+
+### Más fuentes y ofertas
+
+* Nuevos conectores a fuentes con API pública o feed autorizado, priorizando ofertas con sede en Argentina (por ejemplo, las páginas de empleo públicas de empresas que usan Greenhouse, Lever o Workable).
+* Acuerdos de acceso con portales que hoy no habilitan acceso automatizado.
+* OCR para CVs escaneados.
+
+### Cuentas
+
+* Login con Google.
+* Verificación de email.
+
+### IA asistiva
 
 La IA podría utilizarse para:
 
@@ -55,4 +64,8 @@ La IA podría utilizarse para:
 * sugerir mejoras;
 * adaptar el lenguaje del CV.
 
-La IA no deberá sustituir necesariamente el motor determinístico de matching.
+Siempre como propuesta que el usuario acepta o rechaza. La IA no sustituye el motor determinístico de matching.
+
+### Empresas
+
+* El matching inverso: de una oferta a los candidatos compatibles, con consentimiento del candidato.
