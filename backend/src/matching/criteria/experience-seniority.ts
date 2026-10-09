@@ -3,7 +3,6 @@ import type { MatchingConfig } from '../matching-config.js';
 import {
   SENIORITY_LABELS,
   formatYears,
-  notRequired,
   scored,
   unknown,
   type CriterionOutcome,
@@ -15,7 +14,12 @@ export function evaluateExperience(
   config: MatchingConfig,
 ): CriterionOutcome {
   if (requiredYears === null || requiredYears <= 0) {
-    return notRequired('La oferta no exige años de experiencia');
+    // No required years: any experience level meets it, so it counts as a match (not neutral).
+    const message =
+      candidateYears !== null && candidateYears > 0
+        ? `La oferta no exige años de experiencia; el CV indica ${formatYears(candidateYears)}`
+        : 'La oferta no exige años de experiencia';
+    return scored(100, message, config);
   }
   if (candidateYears === null) {
     return unknown(

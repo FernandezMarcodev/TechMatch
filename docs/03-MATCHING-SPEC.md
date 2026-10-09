@@ -103,7 +103,7 @@ candidateYears >= requiredYears → 100
 candidateYears <  requiredYears → candidateYears / requiredYears × 100
 ```
 
-Si no existe requisito explícito: 100 con razón neutral (no penaliza).
+Si no existe requisito explícito: 100 con razón **positiva**. Cualquier nivel de experiencia cumple; si el CV indica años, la razón los muestra.
 
 Si la oferta lo exige y el CV no permite determinarlo: `UNKNOWN`.
 
