@@ -4,25 +4,25 @@
 
 Aplicación web que analiza un CV en PDF y recomienda ofertas de trabajo en tecnología compatibles, explicando por qué encaja cada una.
 
-* Matching **determinístico y explicable**: tecnologías, seniority, experiencia, educación, idiomas, ubicación y modalidad.
-* Ofertas reales obtenidas de la **API pública de Get on Board** (sin scraping), actualizadas cada 12 horas.
-* Interfaz en **Material Design 3**, responsive, con modo claro y oscuro.
-* Uso anónimo: sin registro.
+- Matching **determinístico y explicable**: tecnologías, seniority, experiencia, educación, idiomas, ubicación y modalidad.
+- Ofertas reales obtenidas de la **API pública de Get on Board** (sin scraping), actualizadas cada 12 horas.
+- Interfaz en **Material Design 3**, responsive, con modo claro y oscuro.
+- Uso anónimo: sin registro.
 
 ## Stack
 
-| Capa | Tecnologías |
-| --- | --- |
-| Frontend | React 19, TypeScript, Vite |
-| Backend | Node.js, TypeScript, Express 5 |
-| Datos | PostgreSQL 16 (Docker), migraciones SQL |
-| Tests | Vitest, Testing Library, Playwright |
-| CI | GitHub Actions |
+| Capa     | Tecnologías                             |
+| -------- | --------------------------------------- |
+| Frontend | React 19, TypeScript, Vite              |
+| Backend  | Node.js, TypeScript, Express 5          |
+| Datos    | PostgreSQL 16 (Docker), migraciones SQL |
+| Tests    | Vitest, Testing Library, Playwright     |
+| CI       | GitHub Actions                          |
 
 ## Requisitos
 
-* Node.js 22.12 o superior (recomendado 24).
-* Docker Desktop (para PostgreSQL).
+- Node.js 22.12 o superior (recomendado 24).
+- Docker Desktop (para PostgreSQL).
 
 ## Puesta en marcha local
 
@@ -69,7 +69,7 @@ docs/       especificación (SRS, matching, API, base de datos, decisiones, plan
 
 La especificación completa está en [`docs/`](docs/). Puntos de entrada:
 
-* [`01-SRS-IEEE-29148.md`](docs/01-SRS-IEEE-29148.md): requisitos.
-* [`03-MATCHING-SPEC.md`](docs/03-MATCHING-SPEC.md): cómo se calcula la compatibilidad.
-* [`13-DECISIONES-TECNICAS.md`](docs/13-DECISIONES-TECNICAS.md): decisiones de diseño y su porqué.
-* [`14-PLAN-DE-DESARROLLO.md`](docs/14-PLAN-DE-DESARROLLO.md): próximas versiones.
+- [`01-SRS-IEEE-29148.md`](docs/01-SRS-IEEE-29148.md): requisitos.
+- [`03-MATCHING-SPEC.md`](docs/03-MATCHING-SPEC.md): cómo se calcula la compatibilidad.
+- [`13-DECISIONES-TECNICAS.md`](docs/13-DECISIONES-TECNICAS.md): decisiones de diseño y su porqué.
+- [`14-PLAN-DE-DESARROLLO.md`](docs/14-PLAN-DE-DESARROLLO.md): próximas versiones.
