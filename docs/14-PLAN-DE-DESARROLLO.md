@@ -35,7 +35,7 @@ Carga de CV, matching determinístico explicado, ofertas de Get on Board, interf
 
 | # | Rama | Alcance |
 | --- | --- | --- |
-| 4 | `docs/spec-adaptacion-cv` | Especificación: flujo, regla de no inventar, contrato de la API |
+| 4 | `docs/spec-adaptacion-cv` | Especificación (`15-ADAPTACION-DE-CV.md`): flujo, regla de no inventar, contrato de la API |
 | 5 | `feat/cv-adaptado-backend` | Endpoint que arma el borrador: tecnologías coincidentes primero, experiencias relevantes destacadas, resumen por plantilla, sugerencias aparte |
 | 6 | `feat/editor-cv` | Editor por secciones con vista previa en formato Harvard; el CV editado vive en el navegador |
 | 7 | `feat/recalcular-compatibilidad` | Endpoint que evalúa el CV editado contra la oferta con el mismo motor de matching |
