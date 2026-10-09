@@ -4,11 +4,15 @@ Evolución de TechMatch después del MVP (`v1.0.0`), organizada por versiones y 
 
 ## Forma de trabajo
 
-* `main` siempre funciona: no se commitea directo, todo entra por Pull Request.
-* Una rama por funcionalidad: `feat/…`, `fix/…`, `chore/…`, `docs/…`.
+* Una rama por ticket, creada desde `main`: `feat/…`, `fix/…`, `chore/…`, `docs/…`.
 * Commits con prefijo ([Conventional Commits](https://www.conventionalcommits.org/)): `feat:`, `fix:`, `test:`, `docs:`, `chore:`.
-* Cada rama incluye código, tests y actualización de la documentación. No se mergea con tests, lint o typecheck en rojo.
-* Merge con squash (un commit por funcionalidad en `main`) y un tag por versión (`vX.Y.Z`).
+* Cada rama incluye código, tests y actualización de la documentación.
+* Al terminar un ticket, con `npm run ci` en verde:
+  1. se sube la rama a GitHub;
+  2. se mergea **directamente** a `main` con `git merge --no-ff` (sin Pull Request), dejando un commit de merge que identifica la rama;
+  3. se sube `main`. El CI corre en cada push a `main`.
+* Las ramas se conservan en GitHub después del merge.
+* Un tag por versión (`vX.Y.Z`) sobre `main`.
 
 ## Decisiones de alcance
 

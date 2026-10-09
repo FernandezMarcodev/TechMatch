@@ -52,7 +52,7 @@ Frontend (`frontend/src`): Material Design 3 look — color/shape/elevation toke
 
 ## Git workflow
 
-`main` is always green and only receives Pull Requests (squash merge, one tag per version). One branch per ticket from the plan (`feat/…`, `fix/…`, `chore/…`, `docs/…`); Conventional Commits; each branch ships code + tests + docs.
+One branch per ticket from the plan (`feat/…`, `fix/…`, `chore/…`, `docs/…`), created from `main`; Conventional Commits; each branch ships code + tests + docs. When a ticket is done and `npm run ci` passes locally: push the branch, then merge it **directly** into `main` with `git merge --no-ff` and push `main` — **no Pull Requests** unless the user asks for one. Keep the branch on GitHub after merging. CI runs on every push to `main`. One annotated tag per version (`vX.Y.Z`) on `main`.
 
 ## Rules that must hold
 
