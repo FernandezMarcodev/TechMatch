@@ -63,7 +63,7 @@ export function createContainer(options: ContainerOptions) {
   return {
     cvService,
     queries: new QueryService(cvs, jobs, matches),
-    adaptation: new AdaptationService(cvs, profiles, jobs),
+    adaptation: new AdaptationService(cvs, profiles, jobs, matchingConfig, clock),
     jobs,
     runner,
     clock,
