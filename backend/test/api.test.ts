@@ -35,6 +35,7 @@ beforeAll(async () => {
     routes: createRoutes({
       cvService: container.cvService,
       queries: container.queries,
+      adaptation: container.adaptation,
       maxUploadBytes: MAX_BYTES,
     }),
   });
