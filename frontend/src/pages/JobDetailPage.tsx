@@ -144,6 +144,15 @@ export function JobDetailPage() {
                 Ver oferta original en {source}
                 <Icon name="external" size={16} />
               </a>
+              {cvId && (
+                <Link
+                  to={`/cv/${encodeURIComponent(cvId)}/adaptar/${job.id}`}
+                  className="button button--tonal button--block detail__adapt"
+                >
+                  <Icon name="file" size={16} />
+                  Adaptar mi CV a esta oferta
+                </Link>
+              )}
               <p className="body-muted detail__note">
                 La postulación se hace en {source}. TechMatch no envía tu CV a ninguna empresa.
               </p>

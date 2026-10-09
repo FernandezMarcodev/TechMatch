@@ -34,6 +34,54 @@ export interface JobDetail {
   isActive: boolean;
 }
 
+/** Editable CV document (docs/15-ADAPTACION-DE-CV.md). Dates: "YYYY-MM" or "YYYY"; null end = "Actualidad". */
+export interface CvDocument {
+  personal: {
+    fullName: string;
+    headline: string | null;
+    email: string;
+    phone: string;
+    location: string | null;
+    links: string[];
+  };
+  summary: string;
+  experiences: CvExperience[];
+  education: CvEducation[];
+  skills: { name: string; highlighted: boolean }[];
+  languages: { name: string; level: string | null }[];
+}
+
+export interface CvExperience {
+  position: string | null;
+  company: string | null;
+  startDate: string | null;
+  endDate: string | null;
+  highlights: string[];
+  relevant: boolean;
+}
+
+export interface CvEducation {
+  degree: string | null;
+  institution: string | null;
+  startDate: string | null;
+  endDate: string | null;
+}
+
+export type SuggestionType =
+  'MISSING_REQUIRED_SKILL' | 'MISSING_OPTIONAL_SKILL' | 'LANGUAGE' | 'EXPERIENCE' | 'MISSING_DATA';
+
+export interface AdaptationSuggestion {
+  type: SuggestionType;
+  message: string;
+  skill?: string;
+}
+
+export interface AdaptedDraft {
+  job: { id: string; title: string; company: string };
+  document: CvDocument;
+  suggestions: AdaptationSuggestion[];
+}
+
 /** Error following the backend contract: { error: { code, message, details } }. */
 export class ApiError extends Error {
   constructor(
@@ -81,5 +129,8 @@ export const api = {
   },
   getJob(jobId: string): Promise<JobDetail> {
     return request(`/jobs/${encodeURIComponent(jobId)}`);
+  },
+  getAdaptation(cvId: string, jobId: string): Promise<AdaptedDraft> {
+    return request(`/cvs/${encodeURIComponent(cvId)}/adaptations/${encodeURIComponent(jobId)}`);
   },
 };
