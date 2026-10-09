@@ -166,6 +166,69 @@ describe('AdaptCvPage', () => {
   });
 });
 
+describe('re-evaluating the adapted CV', () => {
+  function mockApi() {
+    const fetchFn = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
+      if (String(input).endsWith('/evaluation') && init?.method === 'POST') {
+        return Promise.resolve(
+          respond(200, {
+            data: {
+              original: { level: 'MEDIUM' },
+              adapted: {
+                level: 'HIGH',
+                reasons: [
+                  {
+                    criterion: 'skills',
+                    status: 'positive',
+                    message: 'Coinciden 3 de 3 tecnologías requeridas',
+                  },
+                ],
+              },
+            },
+          }),
+        );
+      }
+      return Promise.resolve(respond(200, { data: draft }));
+    });
+    vi.stubGlobal('fetch', fetchFn);
+    return fetchFn;
+  }
+
+  it('compares before and after without sending personal data', async () => {
+    const fetchFn = mockApi();
+    renderAdapt();
+    await userEvent.type(await screen.findByLabelText('Nombre y apellido'), 'María Fernández');
+    await userEvent.type(screen.getByLabelText('Email'), 'maria@example.com');
+    await userEvent.click(screen.getByRole('button', { name: 'Calcular compatibilidad' }));
+
+    expect(
+      await screen.findByText('Tu CV adaptado encaja mejor con esta oferta.'),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Compatibilidad media')).toBeInTheDocument();
+    expect(screen.getByText('Alta compatibilidad')).toBeInTheDocument();
+    expect(screen.getByText('Coinciden 3 de 3 tecnologías requeridas')).toBeInTheDocument();
+
+    const post = fetchFn.mock.calls.find(([, init]) => init?.method === 'POST');
+    const body = String(post?.[1]?.body);
+    expect(JSON.parse(body).personal).toEqual({
+      headline: 'Desarrolladora Backend',
+      location: 'Capital Federal, Buenos Aires',
+    });
+    expect(body).not.toContain('María');
+    expect(body).not.toContain('maria@example.com');
+  });
+
+  it('marks the result as outdated after further edits', async () => {
+    mockApi();
+    renderAdapt();
+    await userEvent.click(await screen.findByRole('button', { name: 'Calcular compatibilidad' }));
+    await screen.findByText('Tu CV adaptado encaja mejor con esta oferta.');
+    await userEvent.type(screen.getByLabelText('Resumen profesional'), ' Más texto.');
+    expect(screen.getByText(/Hiciste cambios después de calcular/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Volver a calcular' })).toBeInTheDocument();
+  });
+});
+
 describe('entry points', () => {
   it('offers "Adaptar mi CV" on each recommendation', async () => {
     vi.stubGlobal(

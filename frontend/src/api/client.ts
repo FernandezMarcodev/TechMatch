@@ -82,6 +82,11 @@ export interface AdaptedDraft {
   suggestions: AdaptationSuggestion[];
 }
 
+export interface AdaptationEvaluation {
+  original: { level: MatchLevel };
+  adapted: { level: MatchLevel; reasons: MatchReason[] };
+}
+
 /** Error following the backend contract: { error: { code, message, details } }. */
 export class ApiError extends Error {
   constructor(
@@ -129,6 +134,26 @@ export const api = {
   },
   getJob(jobId: string): Promise<JobDetail> {
     return request(`/jobs/${encodeURIComponent(jobId)}`);
+  },
+  /**
+   * Re-evaluates the edited CV. Name, email, phone and links are removed here: personal data
+   * never leaves the browser.
+   */
+  evaluateAdaptation(
+    cvId: string,
+    jobId: string,
+    document: CvDocument,
+  ): Promise<AdaptationEvaluation> {
+    const { headline, location } = document.personal;
+    const body = { ...document, personal: { headline, location } };
+    return request(
+      `/cvs/${encodeURIComponent(cvId)}/adaptations/${encodeURIComponent(jobId)}/evaluation`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      },
+    );
   },
   getAdaptation(cvId: string, jobId: string): Promise<AdaptedDraft> {
     return request(`/cvs/${encodeURIComponent(cvId)}/adaptations/${encodeURIComponent(jobId)}`);

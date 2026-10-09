@@ -11,6 +11,7 @@ import { Icon } from '../components/Icon';
 import { Page } from '../components/Layout';
 import { StateView } from '../components/StateView';
 import { CvEditor } from '../components/cv/CvEditor';
+import { EvaluationPanel } from '../components/cv/EvaluationPanel';
 import { CvPreview } from '../components/cv/CvPreview';
 
 type State =
@@ -252,6 +253,8 @@ export function AdaptCvPage() {
           }
         />
       </section>
+
+      <EvaluationPanel cvId={cvId} jobId={jobId} document={doc} />
 
       <div className="segmented" role="tablist" aria-label="Vista">
         <button
