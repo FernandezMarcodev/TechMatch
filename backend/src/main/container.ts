@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { AdaptationService } from '../application/adaptation-service.js';
 import { CvService } from '../application/cv-service.js';
 import { MatchingService } from '../application/matching-service.js';
 import type { Clock, IdGenerator } from '../application/ports.js';
@@ -62,6 +63,7 @@ export function createContainer(options: ContainerOptions) {
   return {
     cvService,
     queries: new QueryService(cvs, jobs, matches),
+    adaptation: new AdaptationService(cvs, profiles, jobs),
     jobs,
     runner,
     clock,

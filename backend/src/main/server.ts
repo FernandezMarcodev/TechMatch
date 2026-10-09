@@ -17,6 +17,7 @@ const app = createApp({
   routes: createRoutes({
     cvService: container.cvService,
     queries: container.queries,
+    adaptation: container.adaptation,
     maxUploadBytes: env.CV_MAX_SIZE_BYTES,
   }),
 });
