@@ -1,0 +1,7 @@
+# Normalize line endings: LF in the repository and in CI (Linux), regardless of the OS.
+* text=auto eol=lf
+
+*.pdf binary
+*.png binary
+*.jpg binary
+*.ico binary
