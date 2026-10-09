@@ -97,11 +97,10 @@
 * [x] Security checks (validación de archivos, path traversal, logs sin CV).
 * [x] Error handling.
 * [x] Documentation.
-* [ ] Production configuration (despliegue, HTTPS, almacenamiento de archivos).
 
 ## Pendiente
 
+* [ ] Production configuration (despliegue, HTTPS, almacenamiento de archivos).
 * [ ] Revisar los términos de uso de la API de Get on Board antes de producción.
-* [ ] Recalcular recomendaciones de CVs ya procesados después de cada sincronización.
-* [ ] Habilitar OCR para CVs escaneados.
-* [ ] Sumar fuentes con API pública para ampliar la oferta en Argentina.
+
+Las próximas versiones (v1.1 a v2.2) y sus ramas están en `14-PLAN-DE-DESARROLLO.md`.
