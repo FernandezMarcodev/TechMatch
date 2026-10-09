@@ -21,6 +21,9 @@ const app = createApp({
   }),
 });
 
+// Before accepting requests: CVs left mid-processing by a previous run cannot finish.
+await container.cvService.recoverInterrupted();
+
 const server = app.listen(env.PORT, () => {
   logger.info({ port: env.PORT }, 'TechMatch backend listening');
 });

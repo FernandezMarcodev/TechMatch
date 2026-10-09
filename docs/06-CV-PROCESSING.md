@@ -40,6 +40,8 @@ Tras la carga, el CV queda en `PROCESSING` y se procesa en segundo plano dentro 
 
 Al finalizar, se guarda el perfil y se calculan los resultados de matching contra las ofertas activas en ese momento.
 
+Si el backend se reinicia mientras un CV se procesa, ese trabajo se pierde. Al iniciar, el backend marca como `FAILED` los CVs que quedaron en `UPLOADED` o `PROCESSING`, y el usuario ve el mensaje para cargarlo de nuevo. Esto supone una única instancia del backend; con varias, el procesamiento debería pasar a una cola persistente.
+
 ## Compresión/optimización
 
 Paso previsto en el pipeline sin transformación en el MVP. Los archivos están limitados en tamaño y no se publican, así que recomprimirlos no aporta lo suficiente para justificar una dependencia adicional.
