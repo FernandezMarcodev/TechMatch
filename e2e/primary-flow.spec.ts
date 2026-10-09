@@ -3,7 +3,7 @@ import { createPool } from '../backend/src/infrastructure/db/pool.js';
 import { PgJobOfferRepository } from '../backend/src/persistence/pg-job-offer-repository.js';
 import { normalizeJobOffer } from '../backend/src/job-sources/normalizer.js';
 import { SAMPLE_CV_LINES, makePdf } from '../backend/test/support/make-pdf.js';
-import { E2E_DATABASE_URL } from '../playwright.config.js';
+import { E2E_DATABASE_URL } from './e2e-env.js';
 
 const SEEN_AT = new Date();
 
