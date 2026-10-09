@@ -54,6 +54,13 @@ function RecommendationCard({ item, cvId }: { item: Recommendation; cvId: string
         <Link to={detailUrl} className="button button--outlined">
           Ver detalle
         </Link>
+        <Link
+          to={`/cv/${encodeURIComponent(cvId)}/adaptar/${job.id}`}
+          className="button button--tonal"
+        >
+          <Icon name="file" size={16} />
+          Adaptar mi CV
+        </Link>
         <a
           href={job.sourceUrl}
           target="_blank"
