@@ -6,6 +6,7 @@ export const ERROR_CODES = [
   'CV_NOT_FOUND',
   'JOB_NOT_FOUND',
   'CV_NOT_PROCESSED',
+  'INVALID_CV_DOCUMENT',
   'INTERNAL_ERROR',
 ] as const;
 

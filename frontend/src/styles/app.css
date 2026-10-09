@@ -1567,3 +1567,51 @@ p {
 .suggestions__toggle {
   margin: 6px 0 0 -8px;
 }
+
+.level-chip--low {
+  background: var(--md-error-container);
+  color: var(--md-on-error-container);
+}
+
+.evaluation {
+  border-radius: var(--md-shape-lg);
+  margin-bottom: 16px;
+  border-color: color-mix(in srgb, var(--md-primary) 35%, var(--md-outline-variant));
+}
+
+.evaluation__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.evaluation__head h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.evaluation__result {
+  margin-top: 14px;
+  display: grid;
+  gap: 8px;
+}
+
+.evaluation__result--stale {
+  opacity: 0.6;
+}
+
+.evaluation__compare {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-weight: 500;
+}
+
+.evaluation__arrow {
+  transform: rotate(180deg);
+  color: var(--md-on-surface-variant);
+}

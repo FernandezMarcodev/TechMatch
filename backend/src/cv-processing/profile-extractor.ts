@@ -116,7 +116,7 @@ function extractExperiences(lines: readonly string[], today: YearMonth): Experie
 const EXPLICIT_YEARS =
   /(\d{1,2}(?:[.,]\d)?)\s*\+?\s*(?:anos|years)\s+(?:de\s+)?(?:experiencia|experience)/g;
 
-function explicitExperienceYears(text: string): number | null {
+export function explicitExperienceYears(text: string): number | null {
   const values = [...foldText(text).matchAll(EXPLICIT_YEARS)].map((m) =>
     Number((m[1] ?? '').replace(',', '.')),
   );
