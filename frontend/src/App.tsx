@@ -2,6 +2,7 @@ import { Link, Route, Routes } from 'react-router-dom';
 import { Icon } from './components/Icon';
 import { Footer, Page, TopAppBar } from './components/Layout';
 import { StateView } from './components/StateView';
+import { AdaptCvPage } from './pages/AdaptCvPage';
 import { HomePage } from './pages/HomePage';
 import { JobDetailPage } from './pages/JobDetailPage';
 import { ProcessingPage } from './pages/ProcessingPage';
@@ -17,6 +18,7 @@ export function App() {
           <Route path="/cv/:cvId" element={<ProcessingPage />} />
           <Route path="/cv/:cvId/recomendaciones" element={<RecommendationsPage />} />
           <Route path="/ofertas/:jobId" element={<JobDetailPage />} />
+          <Route path="/cv/:cvId/adaptar/:jobId" element={<AdaptCvPage />} />
           <Route
             path="*"
             element={
