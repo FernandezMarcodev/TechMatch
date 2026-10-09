@@ -1615,3 +1615,77 @@ p {
   transform: rotate(180deg);
   color: var(--md-on-surface-variant);
 }
+
+.adapt-header__actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.adapt-banner {
+  margin: 0 0 16px;
+}
+
+/* ---------- Print: only the Harvard CV (PDF export) ---------- */
+
+@page {
+  size: A4;
+  margin: 16mm 18mm;
+}
+
+@media print {
+  :root {
+    color-scheme: light;
+  }
+
+  body {
+    background: #ffffff;
+  }
+
+  .top-app-bar,
+  .footer,
+  .detail-nav,
+  .adapt-header,
+  .adapt-banner,
+  .adapt-suggestions,
+  .evaluation,
+  .segmented,
+  .adapt-layout__editor {
+    display: none !important;
+  }
+
+  .page {
+    max-width: none;
+    padding: 0;
+  }
+
+  .adapt-layout {
+    display: block;
+  }
+
+  /* Also when the mobile "Editar" tab was active. */
+  .print-target {
+    display: block !important;
+    position: static;
+    max-height: none;
+    overflow: visible;
+    box-shadow: none;
+  }
+
+  .cv-paper {
+    padding: 0;
+    border-radius: 0;
+    box-shadow: none;
+    font-size: 10.5pt;
+  }
+
+  .cv-paper__entry,
+  .cv-paper__section h2 {
+    break-inside: avoid;
+  }
+
+  .cv-paper__section h2 {
+    break-after: avoid;
+  }
+}

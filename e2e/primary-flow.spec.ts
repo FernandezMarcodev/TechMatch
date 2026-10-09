@@ -108,3 +108,53 @@ test('rejects a non-PDF file with a clear message', async ({ page }) => {
   await page.getByRole('button', { name: 'Analizar CV' }).click();
   await expect(page.getByRole('alert')).toHaveText('El archivo debe estar en formato PDF.');
 });
+
+test('adapt the CV to an offer → edit → re-evaluate → download as PDF', async ({ page }) => {
+  // Record the print request instead of opening the browser dialog.
+  await page.addInitScript(() => {
+    window.print = () => {
+      (window as unknown as { printedTitle: string }).printedTitle = document.title;
+    };
+  });
+
+  await page.goto('/');
+  await page.getByLabel(/CV en PDF/).setInputFiles({
+    name: 'maria-fernandez.pdf',
+    mimeType: 'application/pdf',
+    buffer: makePdf(SAMPLE_CV_LINES),
+  });
+  await page.getByRole('button', { name: 'Analizar CV' }).click();
+  await expect(page.getByRole('heading', { name: 'Ofertas recomendadas' })).toBeVisible({
+    timeout: 20_000,
+  });
+
+  await page
+    .locator('.recommendation')
+    .first()
+    .getByRole('link', { name: 'Adaptar mi CV' })
+    .click();
+  await expect(page.getByRole('heading', { name: 'Adaptá tu CV' })).toBeVisible();
+
+  // The draft only contains what the CV has, with the offer's technologies first.
+  const preview = page.getByRole('article', { name: 'Vista previa del CV' });
+  await expect(preview).toContainText('Acme S.A.');
+  await expect(preview).toContainText('Java');
+
+  await page.getByLabel('Nombre y apellido').fill('María Fernández');
+  await expect(preview.getByRole('heading', { name: 'María Fernández' })).toBeVisible();
+
+  await page.getByRole('button', { name: 'Calcular compatibilidad' }).click();
+  await expect(page.getByText('Antes', { exact: true })).toBeVisible();
+  await expect(page.getByText('Ahora', { exact: true })).toBeVisible();
+
+  await page.getByRole('button', { name: 'Descargar PDF' }).click();
+  expect(
+    await page.evaluate(() => (window as unknown as { printedTitle: string }).printedTitle),
+  ).toBe('CV - María Fernández - Empresa E2E');
+
+  // In print media only the Harvard CV is visible.
+  await page.emulateMedia({ media: 'print' });
+  await expect(page.getByLabel('Nombre y apellido')).toBeHidden();
+  await expect(page.getByRole('button', { name: 'Descargar PDF' })).toBeHidden();
+  await expect(preview.getByRole('heading', { name: 'María Fernández' })).toBeVisible();
+});
