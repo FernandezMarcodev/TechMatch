@@ -7,6 +7,7 @@ Aplicación web que analiza un CV en PDF y recomienda ofertas de trabajo en tecn
 - Matching **determinístico y explicable**: tecnologías, seniority, experiencia, educación, idiomas, ubicación y modalidad.
 - Ofertas reales obtenidas de la **API pública de Get on Board** (sin scraping), actualizadas cada 12 horas.
 - Interfaz en **Material Design 3**, responsive, con modo claro y oscuro.
+- **CV adaptado a una oferta**: editor con vista previa en formato Harvard, recálculo de la compatibilidad y descarga en PDF. Solo reordena y destaca lo que tu CV ya tiene; lo que falta son sugerencias.
 - Uso anónimo: sin registro.
 
 ## Stack
