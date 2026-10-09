@@ -1,9 +1,10 @@
 import { Router, type Request } from 'express';
 import multer from 'multer';
+import type { AdaptationService } from '../application/adaptation-service.js';
 import type { CvService } from '../application/cv-service.js';
 import { AppError } from '../application/errors.js';
 import type { QueryService } from '../application/query-service.js';
-import { toCvStatusDto, toJobDetailDto, toRecommendationDto } from './dto.js';
+import { toAdaptedDraftDto, toCvStatusDto, toJobDetailDto, toRecommendationDto } from './dto.js';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -20,10 +21,16 @@ const jobNotFound = () => new AppError('JOB_NOT_FOUND', 'No se encontró la ofer
 export interface RouteDeps {
   cvService: CvService;
   queries: QueryService;
+  adaptation: AdaptationService;
   maxUploadBytes: number;
 }
 
-export function createRoutes({ cvService, queries, maxUploadBytes }: RouteDeps): Router {
+export function createRoutes({
+  cvService,
+  queries,
+  adaptation,
+  maxUploadBytes,
+}: RouteDeps): Router {
   const router = Router();
   const upload = multer({
     storage: multer.memoryStorage(),
@@ -52,6 +59,14 @@ export function createRoutes({ cvService, queries, maxUploadBytes }: RouteDeps):
     const cvId = idParam(req, 'cvId', cvNotFound());
     const recommendations = await queries.getRecommendations(cvId);
     res.json({ data: { cvId, recommendations: recommendations.map(toRecommendationDto) } });
+  });
+
+  // CV adaptation to an offer (docs/15-ADAPTACION-DE-CV.md).
+  router.get('/cvs/:cvId/adaptations/:jobId', async (req, res) => {
+    const cvId = idParam(req, 'cvId', cvNotFound());
+    const jobId = idParam(req, 'jobId', jobNotFound());
+    const draft = await adaptation.getDraft(cvId, jobId);
+    res.json({ data: toAdaptedDraftDto(draft) });
   });
 
   router.get('/jobs/:jobId', async (req, res) => {

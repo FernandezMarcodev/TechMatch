@@ -1,4 +1,5 @@
 import type { Recommendation } from '../application/ports.js';
+import type { AdaptationSuggestion, AdaptedDraft, CvDocument } from '../cv-adaptation/types.js';
 import type { JobOffer, MatchReason } from '../domain/entities.js';
 import type { CvStatus, MatchLevel, Modality } from '../domain/enums.js';
 
@@ -78,5 +79,23 @@ export function toJobDetailDto(job: JobOffer): JobDetailDto {
     skills: job.skills.map((s) => s.name),
     source: { name: job.source, url: job.sourceUrl },
     isActive: job.isActive,
+  };
+}
+
+export interface AdaptedDraftDto {
+  job: { id: string; title: string; company: string };
+  document: CvDocument;
+  suggestions: AdaptationSuggestion[];
+}
+
+export function toAdaptedDraftDto(draft: AdaptedDraft & { job: JobOffer }): AdaptedDraftDto {
+  return {
+    job: { id: draft.job.id, title: draft.job.title, company: draft.job.company },
+    document: draft.document,
+    suggestions: draft.suggestions.map((s) => ({
+      type: s.type,
+      message: s.message,
+      ...(s.skill ? { skill: s.skill } : {}),
+    })),
   };
 }

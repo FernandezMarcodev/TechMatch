@@ -151,6 +151,27 @@ El endpoint no devuelve ofertas `LOW` ni el score numérico: el score es interno
 }
 ```
 
+## GET /api/cvs/{cvId}/adaptations/{jobId}
+
+Borrador del CV adaptado a una oferta, más sugerencias. Detalle del documento y de las reglas en `15-ADAPTACION-DE-CV.md`. No guarda nada.
+
+```json
+{
+  "data": {
+    "job": { "id": "…", "title": "Backend Developer", "company": "Empresa X" },
+    "document": {
+      "personal": { "fullName": "", "headline": "Desarrolladora Backend", "email": "", "phone": "", "location": "Capital Federal, Buenos Aires", "links": [] },
+      "summary": "Desarrolladora Backend Semi Senior con 7 años de experiencia en Java y Spring Boot.",
+      "experiences": [{ "position": "…", "company": "…", "startDate": "2021-03", "endDate": null, "highlights": ["…"], "relevant": true }],
+      "education": [{ "degree": "…", "institution": "…", "startDate": "2013", "endDate": "2019" }],
+      "skills": [{ "name": "Java", "highlighted": true }],
+      "languages": [{ "name": "Inglés", "level": "C1" }]
+    },
+    "suggestions": [{ "type": "MISSING_REQUIRED_SKILL", "skill": "Kubernetes", "message": "La oferta pide Kubernetes. Si tenés experiencia, agregala." }]
+  }
+}
+```
+
 ## Error contract
 
 Todos los errores:
@@ -173,6 +194,7 @@ Todos los errores:
 | `CV_PROCESSING_FAILED` | 422 | error durante el procesamiento |
 | `CV_NOT_FOUND` | 404 | CV inexistente o id inválido |
 | `JOB_NOT_FOUND` | 404 | oferta inexistente o id inválido |
+| `CV_NOT_PROCESSED` | 409 | el CV todavía no terminó de procesarse o falló (adaptación) |
 | `INTERNAL_ERROR` | 500 | error inesperado |
 
 HTTP utilizados:
@@ -182,6 +204,7 @@ HTTP utilizados:
 201 Created
 400 Bad Request
 404 Not Found
+409 Conflict
 413 Payload Too Large
 422 Unprocessable Entity
 500 Internal Server Error
