@@ -185,14 +185,26 @@ describe('evaluateMatch — experience and seniority', () => {
     expect(exp.evidence).toBe('La oferta requiere 4 años y el CV indica 1 año');
   });
 
-  it('no experience requirement does not penalize', () => {
+  it('no experience requirement is a match for any experience level', () => {
     const result = evaluateMatch(
       profile({ totalExperienceYears: 0 }),
       job({ experienceYearsMin: null }),
       config,
     );
     expect(criterion(result, 'experience').score).toBe(100);
-    expect(criterion(result, 'experience').status).toBe('neutral');
+    expect(criterion(result, 'experience').status).toBe('positive');
+    expect(criterion(result, 'experience').evidence).toBe('La oferta no exige años de experiencia');
+
+    const experienced = evaluateMatch(
+      profile({ totalExperienceYears: 7 }),
+      job({ experienceYearsMin: null }),
+      config,
+    );
+    expect(criterion(experienced, 'experience')).toMatchObject({
+      score: 100,
+      status: 'positive',
+      evidence: 'La oferta no exige años de experiencia; el CV indica 7 años',
+    });
   });
 
   it('compatible seniority', () => {
