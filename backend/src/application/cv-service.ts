@@ -63,6 +63,19 @@ export class CvService {
     return { cvId: id, status: 'PROCESSING' };
   }
 
+  /**
+   * Processing runs in memory: a restart loses in-flight work, which would leave those CVs
+   * "processing" forever. Called once at startup (single backend instance), it fails them
+   * so the user is told to upload the CV again.
+   */
+  async recoverInterrupted(): Promise<number> {
+    const count = await this.deps.cvs.failInterrupted();
+    if (count > 0) {
+      this.deps.logger.warn({ count }, 'CVs interrupted by a restart marked as failed');
+    }
+    return count;
+  }
+
   async getStatus(cvId: string): Promise<CvStatus> {
     const cv = await this.deps.cvs.findById(cvId);
     if (!cv) throw new AppError('CV_NOT_FOUND', 'No se encontró el CV solicitado.');

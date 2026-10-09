@@ -70,4 +70,12 @@ export class PgCvRepository implements CvRepository {
       [id, status, extractedText],
     );
   }
+
+  async failInterrupted(): Promise<number> {
+    const result = await this.db.query(
+      `UPDATE cvs SET processing_status = 'FAILED', updated_at = now()
+       WHERE processing_status IN ('UPLOADED', 'PROCESSING')`,
+    );
+    return result.rowCount ?? 0;
+  }
 }
