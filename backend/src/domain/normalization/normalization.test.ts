@@ -83,6 +83,8 @@ describe('language normalization', () => {
     ['intermedio', 'B1'],
     ['avanzado', 'C1'],
     ['bilingüe', 'C2'],
+    ['Nativo', 'NATIVE'],
+    ['lengua materna', 'NATIVE'],
     ['básico', 'A2'],
   ])('parses level from "%s"', (raw, level) => {
     expect(parseLanguageLevel(raw)).toBe(level);

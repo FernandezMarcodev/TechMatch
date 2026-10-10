@@ -95,6 +95,13 @@ describe('AdaptCvPage', () => {
     expect(paper.getByText('Inglés (B1)')).toBeInTheDocument();
   });
 
+  it('offers the native level for languages', async () => {
+    mockDraft();
+    renderAdapt();
+    await userEvent.selectOptions(await screen.findByLabelText('Nivel'), 'Nativo');
+    expect(within(preview()).getByText('Inglés (Nativo)')).toBeInTheDocument();
+  });
+
   it('updates the preview while editing and keeps the draft in the browser', async () => {
     mockDraft();
     renderAdapt();

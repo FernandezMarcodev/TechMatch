@@ -1,8 +1,9 @@
 import { useId, useState, type ReactNode } from 'react';
 import type { CvDocument, CvEducation, CvExperience } from '../../api/client';
 import { Icon } from '../Icon';
+import { languageLevelLabel } from '../labels';
 
-const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] as const;
+const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2', 'NATIVE'] as const;
 
 interface CvEditorProps {
   document: CvDocument;
@@ -406,7 +407,7 @@ export function CvEditor({ document: doc, onChange }: CvEditorProps) {
                   <option value="">Sin indicar</option>
                   {LEVELS.map((l) => (
                     <option key={l} value={l}>
-                      {l}
+                      {languageLevelLabel(l)}
                     </option>
                   ))}
                 </select>

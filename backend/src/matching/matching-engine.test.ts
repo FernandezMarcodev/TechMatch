@@ -359,6 +359,16 @@ describe('evaluateMatch — missing information (UNKNOWN is neither match nor mi
     expect(criterion(result, 'languages').evidence).toContain('inglés C1');
   });
 
+  it('a native level meets any requirement and is shown as "nativo"', () => {
+    const result = evaluateMatch(
+      profile({ languages: [{ name: 'English', level: 'NATIVE' }] }),
+      job({ languageRequirements: [{ name: 'English', level: 'C2' }] }),
+      config,
+    );
+    expect(criterion(result, 'languages').score).toBe(100);
+    expect(criterion(result, 'languages').evidence).toBe('Inglés nativo cumple el nivel C2');
+  });
+
   it('an offer without comparable skills is never recommended', () => {
     const result = evaluateMatch(profile(), job({ skills: [] }), config);
     expect(result.level).toBe('LOW');

@@ -49,7 +49,7 @@ export const CRITERIA: Record<string, { label: string; icon: IconName; descripti
   languages: {
     label: 'Idiomas',
     icon: 'language',
-    description: 'Idiomas y niveles (A1 a C2) requeridos.',
+    description: 'Idiomas y niveles (A1 a C2 o nativo) requeridos.',
   },
   location: {
     label: 'Ubicación',
@@ -62,6 +62,11 @@ export const CRITERIA: Record<string, { label: string; icon: IconName; descripti
     description: 'Remoto, híbrido o presencial según dónde estés.',
   },
 };
+
+/** CEFR codes are shown as is; NATIVE is "Nativo". */
+export function languageLevelLabel(level: string): string {
+  return level === 'NATIVE' ? 'Nativo' : level;
+}
 
 export function modalityLabel(modality: Modality): string | null {
   return modality ? MODALITY_LABELS[modality] : null;

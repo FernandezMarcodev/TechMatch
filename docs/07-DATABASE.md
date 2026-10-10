@@ -67,7 +67,7 @@ created_at TIMESTAMPTZ
 id UUID PK
 candidate_profile_id UUID FK
 name VARCHAR
-level VARCHAR NULL          (A1 … C2)
+level VARCHAR NULL          (A1 … C2, NATIVE)
 created_at TIMESTAMPTZ
 ```
 
