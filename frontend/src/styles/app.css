@@ -1403,7 +1403,7 @@ p {
 
 /* ---------- CV adaptation: Harvard paper ---------- */
 
-/* The paper is always white with dark ink, also in dark mode: it represents the printed page. */
+/* The paper is always white with dark ink: it represents the printed page. */
 .cv-paper {
   background: #ffffff;
   color: #1a1a1a;

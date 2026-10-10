@@ -51,6 +51,16 @@ Carga de CV, matching determinístico explicado, ofertas de Get on Board, interf
 | --- | --- | --- |
 | — | `chore/despliegue-gratuito` | El backend sirve el frontend compilado; `render.yaml` (Render free), base en Neon free, sincronización programada en GitHub Actions; guía `16-DESPLIEGUE.md` |
 
+## v2.0.2 — Correcciones tras probar el sistema
+
+| # | Rama | Alcance |
+| --- | --- | --- |
+| — | `chore/solo-tema-claro` | Solo tema claro: se elimina el esquema oscuro |
+| — | `fix/seniority-oferta` | Una diferencia de seniority de dos niveles o más (p. ej. oferta Senior y CV Junior) impide la recomendación; el seniority del título prevalece sobre la categoría declarada |
+| — | `fix/nivel-idioma-nativo` | Nivel de idioma "Nativo" en el perfil, el matching y el editor de CV |
+| — | `fix/vinetas-texto-cv` | Las viñetas que ocupan varios renglones del PDF se unen en una sola |
+| — | `feat/cv-harvard-proyectos` | Proyectos personales extraídos del CV y CV adaptado con el formato de Harvard |
+
 ## v2.1.0 — Cuentas de usuario (opcionales)
 
 | # | Rama | Alcance |
