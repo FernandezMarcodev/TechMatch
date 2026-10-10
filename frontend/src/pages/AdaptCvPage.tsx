@@ -12,7 +12,7 @@ import { Page } from '../components/Layout';
 import { StateView } from '../components/StateView';
 import { CvEditor } from '../components/cv/CvEditor';
 import { EvaluationPanel } from '../components/cv/EvaluationPanel';
-import { CvPreview } from '../components/cv/CvPreview';
+import { CvSheet } from '../components/cv/CvSheet';
 
 type State =
   { kind: 'loading' } | { kind: 'error'; message: string } | { kind: 'ready'; draft: AdaptedDraft };
@@ -135,6 +135,17 @@ export function AdaptCvPage() {
   const [state, setState] = useState<State>({ kind: 'loading' });
   const [document, setDocument] = useState<CvDocument | null>(null);
   const [view, setView] = useState<'edit' | 'preview'>('edit');
+  const [expanded, setExpanded] = useState(false);
+
+  // Esc closes the enlarged preview.
+  useEffect(() => {
+    if (!expanded) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setExpanded(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [expanded]);
   const [confirmReset, setConfirmReset] = useState(false);
   const [nameMissing, setNameMissing] = useState(false);
 
@@ -313,9 +324,31 @@ export function AdaptCvPage() {
           <CvEditor document={doc} onChange={update} />
         </div>
         <div className="adapt-layout__preview print-target">
-          <CvPreview document={doc} />
+          <CvSheet document={doc} onExpand={() => setExpanded(true)} />
         </div>
       </div>
+
+      {expanded && (
+        <div
+          className="cv-zoom"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Vista previa ampliada"
+          onClick={(e) => e.target === e.currentTarget && setExpanded(false)}
+        >
+          <div className="cv-zoom__body">
+            <button
+              type="button"
+              className="button button--filled button--small cv-zoom__close"
+              onClick={() => setExpanded(false)}
+              autoFocus
+            >
+              <Icon name="close" size={16} /> Cerrar
+            </button>
+            <CvSheet document={doc} />
+          </div>
+        </div>
+      )}
     </Page>
   );
 }

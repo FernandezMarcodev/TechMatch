@@ -60,6 +60,7 @@ Carga de CV, matching determinístico explicado, ofertas de Get on Board, interf
 | — | `fix/nivel-idioma-nativo` | Nivel de idioma "Nativo" en el perfil, el matching y el editor de CV |
 | — | `fix/vinetas-texto-cv` | Las viñetas que ocupan varios renglones del PDF se unen en una sola |
 | — | `feat/cv-harvard-proyectos` | Proyectos personales extraídos del CV y CV adaptado con el formato de Harvard |
+| — | `feat/vista-previa-a4` | Vista previa del CV como hoja A4 idéntica al PDF, con saltos de página y vista ampliada |
 
 ## v2.1.0 — Cuentas de usuario (opcionales)
 

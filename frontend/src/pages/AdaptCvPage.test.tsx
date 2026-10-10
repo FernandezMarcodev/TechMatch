@@ -124,6 +124,17 @@ describe('AdaptCvPage', () => {
     expect(paper.getByText('API REST con Java para recomendar ofertas.')).toBeInTheDocument();
   });
 
+  it('shows the preview as an A4 sheet and enlarges it on demand', async () => {
+    mockDraft();
+    renderAdapt();
+    expect(await screen.findByText(/Tamaño A4, igual que el PDF · 1 página/)).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Ampliar' }));
+    const zoom = screen.getByRole('dialog', { name: 'Vista previa ampliada' });
+    expect(within(zoom).getByRole('article', { name: 'Vista previa del CV' })).toBeInTheDocument();
+    await userEvent.keyboard('{Escape}');
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
   it('edits, adds and removes projects', async () => {
     mockDraft();
     renderAdapt();

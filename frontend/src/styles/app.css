@@ -1223,7 +1223,8 @@ p {
 
 .adapt-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  /* The preview gets more room: it is a scaled A4 sheet. */
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
   gap: 24px;
   align-items: start;
 }
@@ -1403,16 +1404,91 @@ p {
 
 /* ---------- CV adaptation: Harvard paper ---------- */
 
-/* The paper is always white with dark ink: it represents the printed page. */
+/*
+ * The paper is always white with dark ink: it represents the printed page. On screen it is an
+ * A4 sheet with the @page margins and the print font sizes (pt), so lines wrap exactly as in
+ * the PDF; CvSheet scales it down to fit the column.
+ */
 .cv-paper {
+  position: relative;
+  box-sizing: border-box;
+  width: 210mm;
+  min-height: 297mm;
+  padding: 16mm 18mm;
   background: #ffffff;
   color: #1a1a1a;
   font-family: Georgia, 'Times New Roman', Times, serif;
-  font-size: 0.875rem;
+  font-size: 10.5pt;
   line-height: 1.45;
-  padding: 40px 44px;
-  border-radius: var(--md-shape-md);
-  box-shadow: var(--md-elevation-1);
+  box-shadow: var(--md-elevation-2);
+}
+
+.cv-sheet__caption {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 32px;
+  margin-bottom: 8px;
+  color: var(--md-on-surface-variant);
+  font-size: 0.8rem;
+}
+
+/* Enlarged preview: the sheet at its real size (or the screen width), over a dim backdrop. */
+.cv-zoom {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  overflow: auto;
+  padding: 24px 16px 48px;
+  background: rgb(31 31 31 / 0.72);
+}
+
+.cv-zoom__body {
+  max-width: 210mm;
+  margin: 0 auto;
+}
+
+.cv-zoom__body .cv-sheet__caption {
+  color: #ffffff;
+}
+
+.cv-zoom__close {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  margin: 0 0 8px auto;
+}
+
+.cv-sheet__frame {
+  overflow: hidden;
+}
+
+.cv-sheet__scaled {
+  position: relative;
+  width: 210mm;
+  transform-origin: top left;
+}
+
+/* Where the printed page breaks: a dashed line in the margin area, never printed. */
+.cv-sheet__break {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 2px dashed var(--md-primary);
+  pointer-events: none;
+}
+
+.cv-sheet__break span {
+  position: absolute;
+  right: 6mm;
+  top: 2px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--md-primary);
+  color: var(--md-on-primary);
+  font: 600 9pt/1.4 var(--md-font);
 }
 
 .cv-paper__header {
@@ -1421,7 +1497,7 @@ p {
 }
 
 .cv-paper__name {
-  font-size: 1.6rem;
+  font-size: 18pt;
   font-weight: 700;
   letter-spacing: 0.02em;
 }
@@ -1433,7 +1509,7 @@ p {
 
 .cv-paper__contact {
   margin-top: 4px;
-  font-size: 0.8rem;
+  font-size: 9.5pt;
   color: #444;
 }
 
@@ -1442,7 +1518,7 @@ p {
 }
 
 .cv-paper__section h2 {
-  font-size: 0.85rem;
+  font-size: 10.5pt;
   font-variant: small-caps;
   letter-spacing: 0.08em;
   text-transform: lowercase;
@@ -1500,10 +1576,6 @@ p {
   .adapt-layout__preview {
     position: static;
     max-height: none;
-  }
-
-  .cv-paper {
-    padding: 24px 20px;
   }
 }
 
@@ -1677,11 +1749,28 @@ p {
     box-shadow: none;
   }
 
+  /* The page margins come from @page: the sheet becomes the page content box. */
   .cv-paper {
+    width: auto;
+    min-height: 0;
     padding: 0;
-    border-radius: 0;
     box-shadow: none;
-    font-size: 10.5pt;
+  }
+
+  .cv-sheet__frame {
+    height: auto !important;
+    overflow: visible;
+  }
+
+  .cv-sheet__scaled {
+    width: auto;
+    transform: none !important;
+  }
+
+  .cv-sheet__caption,
+  .cv-sheet__break,
+  .cv-zoom {
+    display: none !important;
   }
 
   .cv-paper__entry,
