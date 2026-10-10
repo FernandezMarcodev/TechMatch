@@ -7,7 +7,7 @@ import { sanitizeFilename, validatePdfUpload } from './pdf-validation.js';
 import { extractProfile } from './profile-extractor.js';
 import { segment } from './sections.js';
 import { cleanText } from './text-cleanup.js';
-import { PdfTextExtractor, disabledOcr } from './text-extraction.js';
+import { PdfTextExtractor, disabledOcr, toLines } from './text-extraction.js';
 
 const REFERENCE_DATE = new Date('2026-03-01T00:00:00Z');
 const MB = 1024 * 1024;
@@ -74,6 +74,71 @@ describe('cleanText', () => {
   it('normalizes bullets, whitespace and hyphenation', () => {
     const raw = '• Java\u00a0\u00a0y   Spring\r\n\n\n- desa-\nrrollo\u0007';
     expect(cleanText(raw)).toBe('Java y Spring\n\ndesarrollo');
+  });
+
+  it('joins a bullet the PDF wrapped over two lines into a single item', () => {
+    const raw = [
+      '• Desarrollé microservicios con Java y Spring Boot para el',
+      'área de pagos, con más de 1 millón de transacciones diarias.',
+      '• Migré la infraestructura a AWS con Terraform, reduciendo costos con',
+      'Kubernetes y monitoreo en Grafana.',
+      '* Lideré un equipo de 4 personas.',
+    ].join('\n');
+    expect(cleanText(raw).split('\n')).toEqual([
+      'Desarrollé microservicios con Java y Spring Boot para el área de pagos, con más de 1 millón de transacciones diarias.',
+      'Migré la infraestructura a AWS con Terraform, reduciendo costos con Kubernetes y monitoreo en Grafana.',
+      'Lideré un equipo de 4 personas.',
+    ]);
+  });
+
+  it('joins wrapped sentences without bullets and keeps separate items apart', () => {
+    const raw = [
+      'Responsable del backend de la plataforma de pagos y de la integración',
+      'con proveedores externos.',
+      'Microservicios con Java',
+      'Mantenimiento de APIs REST',
+    ].join('\n');
+    expect(cleanText(raw).split('\n')).toEqual([
+      'Responsable del backend de la plataforma de pagos y de la integración con proveedores externos.',
+      'Microservicios con Java',
+      'Mantenimiento de APIs REST',
+    ]);
+  });
+
+  it('never joins headings, dates or contact lines', () => {
+    const raw = [
+      'Desarrolladora Backend en Acme S.A. para el equipo de pagos y',
+      'mar 2021 - Actualidad',
+      'Buenos Aires, Argentina, con disponibilidad para viajar a',
+      'maria@example.com',
+      'Desarrollo de APIs y microservicios para clientes de la región con',
+      'Experiencia',
+    ].join('\n');
+    expect(cleanText(raw).split('\n')).toHaveLength(6);
+  });
+
+  it('removes Word, Wingdings and arrow bullet markers, also alone on a line', () => {
+    const raw = '\uf0b7 Java\n\u27a2 Spring\n\u25aa Docker\n\u2217 SQL\n\u2022\nGit';
+    expect(cleanText(raw)).toBe('Java\nSpring\nDocker\nSQL\nGit');
+  });
+
+  it('keeps separate bullets apart even when they start in lowercase', () => {
+    const raw = '• desarrollo de APIs REST para clientes del sector financiero y\n• mantenimiento';
+    expect(cleanText(raw)).toBe(
+      'desarrollo de APIs REST para clientes del sector financiero y\nmantenimiento',
+    );
+  });
+});
+
+describe('toLines', () => {
+  it('keeps a bullet drawn off the text baseline on the same line', () => {
+    const lines = toLines([
+      { str: 'Experiencia', x: 50, y: 700, fontSize: 12 },
+      { str: '•', x: 50, y: 683, fontSize: 10 },
+      { str: 'Microservicios con Java', x: 60, y: 680, fontSize: 10 },
+      { str: 'APIs REST', x: 60, y: 666, fontSize: 10 },
+    ]);
+    expect(lines).toEqual(['Experiencia', '• Microservicios con Java', 'APIs REST']);
   });
 });
 

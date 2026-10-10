@@ -48,7 +48,7 @@ Paso previsto en el pipeline sin transformación en el MVP. Los archivos están 
 
 ## Extracción
 
-Se obtiene el texto nativo del PDF y se reconstruyen las líneas a partir de la posición de cada fragmento (de arriba hacia abajo y de izquierda a derecha).
+Se obtiene el texto nativo del PDF y se reconstruyen las líneas a partir de la posición de cada fragmento (de arriba hacia abajo y de izquierda a derecha). Dos fragmentos a menos de media altura de letra de distancia vertical forman la misma línea: las viñetas y los cambios de fuente suelen dibujarse unos puntos fuera de la línea base y no deben quedar en una línea aparte.
 
 Si no hay texto útil (menos de `CV_MIN_TEXT_CHARS` letras y dígitos):
 

@@ -37,12 +37,22 @@ async function openPdf(content: Buffer): Promise<PdfDocument> {
   }
 }
 
-/** Groups positioned text items into lines (top-to-bottom, left-to-right) per page. */
-function toLines(items: { str: string; x: number; y: number }[]): string[] {
+/** Minimum vertical distance (PDF units) between two separate lines. */
+const MIN_ROW_TOLERANCE = 2;
+
+/**
+ * Groups positioned text items into lines (top-to-bottom, left-to-right) per page. Items
+ * closer than half their font size vertically share a line: bullet glyphs and mixed fonts are
+ * often drawn a few units off the text baseline, and must not become lines of their own.
+ */
+export function toLines(
+  items: { str: string; x: number; y: number; fontSize?: number }[],
+): string[] {
   const rows: { y: number; parts: { x: number; str: string }[] }[] = [];
   for (const item of items) {
     if (!item.str.trim()) continue;
-    const row = rows.find((r) => Math.abs(r.y - item.y) < 2);
+    const tolerance = Math.max(MIN_ROW_TOLERANCE, (item.fontSize ?? 0) / 2);
+    const row = rows.find((r) => Math.abs(r.y - item.y) < tolerance);
     if (row) row.parts.push({ x: item.x, str: item.str });
     else rows.push({ y: item.y, parts: [{ x: item.x, str: item.str }] });
   }
