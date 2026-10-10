@@ -48,7 +48,7 @@ Dependency direction: `api` → `application` → `domain`/`matching`; infrastru
 - `persistence/` — raw SQL repositories over `pg` (NUMERIC comes back as string → `toNumber`); requirements stored as newline-separated TEXT.
 - `api/` — routes + DTO mappers (`dto.ts`): lowercase CV statuses, `{data: …}` / `{error: {code, message, details}}`, never expose entities or storage paths. Malformed UUIDs → 404 of the resource.
 
-Frontend (`frontend/src`): Material Design 3 look — color/shape/elevation tokens in `styles/tokens.css` (light + dark via `prefers-color-scheme`), components in `styles/app.css`, inline SVG icons in `components/Icon.tsx` (no icon/UI library). `api/client.ts` (typed fetch, `ApiError`); pages Home (hero + drag & drop upload) → Processing (polls status) → Recommendations (signal-bar level meter — the numeric score is internal and never sent by the API —, client-side level/remote filters, expandable reasons, "show more") → Job detail. UI text is Spanish.
+Frontend (`frontend/src`): Material Design 3 look — color/shape/elevation tokens in `styles/tokens.css` (light theme only — no dark mode, by decision), components in `styles/app.css`, inline SVG icons in `components/Icon.tsx` (no icon/UI library). `api/client.ts` (typed fetch, `ApiError`); pages Home (hero + drag & drop upload) → Processing (polls status) → Recommendations (signal-bar level meter — the numeric score is internal and never sent by the API —, client-side level/remote filters, expandable reasons, "show more") → Job detail. UI text is Spanish.
 
 ## Git workflow
 

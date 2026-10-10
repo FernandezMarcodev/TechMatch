@@ -79,7 +79,7 @@
 
 ## Fase 8 — Frontend (Material Design 3)
 
-* [x] Tokens de diseño (claro y oscuro).
+* [x] Tokens de diseño (solo tema claro).
 * [x] Barra superior y pie con atribución de la fuente.
 * [x] Inicio: portada, carga con arrastrar y soltar, cómo funciona, qué evaluamos.
 * [x] Procesamiento.

@@ -94,7 +94,7 @@ Filtrar por nivel o por modalidad remota reduce la lista sin alterar el orden po
 
 ## CA-020 — Interfaz
 
-La interfaz sigue Material Design 3, se adapta a móvil y escritorio, y respeta el modo claro u oscuro del sistema.
+La interfaz sigue Material Design 3, se adapta a móvil y escritorio, y usa siempre el tema claro, aunque el sistema esté en modo oscuro.
 
 ## CA-021 — Sin scraping
 

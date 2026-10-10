@@ -163,7 +163,7 @@ Use repositories/data-access abstractions so domain logic is not tied directly t
 
 Follow Material Design 3: color roles, shape, elevation and type scale from `frontend/src/styles/tokens.css`.
 
-Support light and dark mode, mobile and desktop, keyboard focus and reduced motion.
+Light theme only (no dark mode), mobile and desktop, keyboard focus and reduced motion.
 
 All user-facing text is Spanish.
 

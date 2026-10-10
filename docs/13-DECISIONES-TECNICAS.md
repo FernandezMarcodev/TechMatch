@@ -88,7 +88,7 @@ Los valores concretos están en `03-MATCHING-SPEC.md` y en `matching-config.ts`.
 
 ## Frontend
 
-* **Material Design 3:** roles de color, forma, elevación y escala tipográfica como variables CSS (`styles/tokens.css`), con esquema claro y oscuro según `prefers-color-scheme`.
+* **Material Design 3:** roles de color, forma, elevación y escala tipográfica como variables CSS (`styles/tokens.css`), con un único esquema claro: el tema oscuro se descartó porque la interfaz se veía y se leía mejor en claro, y mantener un solo esquema simplifica el diseño y las pruebas (`color-scheme: light` evita que el navegador oscurezca controles nativos).
 * **Íconos SVG propios** (`components/Icon.tsx`) en lugar de una fuente de íconos o una librería.
 * **Color:** la paleta principal es azul; el verde (con acentos cian y ámbar) comunica lo positivo y da vida a la portada, los pasos de "Cómo funciona" y los criterios. Los criterios prioritarios (tecnologías, seniority, experiencia) se destacan en azul pleno.
 * **Tipografía Roboto** desde Google Fonts, con fuentes del sistema como respaldo.
