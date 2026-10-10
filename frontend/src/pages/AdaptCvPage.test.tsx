@@ -31,6 +31,15 @@ const draft: AdaptedDraft = {
     education: [
       { degree: 'Ingeniería en Sistemas', institution: 'UTN', startDate: '2013', endDate: '2019' },
     ],
+    projects: [
+      {
+        name: 'TechMatch',
+        startDate: '2024',
+        endDate: null,
+        highlights: ['API REST con Java para recomendar ofertas.'],
+        relevant: true,
+      },
+    ],
     skills: [
       { name: 'Java', highlighted: true },
       { name: 'Git', highlighted: false },
@@ -91,8 +100,50 @@ describe('AdaptCvPage', () => {
     const paper = within(preview());
     expect(paper.getByRole('heading', { name: 'Tu nombre' })).toBeInTheDocument();
     expect(paper.getByText('mar 2021 – Actualidad')).toBeInTheDocument();
-    expect(paper.getByText('Java · Git')).toBeInTheDocument();
+    expect(paper.getByText('Java, Git')).toBeInTheDocument();
     expect(paper.getByText('Inglés (B1)')).toBeInTheDocument();
+  });
+
+  it('follows the Harvard order and includes the projects', async () => {
+    mockDraft();
+    renderAdapt();
+    const paper = within(await screen.findByRole('article', { name: 'Vista previa del CV' }));
+    expect(paper.getAllByRole('heading', { level: 2 }).map((h) => h.textContent)).toEqual([
+      'Perfil',
+      'Educación',
+      'Experiencia',
+      'Proyectos',
+      'Habilidades',
+    ]);
+    // Organization in bold, role in italics with its dates.
+    expect(paper.getByText('UTN', { selector: 'strong' })).toBeInTheDocument();
+    expect(paper.getByText('Ingeniería en Sistemas', { selector: 'em' })).toBeInTheDocument();
+    expect(paper.getByText('2013 – 2019')).toBeInTheDocument();
+    expect(paper.getByText('TechMatch', { selector: 'strong' })).toBeInTheDocument();
+    expect(paper.getByText('2024 – En curso')).toBeInTheDocument();
+    expect(paper.getByText('API REST con Java para recomendar ofertas.')).toBeInTheDocument();
+  });
+
+  it('edits, adds and removes projects', async () => {
+    mockDraft();
+    renderAdapt();
+    await userEvent.click(await screen.findByRole('button', { name: 'Agregar proyecto' }));
+    const names = screen.getAllByLabelText('Nombre del proyecto');
+    await userEvent.type(names[1]!, 'Bot de recordatorios');
+    expect(
+      within(preview()).getByText('Bot de recordatorios', { selector: 'strong' }),
+    ).toBeInTheDocument();
+    await userEvent.click(screen.getAllByRole('button', { name: 'Quitar proyecto' })[0]!);
+    expect(within(preview()).queryByText('TechMatch')).not.toBeInTheDocument();
+  });
+
+  it('opens drafts saved before projects existed', async () => {
+    const old: Record<string, unknown> = { ...draft.document };
+    delete old.projects;
+    window.localStorage.setItem(storageKey('cv-1', 'job-1'), JSON.stringify(old));
+    mockDraft();
+    renderAdapt();
+    expect(await screen.findByRole('button', { name: 'Agregar proyecto' })).toBeInTheDocument();
   });
 
   it('offers the native level for languages', async () => {
@@ -119,7 +170,7 @@ describe('AdaptCvPage', () => {
     expect(within(preview()).queryByText(/Kubernetes/)).not.toBeInTheDocument();
 
     await userEvent.click(screen.getByRole('button', { name: 'Sí, agregar' }));
-    expect(within(preview()).getByText('Java · Git · Kubernetes')).toBeInTheDocument();
+    expect(within(preview()).getByText('Java, Git, Kubernetes')).toBeInTheDocument();
     expect(screen.getByText('Agregada')).toBeInTheDocument();
   });
 
@@ -131,7 +182,7 @@ describe('AdaptCvPage', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'Restablecer borrador' }));
     await userEvent.click(screen.getByRole('button', { name: 'Sí, restablecer' }));
-    expect(within(preview()).getByText('Java · Git')).toBeInTheDocument();
+    expect(within(preview()).getByText('Java, Git')).toBeInTheDocument();
     expect(window.localStorage.getItem(storageKey('cv-1', 'job-1'))).toBeNull();
   });
 

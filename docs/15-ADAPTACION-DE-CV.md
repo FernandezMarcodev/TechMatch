@@ -66,6 +66,13 @@ Las coincidentes se marcan como destacadas en la vista previa.
 * Cada experiencia con tecnologías de la oferta se marca como **relevante**.
 * Las líneas de descripción se convierten en viñetas; las que mencionan tecnologías de la oferta van primero.
 
+### Proyectos
+
+* Los proyectos personales o académicos del CV se incluyen siempre.
+* Primero los que mencionan tecnologías de la oferta (marcados como **relevantes**); el resto, en el orden del CV.
+* Fechas solo con año, como en educación: muchos CV fechan los proyectos por año y no se inventa un mes.
+* Las viñetas se ordenan igual que en experiencia.
+
 ### Educación e idiomas
 
 Tal como se extrajeron del CV.
@@ -84,7 +91,7 @@ Se generan a partir de los criterios del matching, nunca se agregan al CV:
 
 ## Edición
 
-* Secciones editables: datos personales, resumen, experiencia (agregar, quitar, reordenar viñetas), educación, tecnologías e idiomas.
+* Secciones editables, en el orden de la vista previa: datos personales, resumen, educación, experiencia, proyectos (agregar, quitar, editar viñetas), tecnologías e idiomas (de A1 a C2 o nativo).
 * Las sugerencias de tecnologías tienen la acción "La tengo, agregar", que solo se aplica con la confirmación del usuario.
 * Vista previa en formato Harvard actualizada en vivo.
 * El borrador editado se guarda en el **navegador** (`localStorage`, por CV y oferta) para no perderlo al recargar. En v2.0 no se guarda en el servidor; guardar en la cuenta llega en v2.1.
@@ -99,11 +106,14 @@ Se generan a partir de los criterios del matching, nunca se agregan al CV:
 
 ## Formato Harvard (vista previa y PDF)
 
+Sigue la plantilla de CV de Harvard (Office of Career Services):
+
 * Una columna, tamaño A4, tipografía serif, márgenes amplios.
-* Encabezado: nombre centrado y una línea con ubicación, email, teléfono y links.
-* Secciones en este orden: Resumen, Experiencia, Educación, Tecnologías, Idiomas.
+* Encabezado: nombre centrado y una línea con ubicación, email, teléfono y links separados por "•".
+* Secciones en este orden: Perfil (opcional), Educación, Experiencia, Proyectos y Habilidades (tecnologías e idiomas). El perfil no forma parte de la plantilla original; se mantiene porque es el resumen adaptado a la oferta, y si se deja vacío no aparece.
 * Títulos de sección en versalitas con una línea divisoria.
-* Experiencia: puesto y empresa a la izquierda, fechas a la derecha, viñetas debajo.
+* Cada entrada: institución, empresa o proyecto en negrita; título o puesto en cursiva; fechas alineadas a la derecha; viñetas debajo, una por logro (una frase por viñeta, aunque ocupe varios renglones).
+* Habilidades: "Tecnologías:" e "Idiomas:" como listas separadas por comas.
 * Exportación: botón "Descargar PDF" que imprime solo la vista previa (CSS `@media print`), con el nombre sugerido `CV - {Nombre} - {Empresa}.pdf`.
 
 ## API
@@ -142,6 +152,15 @@ Genera el borrador.
           "institution": "Universidad Tecnológica Nacional",
           "startDate": "2013",
           "endDate": "2019"
+        }
+      ],
+      "projects": [
+        {
+          "name": "TechMatch - Plataforma de búsqueda de empleo",
+          "startDate": "2024",
+          "endDate": null,
+          "highlights": ["API REST con Node.js y PostgreSQL."],
+          "relevant": true
         }
       ],
       "skills": [

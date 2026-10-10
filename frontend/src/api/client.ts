@@ -47,6 +47,7 @@ export interface CvDocument {
   summary: string;
   experiences: CvExperience[];
   education: CvEducation[];
+  projects: CvProject[];
   skills: { name: string; highlighted: boolean }[];
   languages: { name: string; level: string | null }[];
 }
@@ -65,6 +66,15 @@ export interface CvEducation {
   institution: string | null;
   startDate: string | null;
   endDate: string | null;
+}
+
+/** Personal or academic project. Dates are years ("YYYY"); null end = "En curso". */
+export interface CvProject {
+  name: string | null;
+  startDate: string | null;
+  endDate: string | null;
+  highlights: string[];
+  relevant: boolean;
 }
 
 export type SuggestionType =

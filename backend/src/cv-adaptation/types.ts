@@ -14,6 +14,7 @@ export interface CvDocument {
   readonly summary: string;
   readonly experiences: readonly CvDocumentExperience[];
   readonly education: readonly CvDocumentEducation[];
+  readonly projects: readonly CvDocumentProject[];
   readonly skills: readonly { readonly name: string; readonly highlighted: boolean }[];
   readonly languages: readonly { readonly name: string; readonly level: string | null }[];
 }
@@ -32,6 +33,15 @@ export interface CvDocumentEducation {
   readonly institution: string | null;
   readonly startDate: string | null;
   readonly endDate: string | null;
+}
+
+export interface CvDocumentProject {
+  readonly name: string | null;
+  readonly startDate: string | null;
+  readonly endDate: string | null;
+  readonly highlights: readonly string[];
+  /** Mentions technologies of the offer. */
+  readonly relevant: boolean;
 }
 
 export type SuggestionType =

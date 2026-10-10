@@ -1,4 +1,4 @@
-import type { CandidateProfile, Education, Experience } from '../domain/entities.js';
+import type { CandidateProfile, Education, Experience, Project } from '../domain/entities.js';
 import type { Seniority } from '../domain/enums.js';
 import { detectEducationLevel, extractField } from '../domain/normalization/education.js';
 import { findLanguageMentions } from '../domain/normalization/languages.js';
@@ -157,6 +157,60 @@ function extractEducation(lines: readonly string[]): Education[] {
   return result;
 }
 
+const MAX_PROJECT_TITLE = 80;
+const SENTENCE_END = /[.!?;:]$/;
+const PROJECT_TITLE_SEPARATOR = /\s(?:-|\u2013|\u2014|\|)\s|:\s/;
+
+/**
+ * A project starts on a short line that does not read as a sentence (no closing punctuation,
+ * starts with a capital letter or a digit, not only dates) and either follows a finished
+ * sentence, carries a date range or has a title separator ("TechMatch - App web"). Everything
+ * until the next title is its description, one item per line.
+ */
+function extractProjects(lines: readonly string[]): Project[] {
+  const groups: string[][] = [];
+  lines.forEach((line, i) => {
+    const prev = lines[i - 1];
+    const range = findDateRanges(line)[0];
+    // A line with only dates belongs to the title above it.
+    const onlyDates = range !== undefined && stripRange(line, range).length === 0;
+    const titleLike =
+      !onlyDates &&
+      line.length <= MAX_PROJECT_TITLE &&
+      !SENTENCE_END.test(line) &&
+      /^[\p{Lu}\d]/u.test(line);
+    const startsProject =
+      i === 0 ||
+      (titleLike &&
+        (prev === undefined ||
+          SENTENCE_END.test(prev) ||
+          range !== undefined ||
+          PROJECT_TITLE_SEPARATOR.test(line)));
+    if (startsProject || groups.length === 0) groups.push([line]);
+    else groups[groups.length - 1]?.push(line);
+  });
+
+  return groups.map(([title = '', ...rest]) => {
+    // Dates on the title line, or alone on the line right after it.
+    let range = findDateRanges(title)[0];
+    const name = (range ? stripRange(title, range) : title).trim();
+    let body = rest;
+    const next = rest[0];
+    const nextRange = !range && next ? findDateRanges(next)[0] : undefined;
+    if (next && nextRange && stripRange(next, nextRange).length === 0) {
+      range = nextRange;
+      body = rest.slice(1);
+    }
+    const description = body.join('\n').trim();
+    return {
+      name: name || null,
+      description: description || null,
+      startDate: range ? toIsoDate(range.start) : null,
+      endDate: range?.end ? toIsoDate(range.end) : null,
+    };
+  });
+}
+
 const LOCATION_LABEL =
   /^(?:ubicacion|direccion|domicilio|residencia|localidad|ciudad|location|address|lugar de residencia)\s*:\s*(.+)$/i;
 
@@ -222,6 +276,7 @@ export function extractProfile(text: string, referenceDate: Date): ExtractedProf
     location: extractLocation(sections),
     experiences,
     education: extractEducation(sections.education),
+    projects: extractProjects(sections.projects),
     skills: uniqueSkills([...extractSkillsFromText(text), ...experiences.flatMap((e) => e.skills)]),
     languages,
   };

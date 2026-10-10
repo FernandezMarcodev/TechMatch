@@ -61,6 +61,19 @@ end_date DATE NULL
 created_at TIMESTAMPTZ
 ```
 
+## projects
+
+```text
+id UUID PK
+candidate_profile_id UUID FK
+name VARCHAR NULL
+description TEXT NULL
+start_date DATE NULL
+end_date DATE NULL
+position SMALLINT           (orden en el CV)
+created_at TIMESTAMPTZ
+```
+
 ## languages
 
 ```text

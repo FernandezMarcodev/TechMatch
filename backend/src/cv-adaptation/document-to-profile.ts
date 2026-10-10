@@ -67,6 +67,7 @@ export function documentToProfile(
     doc.personal.headline ?? '',
     doc.summary,
     ...doc.experiences.flatMap((e) => [e.position ?? '', ...e.highlights]),
+    ...doc.projects.flatMap((p) => [p.name ?? '', ...p.highlights]),
   ].join('\n');
 
   const skills = uniqueSkills([
@@ -111,6 +112,18 @@ export function documentToProfile(
     location: doc.personal.location?.trim() || null,
     experiences,
     education,
+    projects: doc.projects
+      .filter((p) => p.name || p.highlights.some((h) => h.trim()))
+      .map((p) => {
+        const start = parseMonth(p.startDate);
+        const end = parseMonth(p.endDate);
+        return {
+          name: p.name,
+          description: p.highlights.filter((h) => h.trim()).join('\n') || null,
+          startDate: start ? toIsoDate(start) : null,
+          endDate: end ? toIsoDate(end) : null,
+        };
+      }),
     skills,
     languages,
   };

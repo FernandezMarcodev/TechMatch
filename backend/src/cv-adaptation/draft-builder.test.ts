@@ -22,6 +22,7 @@ function profile(overrides: Partial<CandidateProfile> = {}): CandidateProfile {
     seniority: 'SEMI_SENIOR',
     totalExperienceYears: 7.1,
     location: 'Capital Federal, Buenos Aires',
+    projects: [],
     experiences: [
       {
         company: 'Globant',
@@ -140,6 +141,44 @@ describe('buildAdaptedDraft — ordering and highlighting', () => {
     ).toEqual([
       ['Acme S.A.', '2021-03', null, true],
       ['Globant', '2019-01', '2021-02', false],
+    ]);
+  });
+
+  it('keeps the projects, those related to the offer first', () => {
+    const { document: withProjects } = buildAdaptedDraft(
+      profile({
+        projects: [
+          {
+            name: 'Bot de recordatorios',
+            description: 'Bot de Telegram para recordar vencimientos.',
+            startDate: null,
+            endDate: null,
+          },
+          {
+            name: 'TechMatch',
+            description: 'Interfaz web accesible.\nAPI REST con Java y Spring Boot.',
+            startDate: '2024-01-01',
+            endDate: '2025-06-01',
+          },
+        ],
+      }),
+      job(),
+    );
+    expect(withProjects.projects).toEqual([
+      {
+        name: 'TechMatch',
+        startDate: '2024',
+        endDate: '2025',
+        highlights: ['API REST con Java y Spring Boot.', 'Interfaz web accesible.'],
+        relevant: true,
+      },
+      {
+        name: 'Bot de recordatorios',
+        startDate: null,
+        endDate: null,
+        highlights: ['Bot de Telegram para recordar vencimientos.'],
+        relevant: false,
+      },
     ]);
   });
 

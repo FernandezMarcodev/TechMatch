@@ -38,6 +38,7 @@ export function makeProfile(
     seniority: 'SEMI_SENIOR',
     totalExperienceYears: 3,
     location: 'CABA',
+    projects: [],
     experiences: [
       {
         company: 'Acme',

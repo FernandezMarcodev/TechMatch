@@ -41,6 +41,18 @@ export const evaluationDocumentSchema = z.object({
       }),
     )
     .max(20),
+  // Optional so drafts saved in the browser before projects existed are still accepted.
+  projects: z
+    .array(
+      z.object({
+        name: nullableText,
+        startDate: date,
+        endDate: date,
+        highlights: z.array(text).max(15),
+      }),
+    )
+    .max(20)
+    .default([]),
   skills: z.array(z.object({ name: z.string().max(100) })).max(100),
   languages: z
     .array(z.object({ name: z.string().max(100), level: z.string().max(10).nullable() }))
