@@ -1,0 +1,36 @@
+name: Sync jobs
+
+# Production job offers sync (docs/16-DESPLIEGUE.md). The free web service sleeps when
+# idle, so the 12-hour sync runs here instead of in the backend's scheduler.
+on:
+  schedule:
+    - cron: '0 */12 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: sync-jobs
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Sync offers from job sources
+    runs-on: ubuntu-latest
+    # Skips quietly in forks or before the secret is configured.
+    if: ${{ github.repository == 'FernandezMarcodev/TechMatch' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Sync
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::warning::PRODUCTION_DATABASE_URL is not set; skipping sync."
+            exit 0
+          fi
+          npm run sync-jobs -w backend
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+          LOG_LEVEL: info
