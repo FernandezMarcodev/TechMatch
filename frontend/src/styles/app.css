@@ -1406,8 +1406,8 @@ p {
 
 /*
  * The paper is always white with dark ink: it represents the printed page. On screen it is an
- * A4 sheet with the @page margins and the print font sizes (pt), so lines wrap exactly as in
- * the PDF; CvSheet scales it down to fit the column.
+ * A4 sheet with the page margins as padding and the print font sizes (pt), so lines wrap
+ * exactly as in the PDF; CvSheet scales it down to fit the column.
  */
 .cv-paper {
   position: relative;
@@ -1704,9 +1704,14 @@ p {
 
 /* ---------- Print: only the Harvard CV (PDF export) ---------- */
 
+/*
+ * No page margins: the browser prints its header and footer (date, page title with the
+ * company, URL) inside them. The margins are the sheet's own padding instead, and every page
+ * after the first starts with a forced break at the block CvSheet computed (see below).
+ */
 @page {
   size: A4;
-  margin: 16mm 18mm;
+  margin: 0;
 }
 
 @media print {
@@ -1748,18 +1753,19 @@ p {
     box-shadow: none;
   }
 
-  /* The page margins come from @page: the sheet becomes the page content box. */
+  /* The sheet is the page: same 16 mm × 18 mm margins as on screen, as padding. */
   .cv-paper {
     width: auto;
     min-height: 0 !important;
-    padding: 0;
+    padding: 16mm 18mm 0;
     background: #ffffff;
     filter: none;
   }
 
-  /* The printer breaks the pages itself: no on-screen pagination space. */
+  /* Each later page starts where the preview shows it, with its top margin. */
   .cv-paper [data-page-start] {
-    padding-top: 0 !important;
+    break-before: page;
+    padding-top: 16mm !important;
   }
 
   .cv-paper__section > p {

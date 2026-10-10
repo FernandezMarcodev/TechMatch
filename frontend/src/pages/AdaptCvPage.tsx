@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { flushSync } from 'react-dom';
 import { Link, useParams } from 'react-router-dom';
 import {
   ApiError,
@@ -12,7 +13,7 @@ import { Page } from '../components/Layout';
 import { StateView } from '../components/StateView';
 import { CvEditor } from '../components/cv/CvEditor';
 import { EvaluationPanel } from '../components/cv/EvaluationPanel';
-import { CvSheet } from '../components/cv/CvSheet';
+import { CvSheet, paginate } from '../components/cv/CvSheet';
 
 type State =
   { kind: 'loading' } | { kind: 'error'; message: string } | { kind: 'ready'; draft: AdaptedDraft };
@@ -222,6 +223,11 @@ export function AdaptCvPage() {
     const previousTitle = page.title;
     page.title = `CV - ${name} - ${draft.job.company}`;
     window.addEventListener('afterprint', () => (page.title = previousTitle), { once: true });
+    // On a phone the editor tab hides the preview, so its pages were never laid out: show it
+    // and paginate it now, because the printed page breaks are the ones it marks.
+    flushSync(() => setView('preview'));
+    const paper = page.querySelector<HTMLElement>('.print-target .cv-paper');
+    if (paper && paper.offsetHeight > 0) paginate(paper);
     window.print();
   }
   return (
