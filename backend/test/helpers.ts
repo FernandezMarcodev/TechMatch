@@ -13,6 +13,6 @@ export function createTestPool(): DbPool {
 export async function truncateAll(pool: DbPool): Promise<void> {
   await pool.query(
     `TRUNCATE match_results, job_skills, job_offers, candidate_skills, skills,
-              languages, education, experiences, candidate_profiles, cvs CASCADE`,
+              languages, education, experiences, projects, candidate_profiles, cvs CASCADE`,
   );
 }

@@ -1,5 +1,5 @@
 import { useId, useState, type ReactNode } from 'react';
-import type { CvDocument, CvEducation, CvExperience } from '../../api/client';
+import type { CvDocument, CvEducation, CvExperience, CvProject } from '../../api/client';
 import { Icon } from '../Icon';
 import { languageLevelLabel } from '../labels';
 
@@ -64,6 +64,8 @@ export function CvEditor({ document: doc, onChange }: CvEditorProps) {
     set({ experiences: updateAt(doc.experiences, i, patch) });
   const setEducation = (i: number, patch: Partial<CvEducation>) =>
     set({ education: updateAt(doc.education, i, patch) });
+  const setProject = (i: number, patch: Partial<CvProject>) =>
+    set({ projects: updateAt(doc.projects, i, patch) });
 
   function addSkill() {
     const name = newSkill.trim();
@@ -156,6 +158,76 @@ export function CvEditor({ document: doc, onChange }: CvEditorProps) {
             />
           )}
         </Field>
+      </Section>
+
+      <Section title="Educación">
+        {doc.education.map((edu, i) => (
+          <div key={i} className="editor-item">
+            <div className="field-grid">
+              <Field label="Título">
+                {(id) => (
+                  <input
+                    id={id}
+                    value={edu.degree ?? ''}
+                    onChange={(e) => setEducation(i, { degree: e.target.value || null })}
+                  />
+                )}
+              </Field>
+              <Field label="Institución">
+                {(id) => (
+                  <input
+                    id={id}
+                    value={edu.institution ?? ''}
+                    onChange={(e) => setEducation(i, { institution: e.target.value || null })}
+                  />
+                )}
+              </Field>
+              <Field label="Año de inicio">
+                {(id) => (
+                  <input
+                    id={id}
+                    inputMode="numeric"
+                    maxLength={4}
+                    value={edu.startDate ?? ''}
+                    onChange={(e) => setEducation(i, { startDate: e.target.value || null })}
+                  />
+                )}
+              </Field>
+              <Field label="Año de fin" hint="Vacío si está en curso.">
+                {(id) => (
+                  <input
+                    id={id}
+                    inputMode="numeric"
+                    maxLength={4}
+                    value={edu.endDate ?? ''}
+                    onChange={(e) => setEducation(i, { endDate: e.target.value || null })}
+                  />
+                )}
+              </Field>
+            </div>
+            <button
+              type="button"
+              className="button button--text button--small"
+              onClick={() => set({ education: removeAt(doc.education, i) })}
+            >
+              <Icon name="close" size={16} /> Quitar estudio
+            </button>
+          </div>
+        ))}
+        <button
+          type="button"
+          className="button button--outlined button--small"
+          onClick={() =>
+            set({
+              education: [
+                ...doc.education,
+                { degree: '', institution: '', startDate: null, endDate: null },
+              ],
+            })
+          }
+        >
+          Agregar estudio
+        </button>
       </Section>
 
       <Section title="Experiencia">
@@ -263,25 +335,21 @@ export function CvEditor({ document: doc, onChange }: CvEditorProps) {
         </button>
       </Section>
 
-      <Section title="Educación">
-        {doc.education.map((edu, i) => (
-          <div key={i} className="editor-item">
+      <Section title="Proyectos">
+        {doc.projects.map((project, i) => (
+          <div key={i} className={`editor-item${project.relevant ? ' editor-item--relevant' : ''}`}>
+            {project.relevant && (
+              <span className="editor-item__badge">
+                <Icon name="target" size={14} /> Relevante para la oferta
+              </span>
+            )}
             <div className="field-grid">
-              <Field label="Título">
+              <Field label="Nombre del proyecto">
                 {(id) => (
                   <input
                     id={id}
-                    value={edu.degree ?? ''}
-                    onChange={(e) => setEducation(i, { degree: e.target.value || null })}
-                  />
-                )}
-              </Field>
-              <Field label="Institución">
-                {(id) => (
-                  <input
-                    id={id}
-                    value={edu.institution ?? ''}
-                    onChange={(e) => setEducation(i, { institution: e.target.value || null })}
+                    value={project.name ?? ''}
+                    onChange={(e) => setProject(i, { name: e.target.value || null })}
                   />
                 )}
               </Field>
@@ -291,8 +359,8 @@ export function CvEditor({ document: doc, onChange }: CvEditorProps) {
                     id={id}
                     inputMode="numeric"
                     maxLength={4}
-                    value={edu.startDate ?? ''}
-                    onChange={(e) => setEducation(i, { startDate: e.target.value || null })}
+                    value={project.startDate ?? ''}
+                    onChange={(e) => setProject(i, { startDate: e.target.value || null })}
                   />
                 )}
               </Field>
@@ -302,18 +370,31 @@ export function CvEditor({ document: doc, onChange }: CvEditorProps) {
                     id={id}
                     inputMode="numeric"
                     maxLength={4}
-                    value={edu.endDate ?? ''}
-                    onChange={(e) => setEducation(i, { endDate: e.target.value || null })}
+                    value={project.endDate ?? ''}
+                    onChange={(e) => setProject(i, { endDate: e.target.value || null })}
                   />
                 )}
               </Field>
             </div>
+            <Field
+              label="Qué hiciste"
+              hint="Una viñeta por línea: objetivo, tecnologías y resultado."
+            >
+              {(id) => (
+                <textarea
+                  id={id}
+                  rows={Math.max(3, project.highlights.length + 1)}
+                  value={project.highlights.join('\n')}
+                  onChange={(e) => setProject(i, { highlights: linesOf(e.target.value) })}
+                />
+              )}
+            </Field>
             <button
               type="button"
               className="button button--text button--small"
-              onClick={() => set({ education: removeAt(doc.education, i) })}
+              onClick={() => set({ projects: removeAt(doc.projects, i) })}
             >
-              <Icon name="close" size={16} /> Quitar estudio
+              <Icon name="close" size={16} /> Quitar proyecto
             </button>
           </div>
         ))}
@@ -322,14 +403,14 @@ export function CvEditor({ document: doc, onChange }: CvEditorProps) {
           className="button button--outlined button--small"
           onClick={() =>
             set({
-              education: [
-                ...doc.education,
-                { degree: '', institution: '', startDate: null, endDate: null },
+              projects: [
+                ...doc.projects,
+                { name: '', startDate: null, endDate: null, highlights: [], relevant: false },
               ],
             })
           }
         >
-          Agregar estudio
+          Agregar proyecto
         </button>
       </Section>
 

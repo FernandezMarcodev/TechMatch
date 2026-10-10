@@ -25,6 +25,7 @@ function profile(overrides: Partial<CandidateProfile> = {}): CandidateProfile {
     seniority: 'SEMI_SENIOR',
     totalExperienceYears: 3,
     location: 'CABA',
+    projects: [],
     experiences: [],
     education: [
       {

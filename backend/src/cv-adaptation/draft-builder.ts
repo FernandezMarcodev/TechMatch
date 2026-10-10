@@ -15,6 +15,7 @@ import type {
   CvDocument,
   CvDocumentEducation,
   CvDocumentExperience,
+  CvDocumentProject,
 } from './types.js';
 
 const SUMMARY_SKILLS = 4;
@@ -74,24 +75,38 @@ export function buildAdaptedDraft(profile: CandidateProfile, job: JobOffer): Ada
     ...rest.map((s) => ({ name: s.name, highlighted: false })),
   ];
 
-  const experiences: CvDocumentExperience[] = [...profile.experiences].sort(byRecency).map((e) => {
-    const lines = (e.description ?? '')
+  const mentionsJob = (text: string) => [...skillKeysIn(text)].some((k) => jobKeys.has(k));
+  // Lines with technologies of the offer first; otherwise keep the CV's order.
+  const highlightsOf = (description: string | null) => {
+    const lines = (description ?? '')
       .split('\n')
       .map((l) => l.trim())
       .filter(Boolean);
-    const mentionsJob = (line: string) => [...skillKeysIn(line)].some((k) => jobKeys.has(k));
-    // Lines with technologies of the offer first; otherwise keep the CV's order.
-    const highlights = [...lines.filter(mentionsJob), ...lines.filter((l) => !mentionsJob(l))];
-    const text = [e.position ?? '', e.description ?? ''].join('\n');
-    return {
-      position: e.position,
-      company: e.company,
-      startDate: toMonth(e.startDate),
-      endDate: toMonth(e.endDate),
-      highlights,
-      relevant: [...skillKeysIn(text)].some((k) => jobKeys.has(k)),
-    };
-  });
+    return [...lines.filter(mentionsJob), ...lines.filter((l) => !mentionsJob(l))];
+  };
+
+  const experiences: CvDocumentExperience[] = [...profile.experiences].sort(byRecency).map((e) => ({
+    position: e.position,
+    company: e.company,
+    startDate: toMonth(e.startDate),
+    endDate: toMonth(e.endDate),
+    highlights: highlightsOf(e.description),
+    relevant: mentionsJob([e.position ?? '', e.description ?? ''].join('\n')),
+  }));
+
+  // Projects related to the offer first; otherwise the CV's order. Years only, like education:
+  // projects are often dated by year and a month must not be invented.
+  const allProjects: CvDocumentProject[] = profile.projects.map((p) => ({
+    name: p.name,
+    startDate: toYear(p.startDate),
+    endDate: toYear(p.endDate),
+    highlights: highlightsOf(p.description),
+    relevant: mentionsJob([p.name ?? '', p.description ?? ''].join('\n')),
+  }));
+  const projects = [
+    ...allProjects.filter((p) => p.relevant),
+    ...allProjects.filter((p) => !p.relevant),
+  ];
 
   const education: CvDocumentEducation[] = profile.education.map((e) => ({
     degree: e.degree,
@@ -114,6 +129,7 @@ export function buildAdaptedDraft(profile: CandidateProfile, job: JobOffer): Ada
     summary: buildSummary(profile, headline, [...matchedRequired, ...matchedOptional]),
     experiences,
     education,
+    projects,
     skills,
     languages: profile.languages.map((l) => ({
       name: capitalize(languageLabel(l.name)),

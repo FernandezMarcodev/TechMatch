@@ -1,7 +1,7 @@
 import { foldText } from '../domain/text.js';
 
 export type SectionName =
-  'header' | 'summary' | 'experience' | 'education' | 'skills' | 'languages' | 'other';
+  'header' | 'summary' | 'experience' | 'education' | 'projects' | 'skills' | 'languages' | 'other';
 
 const HEADINGS: readonly (readonly [SectionName, readonly string[]])[] = [
   [
@@ -49,6 +49,22 @@ const HEADINGS: readonly (readonly [SectionName, readonly string[]])[] = [
     ],
   ],
   [
+    'projects',
+    [
+      'proyectos',
+      'proyectos personales',
+      'proyectos destacados',
+      'proyectos academicos',
+      'proyectos propios',
+      'proyectos relevantes',
+      'projects',
+      'personal projects',
+      'side projects',
+      'portfolio',
+      'portafolio',
+    ],
+  ],
+  [
     'skills',
     [
       'habilidades',
@@ -74,8 +90,6 @@ const HEADINGS: readonly (readonly [SectionName, readonly string[]])[] = [
       'cursos y certificaciones',
       'certifications',
       'courses',
-      'proyectos',
-      'projects',
       'referencias',
       'references',
       'intereses',
@@ -112,6 +126,7 @@ export function segment(text: string): Sections {
     summary: [],
     experience: [],
     education: [],
+    projects: [],
     skills: [],
     languages: [],
     other: [],

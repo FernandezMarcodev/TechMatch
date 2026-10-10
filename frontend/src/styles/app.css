@@ -1459,15 +1459,15 @@ p {
   margin-top: 10px;
 }
 
-.cv-paper__entry-head {
+.cv-paper__row {
   display: flex;
   justify-content: space-between;
+  align-items: baseline;
   gap: 12px;
 }
 
-.cv-paper__entry-head span {
+.cv-paper__row span {
   flex-shrink: 0;
-  font-style: italic;
 }
 
 .cv-paper ul {
@@ -1475,8 +1475,12 @@ p {
   padding-left: 18px;
 }
 
-.cv-paper__muted {
-  color: #444;
+.cv-paper li + li {
+  margin-top: 2px;
+}
+
+.cv-paper__section p + p {
+  margin-top: 2px;
 }
 
 @media (max-width: 1000px) {

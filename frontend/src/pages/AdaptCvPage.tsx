@@ -27,7 +27,10 @@ export function storageKey(cvId: string, jobId: string): string {
 function loadSaved(key: string): CvDocument | null {
   try {
     const raw = window.localStorage.getItem(key);
-    return raw ? (JSON.parse(raw) as CvDocument) : null;
+    if (!raw) return null;
+    const saved = JSON.parse(raw) as CvDocument;
+    // Drafts saved before projects existed have none.
+    return { ...saved, projects: saved.projects ?? [] };
   } catch {
     return null;
   }

@@ -38,6 +38,14 @@ export interface Experience {
   readonly skills: readonly Skill[];
 }
 
+/** A personal or academic project listed in the CV ("Proyectos"). */
+export interface Project {
+  readonly name: string | null;
+  readonly description: string | null;
+  readonly startDate: IsoDate | null;
+  readonly endDate: IsoDate | null;
+}
+
 export interface Education {
   readonly institution: string | null;
   readonly degree: string | null;
@@ -66,6 +74,7 @@ export interface CandidateProfile {
   readonly location: string | null;
   readonly experiences: readonly Experience[];
   readonly education: readonly Education[];
+  readonly projects: readonly Project[];
   readonly skills: readonly Skill[];
   readonly languages: readonly Language[];
 }

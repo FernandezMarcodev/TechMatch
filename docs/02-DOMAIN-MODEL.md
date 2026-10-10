@@ -62,6 +62,18 @@ Education
 └── endDate
 ```
 
+### Project
+
+Proyecto personal o académico del CV (sección "Proyectos").
+
+```text
+Project
+├── name
+├── description
+├── startDate
+└── endDate
+```
+
 ### Language
 
 ```text
@@ -152,6 +164,7 @@ CV
           │
           ├── 1:N Experience
           ├── 1:N Education
+          ├── 1:N Project
           ├── N:N Skill
           └── 1:N Language
 

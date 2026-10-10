@@ -79,8 +79,9 @@ Se detectan secciones por títulos conocidos (en español e inglés):
 * experiencia;
 * educación / formación;
 * habilidades / conocimientos;
+* proyectos (proyectos personales, académicos, portfolio);
 * idiomas;
-* otras (cursos, proyectos, contacto...).
+* otras (cursos, contacto...).
 
 Las líneas previas al primer título forman el encabezado.
 
@@ -104,6 +105,14 @@ Cada línea con un rango de fechas ("Marzo 2021 - Actualidad", "01/2018 a 06/201
 * área;
 * nivel (secundario, terciario, universitario, posgrado);
 * fechas.
+
+### Proyectos
+
+* nombre;
+* descripción (una viñeta por línea);
+* fechas, si las hay en la línea del nombre o en la siguiente.
+
+Un proyecto empieza en una línea corta que no es una oración (sin punto final, empieza con mayúscula o número) y que sigue a una oración terminada, tiene fechas o un separador ("TechMatch - Plataforma web"). Lo que sigue hasta el próximo nombre es su descripción. Los proyectos no suman años de experiencia laboral; sus tecnologías sí cuentan como skills del CV.
 
 ### Skills
 

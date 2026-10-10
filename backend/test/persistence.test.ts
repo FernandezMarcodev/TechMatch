@@ -44,7 +44,11 @@ describe('PgCandidateProfileRepository', () => {
   it('round-trips a profile with its children', async () => {
     const cv = makeCv();
     await cvs.create(cv);
-    const profile = makeProfile(cv.id);
+    const projects = [
+      { name: 'TechMatch', description: 'API REST.', startDate: '2024-01-01', endDate: null },
+      { name: 'Bot', description: null, startDate: null, endDate: null },
+    ];
+    const profile = makeProfile(cv.id, { projects });
     await profiles.save(profile);
 
     const loaded = await profiles.findByCvId(cv.id);
@@ -58,6 +62,8 @@ describe('PgCandidateProfileRepository', () => {
     expect(loaded?.skills.map((s) => s.name)).toEqual(['Java', 'Spring', 'SQL']);
     expect(loaded?.experiences[0]).toMatchObject({ company: 'Acme', startDate: '2022-03-01' });
     expect(loaded?.education[0]?.level).toBe('UNIVERSITY');
+    // Projects keep the CV's order.
+    expect(loaded?.projects).toEqual(projects);
   });
 
   it('does not duplicate shared skills across profiles', async () => {

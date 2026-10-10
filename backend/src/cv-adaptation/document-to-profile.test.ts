@@ -28,6 +28,7 @@ const profile: CandidateProfile = {
   seniority: 'SEMI_SENIOR',
   totalExperienceYears: 7.1,
   location: 'Capital Federal, Buenos Aires',
+  projects: [],
   experiences: [
     {
       company: 'Acme S.A.',
@@ -164,6 +165,7 @@ describe('documentToProfile — edits', () => {
         summary: '',
         experiences: [],
         education: [],
+        projects: [],
         skills: [],
         languages: [],
       }),

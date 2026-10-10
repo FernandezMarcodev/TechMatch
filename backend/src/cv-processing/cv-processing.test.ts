@@ -191,6 +191,27 @@ describe('extractProfile', () => {
     expect(profile.totalExperienceYears).toBe(7.1);
   });
 
+  it('extracts personal projects with their dates and description', () => {
+    expect(profile.projects).toEqual([
+      {
+        name: 'TechMatch - Plataforma de búsqueda de empleo',
+        description:
+          'Matching de CVs con ofertas usando Node.js y PostgreSQL.\nAPI REST documentada y pruebas automatizadas.',
+        // Year-only dates are stored as mid-year, as for experiences.
+        startDate: '2024-06-01',
+        endDate: '2025-06-01',
+      },
+      {
+        name: 'Bot de recordatorios',
+        description: 'Bot de Telegram en JavaScript para recordar vencimientos.',
+        startDate: null,
+        endDate: null,
+      },
+    ]);
+    // Projects are not work experience.
+    expect(profile.experiences).toHaveLength(2);
+  });
+
   it('detects seniority from the most recent position', () => {
     expect(profile.seniority).toBe('SEMI_SENIOR');
   });

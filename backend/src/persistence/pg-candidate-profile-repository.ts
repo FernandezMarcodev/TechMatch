@@ -1,6 +1,12 @@
 import { randomUUID } from 'node:crypto';
 import type { CandidateProfileRepository } from '../application/ports.js';
-import type { CandidateProfile, Education, Experience, Language } from '../domain/entities.js';
+import type {
+  CandidateProfile,
+  Education,
+  Experience,
+  Language,
+  Project,
+} from '../domain/entities.js';
 import type { EducationLevel, LanguageLevel, Seniority } from '../domain/enums.js';
 import { toNumber, withTransaction, type DbPool } from '../infrastructure/db/pool.js';
 import { upsertSkills } from './skill-store.js';
@@ -28,6 +34,13 @@ interface EducationRow {
   degree: string | null;
   field: string | null;
   level: EducationLevel | 'UNKNOWN' | null;
+  start_date: string | null;
+  end_date: string | null;
+}
+
+interface ProjectRow {
+  name: string | null;
+  description: string | null;
   start_date: string | null;
   end_date: string | null;
 }
@@ -87,6 +100,14 @@ export class PgCandidateProfileRepository implements CandidateProfileRepository 
           ],
         );
       }
+      for (const [position, p] of profile.projects.entries()) {
+        await client.query(
+          `INSERT INTO projects (id, candidate_profile_id, name, description, start_date, end_date,
+                                 position)
+           VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+          [randomUUID(), profile.id, p.name, p.description, p.startDate, p.endDate, position],
+        );
+      }
       for (const l of profile.languages) {
         await client.query(
           `INSERT INTO languages (id, candidate_profile_id, name, level) VALUES ($1, $2, $3, $4)`,
@@ -115,7 +136,7 @@ export class PgCandidateProfileRepository implements CandidateProfileRepository 
     const row = rows[0];
     if (!row) return null;
 
-    const [experiences, education, languages, skills] = await Promise.all([
+    const [experiences, education, projects, languages, skills] = await Promise.all([
       this.pool.query<ExperienceRow>(
         `SELECT company, position, description, start_date::text, end_date::text, years
          FROM experiences WHERE candidate_profile_id = $1 ORDER BY start_date DESC NULLS LAST, id`,
@@ -124,6 +145,12 @@ export class PgCandidateProfileRepository implements CandidateProfileRepository 
       this.pool.query<EducationRow>(
         `SELECT institution, degree, field, level, start_date::text, end_date::text
          FROM education WHERE candidate_profile_id = $1 ORDER BY start_date DESC NULLS LAST, id`,
+        [row.id],
+      ),
+      // In the CV's order.
+      this.pool.query<ProjectRow>(
+        `SELECT name, description, start_date::text, end_date::text
+         FROM projects WHERE candidate_profile_id = $1 ORDER BY position, id`,
         [row.id],
       ),
       this.pool.query<{ name: string; level: LanguageLevel | null }>(
@@ -161,6 +188,12 @@ export class PgCandidateProfileRepository implements CandidateProfileRepository 
         level: e.level === 'UNKNOWN' ? null : e.level,
         startDate: e.start_date,
         endDate: e.end_date,
+      })),
+      projects: projects.rows.map((p): Project => ({
+        name: p.name,
+        description: p.description,
+        startDate: p.start_date,
+        endDate: p.end_date,
       })),
       languages: languages.rows.map((l): Language => ({ name: l.name, level: l.level })),
       skills: skills.rows.map((s) => ({ name: s.name, normalizedName: s.normalized_name })),
