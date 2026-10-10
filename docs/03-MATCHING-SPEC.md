@@ -225,8 +225,8 @@ Los criterios `UNKNOWN` se excluyen y su peso se redistribuye proporcionalmente 
 Además, el resultado es `LOW` cuando:
 
 * **las tecnologías no pueden evaluarse** (criterio obligatorio `UNKNOWN`). La razón lo informa como falta de evidencia, no como incompatibilidad. Evita recomendar, por ejemplo, una oferta sin tecnologías solo por coincidir la ubicación;
-* **la coincidencia de tecnologías es menor a 40** (mínimo técnico). En ofertas reales, los criterios que rara vez restringen (remoto, "no exige experiencia") aportan una parte grande del puntaje aunque no haya afinidad técnica. Sin este mínimo, ofertas con casi ninguna tecnología en común alcanzarían MEDIUM.
-
+* **la coincidencia de tecnologías es menor a 40** (mínimo técnico). En ofertas reales, los criterios que rara vez restringen (remoto, "no exige experiencia") aportan una parte grande del puntaje aunque no haya afinidad técnica. Sin este mínimo, ofertas con casi ninguna tecnología en común alcanzarían MEDIUM;
+* **el seniority está a dos niveles o más** (mínimo 50 para seniority, que deja afuera el puntaje 20): una oferta Senior no se recomienda a un CV Junior, aunque las tecnologías coincidan. A un nivel de distancia (Junior y Semi Senior) sí puede recomendarse. Si el seniority de la oferta o del CV es `UNKNOWN`, no aplica;
 * **la modalidad es incompatible** (mínimo 50 para modalidad): una oferta presencial o híbrida en otra región o país no se recomienda, porque el candidato no podría asistir. Las ofertas remotas no se ven afectadas.
 
 ## Recomendaciones

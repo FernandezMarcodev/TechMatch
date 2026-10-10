@@ -104,7 +104,7 @@ Database
   * está bajo un subtítulo deseable ("Conocimientos deseables") hasta el siguiente subtítulo.
 * Además de los tags, se reconocen tecnologías del catálogo de aliases en el título, los requisitos y la descripción.
 * Experiencia, educación e idiomas exigidos se leen de los **requisitos** cuando la fuente los separa. La descripción suele hablar de la empresa ("15 años de experiencia en el mercado") y no debe interpretarse como requisito.
-* Seniority: primero el declarado, luego el título.
+* Seniority: primero el título, luego el declarado y por último las líneas de requisitos.
 * Empresa ausente → "Empresa no especificada" (no se inventa).
 
 ## Deduplicación

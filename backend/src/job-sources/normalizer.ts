@@ -37,8 +37,10 @@ function parseModality(raw: RawJobOffer): Modality {
 }
 
 function parseSeniority(raw: RawJobOffer, requirementLines: readonly string[]): Seniority {
-  // Declared field first, then title; descriptions are too noisy ("lead", "senior partners"...).
-  for (const text of [raw.seniority ?? '', raw.title, ...requirementLines]) {
+  // Title first: it is what the candidate reads ("Senior Developer"), and the declared category
+  // can be broader (Get on Board's "Expert" covers senior roles). Then the declared field, then
+  // requirement lines; the rest of the description is too noisy ("lead", "senior partners"...).
+  for (const text of [raw.title, raw.seniority ?? '', ...requirementLines]) {
     const s = detectSeniority(text);
     if (s !== 'UNKNOWN') return s;
   }
