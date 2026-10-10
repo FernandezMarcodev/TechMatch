@@ -119,9 +119,15 @@ describe('normalizeJobOffer', () => {
     expect(normalizeJobOffer(raw()).modality).toBe('UNKNOWN');
   });
 
-  it('prefers the declared seniority and does not guess otherwise', () => {
-    expect(normalizeJobOffer(raw({ seniority: 'Junior' })).seniority).toBe('JUNIOR');
+  it('takes the seniority from the title, then the declared field, and does not guess', () => {
     expect(normalizeJobOffer(raw()).seniority).toBe('SEMI_SENIOR');
+    // "Senior" in the title wins over a broader declared category ("Expert" → Lead).
+    expect(
+      normalizeJobOffer(raw({ title: 'Senior Full-Stack Developer', seniority: 'Lead' })).seniority,
+    ).toBe('SENIOR');
+    expect(
+      normalizeJobOffer(raw({ title: 'Desarrollador Java', seniority: 'Junior' })).seniority,
+    ).toBe('JUNIOR');
     expect(normalizeJobOffer(raw({ title: 'Desarrollador Java' })).seniority).toBe('UNKNOWN');
   });
 

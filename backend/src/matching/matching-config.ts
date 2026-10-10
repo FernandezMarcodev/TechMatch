@@ -89,8 +89,9 @@ export const DEFAULT_MATCHING_CONFIG: MatchingConfig = {
   },
   thresholds: { medium: 50, high: 75 },
   requiredCriteria: ['skills'],
-  // Skills below 40% or an onsite/hybrid offer in another region (modality = 0) exclude the offer.
-  criterionMinimums: { skills: 40, modality: 50 },
+  // Skills below 40%, a seniority two or more levels away (score 20, e.g. Senior offer and
+  // Junior CV) or an onsite/hybrid offer in another region (modality = 0) exclude the offer.
+  criterionMinimums: { skills: 40, seniority: 50, modality: 50 },
   skills: { requiredSkillWeight: 2, optionalSkillWeight: 1 },
   seniority: { scoreByDistance: [100, 60, 20] },
   education: {

@@ -389,6 +389,32 @@ describe('evaluateMatch — missing information (UNKNOWN is neither match nor mi
     ).toBe('MEDIUM');
   });
 
+  it('is never recommended when the seniority is two or more levels away', () => {
+    // Junior CV vs. Senior offer: seniority 20, but perfect skills would still reach MEDIUM.
+    const gap = evaluateMatch(
+      profile({ seniority: 'JUNIOR' }),
+      job({ seniority: 'SENIOR' }),
+      config,
+    );
+    expect(criterion(gap, 'seniority').score).toBe(20);
+    expect(gap.score).toBeGreaterThanOrEqual(config.thresholds.medium);
+    expect(gap.level).toBe('LOW');
+    expect(gap.reasons.find((r) => r.criterion === 'seniority')).toEqual({
+      criterion: 'seniority',
+      status: 'negative',
+      message: 'La oferta busca Senior y el CV indica Junior',
+    });
+
+    // One level away (Junior vs. Semi Senior) can still be recommended.
+    const near = evaluateMatch(profile({ seniority: 'JUNIOR' }), job(), config);
+    expect(near.level).not.toBe('LOW');
+
+    // An unknown seniority on either side is not a mismatch.
+    expect(
+      evaluateMatch(profile({ seniority: 'UNKNOWN' }), job({ seniority: 'SENIOR' }), config).level,
+    ).not.toBe('LOW');
+  });
+
   it('an offer with only skills stated does not penalize other criteria', () => {
     const result = evaluateMatch(
       profile(),
