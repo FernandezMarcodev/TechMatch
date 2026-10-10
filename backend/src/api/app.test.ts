@@ -49,3 +49,33 @@ describe('createApp serving the built frontend (single-service deployment)', () 
     expect(res.status).toBe(404);
   });
 });
+
+describe('CORS (frontend on Cloudflare Pages, API on Render)', () => {
+  const app = () =>
+    createApp({
+      logger,
+      corsOrigin: 'https://techmatch.pages.dev, https://techmatch.example.com/',
+    });
+
+  it('allows each configured origin', async () => {
+    for (const origin of ['https://techmatch.pages.dev', 'https://techmatch.example.com']) {
+      const res = await request(app()).get('/api/health').set('Origin', origin);
+      expect(res.headers['access-control-allow-origin']).toBe(origin);
+      expect(res.headers.vary).toContain('Origin');
+    }
+  });
+
+  it('answers preflight requests', async () => {
+    const res = await request(app())
+      .options('/api/cvs')
+      .set('Origin', 'https://techmatch.pages.dev')
+      .set('Access-Control-Request-Method', 'POST');
+    expect(res.status).toBe(204);
+    expect(res.headers['access-control-allow-methods']).toContain('POST');
+  });
+
+  it('does not allow other origins', async () => {
+    const res = await request(app()).get('/api/health').set('Origin', 'https://evil.example');
+    expect(res.headers['access-control-allow-origin']).toBeUndefined();
+  });
+});

@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ApiError, api } from '../api/client';
 import { Dropzone } from '../components/Dropzone';
@@ -41,6 +41,9 @@ export function HomePage() {
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+
+  // The free backend may be asleep: start waking it while the user picks a CV.
+  useEffect(() => api.wakeUp(), []);
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();

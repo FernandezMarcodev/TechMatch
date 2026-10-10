@@ -45,11 +45,11 @@ Limitación conocida: la mayoría de las ofertas son remotas o de otros países 
 
 El despliegue no puede tener costo (ver `16-DESPLIEGUE.md`):
 
-* **Un solo servicio** (Render free) ejecuta la API y sirve el frontend compilado (`FRONTEND_DIST_DIR`): una URL, mismo origen, sin CORS.
+* **Frontend en Cloudflare Pages y API en Render:** el frontend es estático, así que Pages lo sirve gratis desde su red, sin dormirse y con las rutas de la SPA resueltas a `index.html`. La API queda en Render. Al estar en dominios distintos, el frontend usa la URL de la API fijada al compilar (`VITE_API_URL`) y el backend autoriza ese origen por CORS (`CORS_ORIGIN`, admite varios). Como la API gratuita se duerme, la portada la despierta con una llamada a `/api/health` mientras el usuario elige su CV. El backend todavía puede servir el frontend en un solo servicio (`FRONTEND_DIST_DIR`) si alguna vez conviene.
 * **PostgreSQL en Neon free:** la base gratuita de Render expira a los 30 días.
 * **Sincronización en GitHub Actions:** el servicio gratuito se duerme sin visitas, así que el scheduler interno no es confiable; el repositorio público tiene minutos ilimitados.
 * **Migraciones al arrancar:** son idempotentes y no dependen de funciones pagas de la plataforma.
-* **Por qué no Cloudflare:** su plan gratuito limita cada request a 10 ms de CPU, insuficiente para procesar un CV; Containers requiere el plan pago. Queda como alternativa futura.
+* **Por qué el backend no va en Cloudflare:** el plan gratuito de Workers limita cada request a 10 ms de CPU, insuficiente para procesar un CV; Containers requiere el plan pago. Queda como alternativa futura.
 
 ## Convenciones de API y datos
 

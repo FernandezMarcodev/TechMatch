@@ -109,12 +109,18 @@ export class ApiError extends Error {
   }
 }
 
+/**
+ * Where the API lives. Empty: same origin (Vite proxy in development, or the backend serving
+ * the frontend). In production on Cloudflare Pages it is the Render URL (docs/16-DESPLIEGUE.md).
+ */
+const API_URL = (import.meta.env.VITE_API_URL ?? '').replace(/\/+$/, '');
+
 const GENERIC_ERROR = 'No pudimos comunicarnos con el servidor. Intentá nuevamente.';
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let res: Response;
   try {
-    res = await fetch(`/api${path}`, init);
+    res = await fetch(`${API_URL}/api${path}`, init);
   } catch {
     throw new ApiError('NETWORK_ERROR', GENERIC_ERROR, 0);
   }
@@ -131,6 +137,13 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export const api = {
+  /**
+   * Wakes the backend up: on the free plan it sleeps when idle and takes about a minute to
+   * start, so the home page calls this while the user picks a CV. Errors are ignored.
+   */
+  wakeUp(): void {
+    void fetch(`${API_URL}/api/health`).catch(() => undefined);
+  },
   uploadCv(file: File): Promise<{ cvId: string; status: CvStatus }> {
     const form = new FormData();
     form.append('file', file);

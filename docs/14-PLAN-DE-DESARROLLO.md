@@ -64,6 +64,12 @@ Carga de CV, matching determinístico explicado, ofertas de Get on Board, interf
 | — | `fix/vista-previa-paginas` | La vista previa divide el CV en hojas A4 separadas, igual que el PDF |
 | — | `fix/pdf-sin-encabezado` | El PDF sale sin el encabezado y pie del navegador (fecha, título con la empresa, URL) |
 
+## v2.0.4 — Frontend y backend por separado
+
+| # | Rama | Alcance |
+| --- | --- | --- |
+| — | `chore/despliegue-cloudflare-render` | Frontend en Cloudflare Pages (`VITE_API_URL`) y API en Render (`CORS_ORIGIN` con varios orígenes); la portada despierta la API; guía `16-DESPLIEGUE.md` actualizada |
+
 ## v2.1.0 — Cuentas de usuario (opcionales)
 
 | # | Rama | Alcance |

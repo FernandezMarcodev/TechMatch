@@ -73,7 +73,8 @@ describe('upload', () => {
     );
     await userEvent.click(screen.getByRole('button', { name: 'Analizar CV' }));
     expect(screen.getByRole('alert')).toHaveTextContent('formato PDF');
-    expect(fetchFn).not.toHaveBeenCalled();
+    // Only the wake-up call to the (possibly sleeping) backend; the file was never sent.
+    expect(fetchFn.mock.calls.map(([url]) => String(url))).toEqual(['/api/health']);
   });
 
   it('uploads and moves to the processing screen, then to recommendations', async () => {

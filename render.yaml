@@ -1,16 +1,16 @@
-# Render Blueprint: free deployment of TechMatch (docs/16-DESPLIEGUE.md).
-# One web service runs the API and also serves the built frontend (same origin).
-# The database is external (Neon free tier); offers are synced by
-# .github/workflows/sync-jobs.yml, because a free service sleeps when idle.
+# Render: the backend API on the free plan (docs/16-DESPLIEGUE.md). The service is created by
+# hand from the Render dashboard; this file records the same settings for reference and can
+# also be used as a Blueprint. The frontend is hosted on Cloudflare Pages, the database on
+# Neon, and offers are synced by .github/workflows/sync-jobs.yml (a free service sleeps).
 services:
   - type: web
-    name: techmatch
+    name: techmatch-api
     runtime: node
     plan: free
     branch: main
     # Deploy only after the GitHub Actions CI passes on main.
     autoDeployTrigger: checksPass
-    buildCommand: npm ci --include=dev && npm run build
+    buildCommand: npm ci --include=dev && npm run build -w backend
     # Migrations are idempotent: applying them on every start keeps the schema up to date.
     startCommand: node backend/dist/main/migrate.js && node backend/dist/main/server.js
     healthCheckPath: /api/health
@@ -21,8 +21,9 @@ services:
         value: production
       - key: DATABASE_URL
         sync: false
-      - key: FRONTEND_DIST_DIR
-        value: frontend/dist
+      # The Cloudflare Pages URL of the frontend, e.g. https://techmatch.pages.dev
+      - key: CORS_ORIGIN
+        sync: false
       - key: CV_STORAGE_DIR
         value: /tmp/techmatch-cvs
       - key: JOB_SYNC_ENABLED

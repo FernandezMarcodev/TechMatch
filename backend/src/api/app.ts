@@ -5,6 +5,10 @@ import { createErrorHandler, notFoundHandler } from './error-handler.js';
 
 export interface AppDependencies {
   logger: Logger;
+  /**
+   * Origins allowed to call the API from a browser: `*`, one origin or a comma-separated list
+   * (e.g. the Cloudflare Pages domain and a custom domain). Not needed for same-origin use.
+   */
   corsOrigin: string;
   routes?: Router;
   /**
@@ -18,8 +22,19 @@ export function createApp(deps: AppDependencies): Express {
   const app = express();
   app.disable('x-powered-by');
   app.use(express.json({ limit: '100kb' }));
+  const origins = deps.corsOrigin
+    .split(',')
+    .map((o) => o.trim().replace(/\/$/, ''))
+    .filter(Boolean);
   app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', deps.corsOrigin);
+    if (origins.includes('*')) {
+      res.setHeader('Access-Control-Allow-Origin', '*');
+    } else {
+      // Echo the caller's origin only when it is allowed; the response varies with it.
+      res.setHeader('Vary', 'Origin');
+      const origin = req.headers.origin;
+      if (origin && origins.includes(origin)) res.setHeader('Access-Control-Allow-Origin', origin);
+    }
     res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     res.setHeader('X-Content-Type-Options', 'nosniff');
