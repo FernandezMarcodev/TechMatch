@@ -1,4 +1,5 @@
 import type { CvDocument } from '../../api/client';
+import { languageLevelLabel } from '../labels';
 
 const MONTHS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
 
@@ -95,7 +96,9 @@ export function CvPreview({ document: doc }: { document: CvDocument }) {
         <section className="cv-paper__section">
           <h2>Idiomas</h2>
           <p>
-            {doc.languages.map((l) => (l.level ? `${l.name} (${l.level})` : l.name)).join(' · ')}
+            {doc.languages
+              .map((l) => (l.level ? `${l.name} (${languageLevelLabel(l.level)})` : l.name))
+              .join(' · ')}
           </p>
         </section>
       )}

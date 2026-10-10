@@ -42,9 +42,11 @@ const LEVEL_WORDS: readonly (readonly [string, LanguageLevel])[] = [
   ['intermedio', 'B1'],
   ['bilingue', 'C2'],
   ['bilingual', 'C2'],
-  ['nativo', 'C2'],
-  ['native', 'C2'],
-  ['lengua materna', 'C2'],
+  ['nativo', 'NATIVE'],
+  ['nativa', 'NATIVE'],
+  ['native', 'NATIVE'],
+  ['lengua materna', 'NATIVE'],
+  ['idioma materno', 'NATIVE'],
   ['fluido', 'C1'],
   ['fluent', 'C1'],
   ['avanzado', 'C1'],
@@ -55,6 +57,11 @@ const LEVEL_WORDS: readonly (readonly [string, LanguageLevel])[] = [
   ['principiante', 'A1'],
   ['beginner', 'A1'],
 ];
+
+/** Level as shown to the user: CEFR codes as is, NATIVE as "nativo". */
+export function formatLanguageLevel(level: LanguageLevel): string {
+  return level === 'NATIVE' ? 'nativo' : level;
+}
 
 /** Parses an explicit level (CEFR code or a common descriptor). Returns null if absent. */
 export function parseLanguageLevel(raw: string): LanguageLevel | null {

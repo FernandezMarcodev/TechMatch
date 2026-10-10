@@ -6,6 +6,7 @@ import type {
 } from '../../domain/entities.js';
 import { educationLevelRank, languageLevelRank, type EducationLevel } from '../../domain/enums.js';
 import { isComputingField } from '../../domain/normalization/education.js';
+import { formatLanguageLevel as lvl } from '../../domain/normalization/languages.js';
 import { foldText } from '../../domain/text.js';
 import type { MatchingConfig } from '../matching-config.js';
 import {
@@ -155,7 +156,7 @@ export function evaluateLanguages(
     const owned = languages.find((l) => l.name === req.name);
     if (!owned) {
       scores.push(0);
-      notes.push(`no se menciona ${label}${req.level ? ` ${req.level}` : ''}`);
+      notes.push(`no se menciona ${label}${req.level ? ` ${lvl(req.level)}` : ''}`);
       continue;
     }
     if (!req.level) {
@@ -164,15 +165,15 @@ export function evaluateLanguages(
       continue;
     }
     if (!owned.level) {
-      notes.push(`se requiere ${label} ${req.level}; el CV no indica el nivel`);
+      notes.push(`se requiere ${label} ${lvl(req.level)}; el CV no indica el nivel`);
       continue;
     }
     const ratio = (languageLevelRank(owned.level) + 1) / (languageLevelRank(req.level) + 1);
     scores.push(Math.min(1, ratio) * 100);
     notes.push(
       ratio >= 1
-        ? `${label} ${owned.level} cumple el nivel ${req.level}`
-        : `se requiere ${label} ${req.level} y el CV indica ${owned.level}`,
+        ? `${label} ${lvl(owned.level)} cumple el nivel ${lvl(req.level)}`
+        : `se requiere ${label} ${lvl(req.level)} y el CV indica ${lvl(owned.level)}`,
     );
   }
 

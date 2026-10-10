@@ -207,7 +207,7 @@ UNKNOWN
 ### Nivel de idioma
 
 ```text
-A1 < A2 < B1 < B2 < C1 < C2
+A1 < A2 < B1 < B2 < C1 < C2 < NATIVE
 ```
 
 ### Nivel educativo
@@ -227,7 +227,7 @@ getonboard
 El dominio contiene la normalización que usan por igual el procesamiento de CV, los conectores de fuentes y el matching:
 
 * catálogo de tecnologías con aliases (`JS → JavaScript`, `Postgres → PostgreSQL`, `Node → Node.js`);
-* idiomas y niveles (CEFR y descriptores: "intermedio" → B1, "avanzado" → C1, "nativo" → C2);
+* idiomas y niveles (CEFR y descriptores: "intermedio" → B1, "avanzado" → C1, "nativo" o "lengua materna" → NATIVE, "bilingüe" → C2);
 * ubicaciones (provincias argentinas, CABA y otros países como regiones propias);
 * seniority y nivel educativo por palabras clave explícitas.
 

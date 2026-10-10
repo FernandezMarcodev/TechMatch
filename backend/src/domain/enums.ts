@@ -12,7 +12,8 @@ export type Seniority = KnownSeniority | 'UNKNOWN';
 export const MODALITIES = ['REMOTE', 'HYBRID', 'ONSITE', 'UNKNOWN'] as const;
 export type Modality = (typeof MODALITIES)[number];
 
-export const LANGUAGE_LEVEL_ORDER = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] as const;
+/** CEFR levels plus NATIVE (native speaker), ranked above C2. */
+export const LANGUAGE_LEVEL_ORDER = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2', 'NATIVE'] as const;
 export type LanguageLevel = (typeof LANGUAGE_LEVEL_ORDER)[number];
 
 export const EDUCATION_LEVEL_ORDER = [

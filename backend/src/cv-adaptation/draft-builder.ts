@@ -1,5 +1,6 @@
 import type { CandidateProfile, Experience, JobOffer } from '../domain/entities.js';
 import { isKnownSeniority, languageLevelRank } from '../domain/enums.js';
+import { formatLanguageLevel } from '../domain/normalization/languages.js';
 import { extractSkillsFromText } from '../domain/normalization/skills.js';
 import { foldText } from '../domain/text.js';
 import {
@@ -173,7 +174,7 @@ function buildSuggestions(
 
   for (const req of job.languageRequirements) {
     const label = languageLabel(req.name);
-    const wanted = req.level ? `${label} ${req.level}` : label;
+    const wanted = req.level ? `${label} ${formatLanguageLevel(req.level)}` : label;
     const own = profile.languages.find((l) => l.name === req.name);
     if (!own) {
       suggestions.push({
@@ -183,7 +184,7 @@ function buildSuggestions(
     } else if (req.level && !own.level) {
       suggestions.push({
         type: 'LANGUAGE',
-        message: `Indicá tu nivel de ${label}: la oferta pide ${req.level}.`,
+        message: `Indicá tu nivel de ${label}: la oferta pide ${formatLanguageLevel(req.level)}.`,
       });
     } else if (
       req.level &&
@@ -192,7 +193,7 @@ function buildSuggestions(
     ) {
       suggestions.push({
         type: 'LANGUAGE',
-        message: `La oferta pide ${wanted} y tu CV indica ${own.level}. Si tu nivel es mayor, actualizalo.`,
+        message: `La oferta pide ${wanted} y tu CV indica ${formatLanguageLevel(own.level)}. Si tu nivel es mayor, actualizalo.`,
       });
     }
   }
