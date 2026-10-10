@@ -4,7 +4,7 @@ import { CvPreview } from './CvPreview';
 
 /** CSS pixels per millimetre (96 dpi). */
 const PX_PER_MM = 96 / 25.4;
-/** A4 and the print margins of `@page` in app.css: the sheet reproduces the printed page. */
+/** A4 and the page margins (the sheet's padding in app.css): the sheet is the printed page. */
 const PAGE_WIDTH_MM = 210;
 const PAGE_HEIGHT_MM = 297;
 const MARGIN_Y_MM = 16;
@@ -38,10 +38,12 @@ function blocksOf(elements: readonly HTMLElement[]): Block[] {
 }
 
 /**
- * Lays the content out on separate A4 sheets, as the printer does: the block that starts each
- * new page is pushed down (padding) to the top margin of the next sheet. Returns the pages.
+ * Lays the content out on separate A4 sheets: the block that starts each new page is pushed
+ * down (padding) to the top margin of the next sheet. The same marked blocks
+ * (`data-page-start`) get a forced page break when printing, so the PDF has the same pages.
+ * Returns the number of pages.
  */
-function paginate(paper: HTMLElement): number {
+export function paginate(paper: HTMLElement): number {
   for (const el of paper.querySelectorAll<HTMLElement>('[data-page-start]')) {
     el.style.paddingTop = '';
     delete el.dataset.pageStart;
