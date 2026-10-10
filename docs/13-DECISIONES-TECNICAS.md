@@ -41,6 +41,16 @@ La arquitectura de conectores permite sumar fuentes sin tocar el resto del siste
 
 Limitación conocida: la mayoría de las ofertas son remotas o de otros países de la región, con pocas sedes en Argentina. Ampliar fuentes está en el roadmap.
 
+## Despliegue gratuito
+
+El despliegue no puede tener costo (ver `16-DESPLIEGUE.md`):
+
+* **Un solo servicio** (Render free) ejecuta la API y sirve el frontend compilado (`FRONTEND_DIST_DIR`): una URL, mismo origen, sin CORS.
+* **PostgreSQL en Neon free:** la base gratuita de Render expira a los 30 días.
+* **Sincronización en GitHub Actions:** el servicio gratuito se duerme sin visitas, así que el scheduler interno no es confiable; el repositorio público tiene minutos ilimitados.
+* **Migraciones al arrancar:** son idempotentes y no dependen de funciones pagas de la plataforma.
+* **Por qué no Cloudflare:** su plan gratuito limita cada request a 10 ms de CPU, insuficiente para procesar un CV; Containers requiere el plan pago. Queda como alternativa futura.
+
 ## Convenciones de API y datos
 
 * Identificadores UUID.

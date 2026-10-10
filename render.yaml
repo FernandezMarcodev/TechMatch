@@ -1,0 +1,31 @@
+# Render Blueprint: free deployment of TechMatch (docs/16-DESPLIEGUE.md).
+# One web service runs the API and also serves the built frontend (same origin).
+# The database is external (Neon free tier); offers are synced by
+# .github/workflows/sync-jobs.yml, because a free service sleeps when idle.
+services:
+  - type: web
+    name: techmatch
+    runtime: node
+    plan: free
+    branch: main
+    # Deploy only after the GitHub Actions CI passes on main.
+    autoDeployTrigger: checksPass
+    buildCommand: npm ci --include=dev && npm run build
+    # Migrations are idempotent: applying them on every start keeps the schema up to date.
+    startCommand: node backend/dist/main/migrate.js && node backend/dist/main/server.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: '24'
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: FRONTEND_DIST_DIR
+        value: frontend/dist
+      - key: CV_STORAGE_DIR
+        value: /tmp/techmatch-cvs
+      - key: JOB_SYNC_ENABLED
+        value: 'false'
+      - key: LOG_LEVEL
+        value: info

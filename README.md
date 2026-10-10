@@ -74,4 +74,4 @@ La especificación completa está en [`docs/`](docs/). Puntos de entrada:
 - [`03-MATCHING-SPEC.md`](docs/03-MATCHING-SPEC.md): cómo se calcula la compatibilidad.
 - [`13-DECISIONES-TECNICAS.md`](docs/13-DECISIONES-TECNICAS.md): decisiones de diseño y su porqué.
 - [`14-PLAN-DE-DESARROLLO.md`](docs/14-PLAN-DE-DESARROLLO.md): próximas versiones.
-- [`16-DESPLIEGUE-CLOUDFLARE.md`](docs/16-DESPLIEGUE-CLOUDFLARE.md): cómo desplegar en Cloudflare.
+- [`16-DESPLIEGUE.md`](docs/16-DESPLIEGUE.md): cómo desplegar gratis (Render + Neon + GitHub Actions).

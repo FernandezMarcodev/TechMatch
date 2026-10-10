@@ -17,6 +17,11 @@ const envSchema = z.object({
   PORT: z.coerce.number().int().positive().default(3000),
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent']).default('info'),
   CORS_ORIGIN: z.string().default('http://localhost:5173'),
+  /** Built frontend served by the API (single-service deployment); unset in development. */
+  FRONTEND_DIST_DIR: z
+    .string()
+    .optional()
+    .transform((value) => (value ? value : undefined)),
 
   DATABASE_URL: z.string().min(1),
   TEST_DATABASE_URL: z.string().min(1).optional(),

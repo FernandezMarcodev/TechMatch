@@ -14,6 +14,7 @@ const container = createContainer({ pool, logger, env });
 const app = createApp({
   logger,
   corsOrigin: env.CORS_ORIGIN,
+  frontendDir: env.FRONTEND_DIST_DIR,
   routes: createRoutes({
     cvService: container.cvService,
     queries: container.queries,

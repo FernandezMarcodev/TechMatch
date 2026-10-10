@@ -45,6 +45,12 @@ Carga de CV, matching determinístico explicado, ofertas de Get on Board, interf
 | 7 | `feat/recalcular-compatibilidad` | Endpoint que evalúa el CV editado contra la oferta con el mismo motor de matching |
 | 8 | `feat/exportar-pdf` | Exportación a PDF mediante CSS de impresión |
 
+## v2.0.1 — Despliegue gratuito
+
+| # | Rama | Alcance |
+| --- | --- | --- |
+| — | `chore/despliegue-gratuito` | El backend sirve el frontend compilado; `render.yaml` (Render free), base en Neon free, sincronización programada en GitHub Actions; guía `16-DESPLIEGUE.md` |
+
 ## v2.1.0 — Cuentas de usuario (opcionales)
 
 | # | Rama | Alcance |
