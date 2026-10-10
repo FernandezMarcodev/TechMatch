@@ -66,9 +66,10 @@ El OCR está definido como un puerto (`OcrProvider`) y deshabilitado en el MVP. 
 
 * normalización Unicode;
 * eliminación de caracteres de control;
-* viñetas al inicio de línea;
+* viñetas al inicio de línea (•, ▪, ➢, ✓, *, guiones y los símbolos privados que exporta Word para viñetas de Symbol/Wingdings), también cuando quedan solas en una línea;
 * espacios múltiples;
-* palabras cortadas con guion entre líneas ("desa-\nrrollo").
+* palabras cortadas con guion entre líneas ("desa-\nrrollo");
+* frases partidas en varios renglones: una línea continúa la anterior cuando la anterior es larga (40 caracteres o más), no termina en puntuación de cierre y la nueva empieza en minúscula, o la anterior termina en coma o conector ("de", "con", "para", "y"…). Nunca se unen una línea con viñeta propia, un título de sección, un rango de fechas ni un dato de contacto. Así cada viñeta del CV adaptado es una sola frase.
 
 ## Segmentación
 
