@@ -1415,12 +1415,17 @@ p {
   width: 210mm;
   min-height: 297mm;
   padding: 16mm 18mm;
-  background: #ffffff;
+  /* One white A4 sheet per page with a 10 mm gap between them (CvSheet paginates). */
+  background: repeating-linear-gradient(
+    to bottom,
+    #ffffff 0 297mm,
+    transparent 297mm calc(297mm + 10mm)
+  );
   color: #1a1a1a;
   font-family: Georgia, 'Times New Roman', Times, serif;
   font-size: 10.5pt;
   line-height: 1.45;
-  box-shadow: var(--md-elevation-2);
+  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.25)) drop-shadow(0 2px 6px rgb(0 0 0 / 0.12));
 }
 
 .cv-sheet__caption {
@@ -1471,24 +1476,18 @@ p {
   transform-origin: top left;
 }
 
-/* Where the printed page breaks: a dashed line in the margin area, never printed. */
-.cv-sheet__break {
+/* The gap between two sheets, with the number of the next page. Never printed. */
+.cv-sheet__gap {
   position: absolute;
   left: 0;
   right: 0;
-  border-top: 2px dashed var(--md-primary);
+  height: 10mm;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--md-on-surface-variant);
+  font: 500 9pt/1 var(--md-font);
   pointer-events: none;
-}
-
-.cv-sheet__break span {
-  position: absolute;
-  right: 6mm;
-  top: 2px;
-  padding: 1px 8px;
-  border-radius: 999px;
-  background: var(--md-primary);
-  color: var(--md-on-primary);
-  font: 600 9pt/1.4 var(--md-font);
 }
 
 .cv-paper__header {
@@ -1752,9 +1751,19 @@ p {
   /* The page margins come from @page: the sheet becomes the page content box. */
   .cv-paper {
     width: auto;
-    min-height: 0;
+    min-height: 0 !important;
     padding: 0;
-    box-shadow: none;
+    background: #ffffff;
+    filter: none;
+  }
+
+  /* The printer breaks the pages itself: no on-screen pagination space. */
+  .cv-paper [data-page-start] {
+    padding-top: 0 !important;
+  }
+
+  .cv-paper__section > p {
+    break-inside: avoid;
   }
 
   .cv-sheet__frame {
@@ -1768,7 +1777,7 @@ p {
   }
 
   .cv-sheet__caption,
-  .cv-sheet__break,
+  .cv-sheet__gap,
   .cv-zoom {
     display: none !important;
   }

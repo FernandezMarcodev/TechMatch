@@ -93,7 +93,7 @@ Se generan a partir de los criterios del matching, nunca se agregan al CV:
 
 * Secciones editables, en el orden de la vista previa: datos personales, resumen, educación, experiencia, proyectos (agregar, quitar, editar viñetas), tecnologías e idiomas (de A1 a C2 o nativo).
 * Las sugerencias de tecnologías tienen la acción "La tengo, agregar", que solo se aplica con la confirmación del usuario.
-* Vista previa en formato Harvard actualizada en vivo, como una **hoja A4 real**: mismo ancho, márgenes (`@page`) y tamaños de letra en puntos que el PDF, así los renglones cortan igual. La hoja se escala para entrar en la columna, marca dónde cae cada salto de página (con las mismas reglas que la impresión: una entrada no se parte y un título no queda solo al final) e indica cuántas páginas ocupa. "Ampliar" la muestra a tamaño real.
+* Vista previa en formato Harvard actualizada en vivo, como una **hoja A4 real**: mismo ancho, márgenes (`@page`) y tamaños de letra en puntos que el PDF, así los renglones cortan igual. La hoja se escala para entrar en la columna y se divide en **hojas separadas** donde la impresión corta las páginas (mismas reglas: una entrada o un párrafo no se parte y un título no queda solo al final), e indica cuántas páginas ocupa. El espacio entre hojas existe solo en pantalla; al imprimir, el navegador corta las páginas. "Ampliar" la muestra a tamaño real.
 * El borrador editado se guarda en el **navegador** (`localStorage`, por CV y oferta) para no perderlo al recargar. En v2.0 no se guarda en el servidor; guardar en la cuenta llega en v2.1.
 
 ## Recalcular la compatibilidad

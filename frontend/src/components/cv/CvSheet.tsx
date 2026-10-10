@@ -10,6 +10,10 @@ const PAGE_HEIGHT_MM = 297;
 const MARGIN_Y_MM = 16;
 const CONTENT_HEIGHT_PX = (PAGE_HEIGHT_MM - 2 * MARGIN_Y_MM) * PX_PER_MM;
 const PAGE_WIDTH_PX = PAGE_WIDTH_MM * PX_PER_MM;
+const PAGE_HEIGHT_PX = PAGE_HEIGHT_MM * PX_PER_MM;
+const MARGIN_Y_PX = MARGIN_Y_MM * PX_PER_MM;
+/** Space between two sheets on screen; must match --cv-sheet-gap in app.css. */
+const SHEET_GAP_PX = 10 * PX_PER_MM;
 
 interface Block {
   top: number;
@@ -20,16 +24,46 @@ interface Block {
   heading: boolean;
 }
 
-function blocksOf(paper: HTMLElement): Block[] {
-  const elements = paper.querySelectorAll<HTMLElement>(
-    '.cv-paper__header, .cv-paper__section > h2, .cv-paper__section > p, .cv-paper__entry',
-  );
-  return [...elements].map((el) => ({
+const BLOCKS =
+  '.cv-paper__header, .cv-paper__section > h2, .cv-paper__section > p, .cv-paper__entry';
+
+/** Every block is printed with `break-inside: avoid` (see the print stylesheet). */
+function blocksOf(elements: readonly HTMLElement[]): Block[] {
+  return elements.map((el) => ({
     top: el.offsetTop,
     bottom: el.offsetTop + el.offsetHeight,
-    keepTogether: el.tagName !== 'P',
+    keepTogether: true,
     heading: el.tagName === 'H2',
   }));
+}
+
+/**
+ * Lays the content out on separate A4 sheets, as the printer does: the block that starts each
+ * new page is pushed down (padding) to the top margin of the next sheet. Returns the pages.
+ */
+function paginate(paper: HTMLElement): number {
+  for (const el of paper.querySelectorAll<HTMLElement>('[data-page-start]')) {
+    el.style.paddingTop = '';
+    delete el.dataset.pageStart;
+  }
+  paper.style.minHeight = '';
+  const elements = [...paper.querySelectorAll<HTMLElement>(BLOCKS)];
+  // Measured once, before any padding moves the blocks.
+  const blocks = blocksOf(elements);
+  const breaks = pageBreaks(blocks, MARGIN_Y_PX);
+  let shift = 0;
+  breaks.forEach((at, i) => {
+    const el = elements[blocks.findIndex((b) => Math.abs(b.top - at) < 0.5)];
+    if (!el) return; // a block taller than a page: it keeps flowing
+    const sheetTop = (i + 1) * (PAGE_HEIGHT_PX + SHEET_GAP_PX) + MARGIN_Y_PX;
+    const space = sheetTop - (at + shift);
+    el.dataset.pageStart = '';
+    el.style.paddingTop = `${space}px`;
+    shift += space;
+  });
+  const pages = breaks.length + 1;
+  paper.style.minHeight = `${pages * PAGE_HEIGHT_PX + (pages - 1) * SHEET_GAP_PX}px`;
+  return pages;
 }
 
 /**
@@ -53,13 +87,9 @@ export function pageBreaks(blocks: readonly Block[], firstContentTop: number): n
   return breaks;
 }
 
-function sameBreaks(a: readonly number[], b: readonly number[]): boolean {
-  return a.length === b.length && a.every((v, i) => Math.abs(v - (b[i] ?? 0)) < 0.5);
-}
-
 /**
- * The CV preview as a real A4 sheet: same width, margins and font sizes as the exported PDF
- * (so lines wrap the same way), scaled down to fit the column, with the page breaks marked.
+ * The CV preview as real A4 sheets: same width, margins and font sizes as the exported PDF (so
+ * lines wrap the same way), split into pages where the printer splits them, scaled to fit.
  */
 export function CvSheet({
   document: doc,
@@ -73,7 +103,7 @@ export function CvSheet({
   const sheetRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
   const [height, setHeight] = useState<number | null>(null);
-  const [breaks, setBreaks] = useState<number[]>([]);
+  const [pages, setPages] = useState(1);
 
   // Fit the sheet to the available width.
   useLayoutEffect(() => {
@@ -93,12 +123,10 @@ export function CvSheet({
   useLayoutEffect(() => {
     const paper = sheetRef.current?.querySelector<HTMLElement>('.cv-paper');
     if (!paper || paper.offsetHeight === 0) return;
+    setPages(paginate(paper));
     setHeight(paper.offsetHeight);
-    const next = pageBreaks(blocksOf(paper), MARGIN_Y_MM * PX_PER_MM);
-    setBreaks((current) => (sameBreaks(current, next) ? current : next));
   }, [doc]);
 
-  const pages = breaks.length + 1;
   return (
     <div className="cv-sheet">
       <div className="cv-sheet__caption">
@@ -116,9 +144,14 @@ export function CvSheet({
       >
         <div ref={sheetRef} className="cv-sheet__scaled" style={{ transform: `scale(${scale})` }}>
           <CvPreview document={doc} />
-          {breaks.map((top, i) => (
-            <div key={i} className="cv-sheet__break" style={{ top }} aria-hidden="true">
-              <span>Página {i + 2}</span>
+          {Array.from({ length: pages - 1 }, (_, i) => (
+            <div
+              key={i}
+              className="cv-sheet__gap"
+              style={{ top: (i + 1) * (PAGE_HEIGHT_PX + SHEET_GAP_PX) - SHEET_GAP_PX }}
+              aria-hidden="true"
+            >
+              Página {i + 2}
             </div>
           ))}
         </div>

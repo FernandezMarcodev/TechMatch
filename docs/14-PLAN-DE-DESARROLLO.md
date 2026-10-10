@@ -61,6 +61,7 @@ Carga de CV, matching determinístico explicado, ofertas de Get on Board, interf
 | — | `fix/vinetas-texto-cv` | Las viñetas que ocupan varios renglones del PDF se unen en una sola |
 | — | `feat/cv-harvard-proyectos` | Proyectos personales extraídos del CV y CV adaptado con el formato de Harvard |
 | — | `feat/vista-previa-a4` | Vista previa del CV como hoja A4 idéntica al PDF, con saltos de página y vista ampliada |
+| — | `fix/vista-previa-paginas` | La vista previa divide el CV en hojas A4 separadas, igual que el PDF |
 
 ## v2.1.0 — Cuentas de usuario (opcionales)
 
