@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import { createPool } from '../backend/src/infrastructure/db/pool.js';
 import { PgJobOfferRepository } from '../backend/src/persistence/pg-job-offer-repository.js';
 import { normalizeJobOffer } from '../backend/src/job-sources/normalizer.js';
@@ -109,14 +109,8 @@ test('rejects a non-PDF file with a clear message', async ({ page }) => {
   await expect(page.getByRole('alert')).toHaveText('El archivo debe estar en formato PDF.');
 });
 
-test('adapt the CV to an offer → edit → re-evaluate → download as PDF', async ({ page }) => {
-  // Record the print request instead of opening the browser dialog.
-  await page.addInitScript(() => {
-    window.print = () => {
-      (window as unknown as { printedTitle: string }).printedTitle = document.title;
-    };
-  });
-
+/** Uploads the sample CV and opens "Adaptar mi CV" on the first recommendation. */
+async function openAdaptPage(page: Page) {
   await page.goto('/');
   await page.getByLabel(/CV en PDF/).setInputFiles({
     name: 'maria-fernandez.pdf',
@@ -134,6 +128,17 @@ test('adapt the CV to an offer → edit → re-evaluate → download as PDF', as
     .getByRole('link', { name: 'Adaptar mi CV' })
     .click();
   await expect(page.getByRole('heading', { name: 'Adaptá tu CV' })).toBeVisible();
+}
+
+test('adapt the CV to an offer → edit → re-evaluate → download as PDF', async ({ page }) => {
+  // Record the print request instead of opening the browser dialog.
+  await page.addInitScript(() => {
+    window.print = () => {
+      (window as unknown as { printedTitle: string }).printedTitle = document.title;
+    };
+  });
+
+  await openAdaptPage(page);
 
   // The draft only contains what the CV has, with the offer's technologies first.
   const preview = page.getByRole('article', { name: 'Vista previa del CV' });
@@ -157,4 +162,26 @@ test('adapt the CV to an offer → edit → re-evaluate → download as PDF', as
   await expect(page.getByLabel('Nombre y apellido')).toBeHidden();
   await expect(page.getByRole('button', { name: 'Descargar PDF' })).toBeHidden();
   await expect(preview.getByRole('heading', { name: 'María Fernández' })).toBeVisible();
+});
+
+test('on a phone the preview tab shows the whole CV, scaled to the screen', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await openAdaptPage(page);
+
+  // Edited while the preview tab is hidden, then shown.
+  await page.getByLabel('Nombre y apellido').fill('María Fernández');
+  await page.getByRole('tab', { name: 'Vista previa' }).click();
+
+  const preview = page.getByRole('article', { name: 'Vista previa del CV' });
+  await expect(preview.getByRole('heading', { name: 'María Fernández' })).toBeVisible();
+  // The frame is exactly as tall as the scaled sheet: nothing cut, no blank half page.
+  await expect
+    .poll(async () => {
+      const frame = await page.locator('.cv-sheet__frame').first().boundingBox();
+      const paper = await preview.boundingBox();
+      return frame && paper ? Math.abs(frame.height - paper.height) : Infinity;
+    })
+    .toBeLessThan(2);
+  const paper = await preview.boundingBox();
+  expect(paper?.width).toBeLessThanOrEqual(390);
 });
