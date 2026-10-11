@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import type { CvDocument } from '../../api/client';
 import { CvPreview } from './CvPreview';
 
@@ -107,27 +107,33 @@ export function CvSheet({
   const [height, setHeight] = useState<number | null>(null);
   const [pages, setPages] = useState(1);
 
-  // Fit the sheet to the available width.
+  /** Height of the sheet and where the pages break; nothing while hidden (`display: none`). */
+  const measure = useCallback(() => {
+    const paper = sheetRef.current?.querySelector<HTMLElement>('.cv-paper');
+    if (!paper || paper.offsetHeight === 0) return;
+    setPages(paginate(paper));
+    setHeight(paper.offsetHeight);
+  }, []);
+
+  // Fit the sheet to the available width. Also measure again when it becomes visible: on a
+  // phone the preview tab is hidden while editing, so the edits were never measured.
   useLayoutEffect(() => {
     const frame = frameRef.current;
     if (!frame || typeof ResizeObserver === 'undefined') return;
     const fit = () => {
       const width = frame.clientWidth;
-      if (width > 0) setScale(Math.min(1, width / PAGE_WIDTH_PX));
+      if (width === 0) return;
+      setScale(Math.min(1, width / PAGE_WIDTH_PX));
+      measure();
     };
     fit();
     const observer = new ResizeObserver(fit);
     observer.observe(frame);
     return () => observer.disconnect();
-  }, []);
+  }, [measure]);
 
-  // Measure after every edit: height of the sheet and where the pages break.
-  useLayoutEffect(() => {
-    const paper = sheetRef.current?.querySelector<HTMLElement>('.cv-paper');
-    if (!paper || paper.offsetHeight === 0) return;
-    setPages(paginate(paper));
-    setHeight(paper.offsetHeight);
-  }, [doc]);
+  // Measure after every edit.
+  useLayoutEffect(measure, [doc, measure]);
 
   return (
     <div className="cv-sheet">

@@ -8,6 +8,13 @@
 
 html {
   scroll-behavior: smooth;
+  /*
+   * Mobile browsers enlarge the text of wide blocks (text autosizing). The CV sheet is an A4
+   * page 210 mm wide scaled down, so they would inflate its fonts on screen only: the preview
+   * and the page breaks measured from it would no longer match the printed PDF.
+   */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
