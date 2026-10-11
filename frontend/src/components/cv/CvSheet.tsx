@@ -39,11 +39,12 @@ function blocksOf(elements: readonly HTMLElement[]): Block[] {
 
 /**
  * Lays the content out on separate A4 sheets: the block that starts each new page is pushed
- * down (padding) to the top margin of the next sheet. The same marked blocks
- * (`data-page-start`) get a forced page break when printing, so the PDF has the same pages.
+ * down (padding, marked `data-page-start`) to the top margin of the next sheet. Screen only:
+ * when printing the browser breaks the pages itself with the same rules (see the print
+ * stylesheet), so a phone that measures differently never shifts the PDF's pages.
  * Returns the number of pages.
  */
-export function paginate(paper: HTMLElement): number {
+function paginate(paper: HTMLElement): number {
   for (const el of paper.querySelectorAll<HTMLElement>('[data-page-start]')) {
     el.style.paddingTop = '';
     delete el.dataset.pageStart;
@@ -115,25 +116,41 @@ export function CvSheet({
     setHeight(paper.offsetHeight);
   }, []);
 
-  // Fit the sheet to the available width. Also measure again when it becomes visible: on a
-  // phone the preview tab is hidden while editing, so the edits were never measured.
+  // Fit the sheet to the available width.
   useLayoutEffect(() => {
     const frame = frameRef.current;
     if (!frame || typeof ResizeObserver === 'undefined') return;
     const fit = () => {
       const width = frame.clientWidth;
-      if (width === 0) return;
-      setScale(Math.min(1, width / PAGE_WIDTH_PX));
-      measure();
+      if (width > 0) setScale(Math.min(1, width / PAGE_WIDTH_PX));
     };
     fit();
     const observer = new ResizeObserver(fit);
     observer.observe(frame);
     return () => observer.disconnect();
-  }, [measure]);
+  }, []);
 
-  // Measure after every edit.
-  useLayoutEffect(measure, [doc, measure]);
+  // Measure after every edit, and again whenever the frame or a block of the sheet changes
+  // size without an edit: when the preview tab is shown on a phone (hidden while editing, so
+  // nothing was measured), or when the browser lays the text out again (fonts, text scaling).
+  // Measuring resizes the blocks, so it runs on the next frame, not inside the observer.
+  useLayoutEffect(() => {
+    measure();
+    const frame = frameRef.current;
+    const paper = sheetRef.current?.querySelector<HTMLElement>('.cv-paper');
+    if (!frame || !paper || typeof ResizeObserver === 'undefined') return;
+    let request = 0;
+    const observer = new ResizeObserver(() => {
+      cancelAnimationFrame(request);
+      request = requestAnimationFrame(measure);
+    });
+    observer.observe(frame);
+    for (const child of paper.children) observer.observe(child);
+    return () => {
+      cancelAnimationFrame(request);
+      observer.disconnect();
+    };
+  }, [doc, measure]);
 
   return (
     <div className="cv-sheet">

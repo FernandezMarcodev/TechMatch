@@ -1713,8 +1713,10 @@ p {
 
 /*
  * No page margins: the browser prints its header and footer (date, page title with the
- * company, URL) inside them. The margins are the sheet's own padding instead, and every page
- * after the first starts with a forced break at the block CvSheet computed (see below).
+ * company, URL) inside them. The margins are the sheet's own padding instead, repeated on
+ * every page (box-decoration-break: clone). The browser breaks the pages itself, with the
+ * same rules CvSheet mirrors on screen: the PDF never depends on the screen measurements,
+ * which a phone can take with other font sizes or a paper size other than A4.
  */
 @page {
   size: A4;
@@ -1760,19 +1762,20 @@ p {
     box-shadow: none;
   }
 
-  /* The sheet is the page: same 16 mm × 18 mm margins as on screen, as padding. */
+  /* The sheet is the page: same 16 mm × 18 mm margins as on screen, as padding on each page. */
   .cv-paper {
     width: auto;
     min-height: 0 !important;
-    padding: 16mm 18mm 0;
+    padding: 16mm 18mm;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
     background: #ffffff;
     filter: none;
   }
 
-  /* Each later page starts where the preview shows it, with its top margin. */
+  /* The space that moves a block to the next sheet exists only on screen. */
   .cv-paper [data-page-start] {
-    break-before: page;
-    padding-top: 16mm !important;
+    padding-top: 0 !important;
   }
 
   .cv-paper__section > p {

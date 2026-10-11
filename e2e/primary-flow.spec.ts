@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { extractText, getDocumentProxy } from 'unpdf';
 import { createPool } from '../backend/src/infrastructure/db/pool.js';
 import { PgJobOfferRepository } from '../backend/src/persistence/pg-job-offer-repository.js';
 import { normalizeJobOffer } from '../backend/src/job-sources/normalizer.js';
@@ -184,4 +185,32 @@ test('on a phone the preview tab shows the whole CV, scaled to the screen', asyn
     .toBeLessThan(2);
   const paper = await preview.boundingBox();
   expect(paper?.width).toBeLessThanOrEqual(390);
+});
+
+test('the PDF pages do not depend on how the screen measured the preview', async ({ page }) => {
+  await openAdaptPage(page);
+  await page.getByLabel('Nombre y apellido').fill('María Fernández');
+  // Long enough for two pages.
+  const bullets = Array.from(
+    { length: 25 },
+    (_, i) => `Logro número ${i + 1} con Java y Spring Boot.`,
+  );
+  await page.getByLabel('Logros y tareas').first().fill(bullets.join('\n'));
+  const caption = page.locator('.cv-sheet__caption').first();
+  await expect(caption).toContainText('2 páginas');
+
+  const pdfPages = async () => {
+    const pdf = await page.pdf({ preferCSSPageSize: true });
+    const { text } = await extractText(await getDocumentProxy(new Uint8Array(pdf)));
+    return text;
+  };
+  const expected = await pdfPages();
+  expect(expected).toHaveLength(2);
+
+  // A phone that lays the preview out with bigger text (text scaling) breaks it elsewhere.
+  await page.addStyleTag({
+    content: '@media screen { .cv-paper { font-size: 15pt !important; } }',
+  });
+  await expect(caption).not.toContainText('2 páginas');
+  expect(await pdfPages()).toEqual(expected);
 });
