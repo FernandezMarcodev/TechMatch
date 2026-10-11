@@ -112,8 +112,13 @@ export class ApiError extends Error {
 /**
  * Where the API lives. Empty: same origin (Vite proxy in development, or the backend serving
  * the frontend). In production on Cloudflare Pages it is the Render URL (docs/16-DESPLIEGUE.md).
+ * Trimmed: a stray space pasted into the hosting panel would break every request.
  */
-const API_URL = (import.meta.env.VITE_API_URL ?? '').replace(/\/+$/, '');
+export const API_URL = normalizeApiUrl(import.meta.env.VITE_API_URL);
+
+export function normalizeApiUrl(value: string | undefined): string {
+  return (value ?? '').trim().replace(/\/+$/, '');
+}
 
 const GENERIC_ERROR = 'No pudimos comunicarnos con el servidor. Intentá nuevamente.';
 

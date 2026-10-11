@@ -143,6 +143,7 @@ En GitHub: **Actions → Sync jobs → Run workflow**. A partir de ahí se repit
 
 * `https://techmatch-api.onrender.com/api/health` responde `{"data":{"status":"ok"}}`.
 * Abrir `https://techmatch.pages.dev`, subir un CV y recorrer: recomendaciones → detalle → adaptar CV → descargar PDF. Entrar directo a una ruta interna (por ejemplo, recargar la página de recomendaciones) también debe funcionar.
+* Si la consola muestra llamadas a otra URL (por ejemplo, otro proyecto de Render): `VITE_API_URL` de **Production** está mal. Pages usa variables distintas para Production (`main`) y Preview (otras ramas). Corregirla y volver a desplegar un deploy de `main`. Los espacios o la `/` final se ignoran.
 * Si el navegador muestra un error de CORS en la consola: revisar que `CORS_ORIGIN` sea exactamente la URL de Pages (con `https://` y sin `/` final).
 
 ## Día a día
