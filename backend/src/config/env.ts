@@ -17,6 +17,15 @@ const envSchema = z.object({
   PORT: z.coerce.number().int().positive().default(3000),
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent']).default('info'),
   CORS_ORIGIN: z.string().default('http://localhost:5173'),
+  /**
+   * Express `trust proxy`: `true` (use the first X-Forwarded-For address), a number of proxy
+   * hops, or `false` when the API is reached directly.
+   */
+  TRUST_PROXY: z
+    .string()
+    .default('false')
+    .transform((value) => (value === 'true' ? true : value === 'false' ? false : Number(value)))
+    .pipe(z.union([z.boolean(), z.number().int().min(0)])),
   /** Built frontend served by the API (single-service deployment); unset in development. */
   FRONTEND_DIST_DIR: z
     .string()
@@ -34,6 +43,9 @@ const envSchema = z.object({
   CV_STORAGE_DIR: z.string().min(1).default('./storage/cvs'),
   /** Below this many letters/digits the PDF is treated as having no usable text. */
   CV_MIN_TEXT_CHARS: z.coerce.number().int().positive().default(50),
+  /** CV uploads allowed per client IP within each window. */
+  CV_UPLOAD_LIMIT_MAX: z.coerce.number().int().positive().default(10),
+  CV_UPLOAD_LIMIT_WINDOW_MINUTES: z.coerce.number().positive().default(15),
 
   MATCHING_CONFIG_PATH: z
     .string()

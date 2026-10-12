@@ -214,6 +214,7 @@ Todos los errores:
 | `JOB_NOT_FOUND` | 404 | oferta inexistente o id inválido |
 | `CV_NOT_PROCESSED` | 409 | el CV todavía no terminó de procesarse o falló (adaptación) |
 | `INVALID_CV_DOCUMENT` | 400 | el CV editado no cumple el formato o los límites (`details.issues`) |
+| `RATE_LIMITED` | 429 | demasiadas subidas de CV desde la misma IP; cabecera `Retry-After` y `details.retryAfterSeconds` |
 | `INTERNAL_ERROR` | 500 | error inesperado |
 
 HTTP utilizados:
@@ -226,5 +227,6 @@ HTTP utilizados:
 409 Conflict
 413 Payload Too Large
 422 Unprocessable Entity
+429 Too Many Requests
 500 Internal Server Error
 ```
