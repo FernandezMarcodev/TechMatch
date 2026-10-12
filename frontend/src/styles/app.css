@@ -243,6 +243,49 @@ p {
   max-width: 48ch;
 }
 
+/* ---------- Accounts ---------- */
+
+.account-link {
+  max-width: 220px;
+}
+
+.account-link__email {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.auth-card {
+  margin-top: 8px;
+}
+
+.auth-card__title {
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.auth-card__footer {
+  text-align: center;
+  color: var(--md-on-surface-variant);
+  font-size: 0.875rem;
+}
+
+.account-data {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px 16px;
+}
+
+.account-data dt {
+  color: var(--md-on-surface-variant);
+  font-size: 0.875rem;
+}
+
+.account-data dd {
+  overflow-wrap: anywhere;
+}
+
 /* ---------- Buttons (M3 common buttons) ---------- */
 
 .button {
@@ -1608,6 +1651,11 @@ p {
 
 @media (max-width: 600px) {
   .nav-link {
+    display: none;
+  }
+
+  /* Icon-only account button on phones; its aria-label keeps it accessible. */
+  .top-app-bar__label {
     display: none;
   }
 

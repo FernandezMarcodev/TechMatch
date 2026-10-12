@@ -1,6 +1,35 @@
 import type { ReactNode } from 'react';
 import { Link, NavLink } from 'react-router-dom';
+import { useAuth } from '../auth/AuthContext';
 import { Icon } from './Icon';
+
+/** "Iniciar sesión" for visitors; the account (email) for logged-in users. */
+function AccountLink() {
+  const { user, loading } = useAuth();
+  if (loading) return null;
+  if (!user) {
+    return (
+      <NavLink
+        to="/ingresar"
+        className="button button--text button--small"
+        aria-label="Iniciar sesión"
+      >
+        <Icon name="user" size={18} />
+        <span className="top-app-bar__label">Iniciar sesión</span>
+      </NavLink>
+    );
+  }
+  return (
+    <NavLink
+      to="/cuenta"
+      className="button button--text button--small account-link"
+      aria-label={`Mi cuenta (${user.email})`}
+    >
+      <Icon name="user" size={18} />
+      <span className="top-app-bar__label account-link__email">{user.email}</span>
+    </NavLink>
+  );
+}
 
 export function TopAppBar() {
   return (
@@ -20,6 +49,7 @@ export function TopAppBar() {
             <Icon name="upload" size={18} />
             Analizar CV
           </NavLink>
+          <AccountLink />
         </nav>
       </div>
     </header>
@@ -33,7 +63,8 @@ export function Footer() {
         <div>
           <p className="footer__brand">TechMatch</p>
           <p className="footer__text">
-            Recomendaciones explicadas a partir de tu CV. Sin registro y sin publicar tus datos.
+            Recomendaciones explicadas a partir de tu CV. La cuenta es opcional y tus datos no se
+            publican.
           </p>
         </div>
         <p className="footer__text">

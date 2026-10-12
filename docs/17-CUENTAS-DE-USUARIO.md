@@ -138,10 +138,11 @@ En la etapa 3, `register` deja de considerar la cuenta lista: manda el email de 
 
 ## Frontend
 
-* Páginas: **Crear cuenta**, **Iniciar sesión**; en la etapa 3, **Verificar email** (`/verificar-email?token=…`); en la etapa 4, **Olvidé mi contraseña** y **Nueva contraseña** (`/restablecer?token=…`).
-* En la barra superior: "Iniciar sesión" para visitantes; el email y "Cerrar sesión" para usuarios logueados.
-* Un contexto de React guarda el usuario actual; al abrir la app, si hay token, se llama a `/api/auth/me` (si responde 401, se borra el token).
-* Las páginas que requieren cuenta redirigen a "Iniciar sesión" y vuelven a donde estaba la persona después de entrar.
+* Páginas: **Crear cuenta** (`/crear-cuenta`), **Iniciar sesión** (`/ingresar`) y **Mi cuenta** (`/cuenta`, con el email, la fecha de alta y "Cerrar sesión"); en la etapa 3, **Verificar email** (`/verificar-email?token=…`); en la etapa 4, **Olvidé mi contraseña** y **Nueva contraseña** (`/restablecer?token=…`).
+* En la etapa 1, crear la cuenta inicia sesión automáticamente. Desde la etapa 3, primero hay que verificar el email.
+* En la barra superior: "Iniciar sesión" para visitantes; el email (enlace a "Mi cuenta") para usuarios logueados. En el celular se muestra solo el ícono.
+* `AuthProvider` (contexto de React) guarda el usuario actual; al abrir la app, si hay token, se llama a `/api/auth/me` (si responde 401, se borra el token). El token vive en `localStorage` (`techmatch.session`); si el navegador no permite guardarlo, dura hasta cerrar la pestaña.
+* `RequireAuth` protege las páginas que requieren cuenta: redirige a "Iniciar sesión" y vuelve a la página pedida después de entrar.
 * Subir un CV, ver recomendaciones y adaptar un CV siguen funcionando sin cuenta.
 
 ## Configuración nueva
