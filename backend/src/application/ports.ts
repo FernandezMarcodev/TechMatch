@@ -6,6 +6,8 @@ import type {
   JobSkill,
   LanguageRequirement,
   MatchResult,
+  Session,
+  User,
 } from '../domain/entities.js';
 import type { CvStatus, JobSource, Modality, Seniority } from '../domain/enums.js';
 
@@ -72,6 +74,26 @@ export interface FileStorage {
   read(storagePath: string): Promise<Buffer>;
   /** Removes the file; a file that no longer exists is not an error. */
   delete(storagePath: string): Promise<void>;
+}
+
+export interface UserRepository {
+  /** Returns 'duplicate' (and stores nothing) when the email already has an account. */
+  create(user: User): Promise<'created' | 'duplicate'>;
+  findByEmail(email: string): Promise<User | null>;
+}
+
+export interface SessionRepository {
+  create(session: Session): Promise<void>;
+  /** The user of a session that exists and has not expired at `now`. */
+  findUser(tokenHash: string, now: Date): Promise<User | null>;
+  delete(tokenHash: string): Promise<void>;
+  /** Removes the user's sessions that expired before `now`. */
+  deleteExpired(userId: string, now: Date): Promise<void>;
+}
+
+export interface PasswordHasher {
+  hash(password: string): Promise<string>;
+  verify(password: string, storedHash: string): Promise<boolean>;
 }
 
 export interface Clock {

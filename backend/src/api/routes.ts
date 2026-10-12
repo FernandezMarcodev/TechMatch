@@ -1,10 +1,12 @@
 import { Router, type Request, type RequestHandler } from 'express';
 import multer from 'multer';
 import type { AdaptationService } from '../application/adaptation-service.js';
+import type { AuthService } from '../application/auth-service.js';
 import type { CvService } from '../application/cv-service.js';
 import { AppError } from '../application/errors.js';
 import { evaluationDocumentSchema } from '../cv-adaptation/document-schema.js';
 import type { QueryService } from '../application/query-service.js';
+import { createAuthRoutes } from './auth-routes.js';
 import { createRateLimit } from './rate-limit.js';
 import {
   toAdaptationEvaluationDto,
@@ -30,19 +32,25 @@ export interface RouteDeps {
   cvService: CvService;
   queries: QueryService;
   adaptation: AdaptationService;
+  auth: AuthService;
   maxUploadBytes: number;
   /** Limit of CV uploads per client IP; without it uploads are unlimited (tests). */
   uploadRateLimit?: { max: number; windowMs: number };
+  /** Limit of register/login attempts per client IP; without it they are unlimited (tests). */
+  authRateLimit?: { max: number; windowMs: number };
 }
 
 export function createRoutes({
   cvService,
   queries,
   adaptation,
+  auth,
   maxUploadBytes,
   uploadRateLimit,
+  authRateLimit,
 }: RouteDeps): Router {
   const router = Router();
+  router.use('/auth', createAuthRoutes({ auth, rateLimit: authRateLimit }));
   const limitUploads: RequestHandler = uploadRateLimit
     ? createRateLimit(uploadRateLimit)
     : (_req, _res, next) => next();
