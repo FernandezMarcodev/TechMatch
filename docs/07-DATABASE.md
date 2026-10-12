@@ -173,6 +173,22 @@ expires_at TIMESTAMPTZ
 created_at TIMESTAMPTZ
 ```
 
+## email_tokens
+
+Links de un solo uso que se mandan por email (verificación de email y recuperación de contraseña).
+
+```text
+id UUID PK
+user_id UUID FK → users (ON DELETE CASCADE)
+purpose VARCHAR             (VERIFY_EMAIL | RESET_PASSWORD)
+token_hash CHAR(64) UNIQUE  (SHA-256 del token; el token no se guarda)
+expires_at TIMESTAMPTZ
+used_at TIMESTAMPTZ NULL    (marcado al usarse: el link sirve una vez)
+created_at TIMESTAMPTZ
+```
+
+Un link nuevo borra los anteriores sin usar del mismo usuario y propósito.
+
 ## Índices
 
 ```text

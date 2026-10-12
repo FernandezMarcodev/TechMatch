@@ -182,3 +182,15 @@ export interface Session {
   readonly expiresAt: Date;
   readonly createdAt: Date;
 }
+
+export type EmailTokenPurpose = 'VERIFY_EMAIL' | 'RESET_PASSWORD';
+
+/** Single-use link sent by email; only its hash is stored. */
+export interface EmailToken {
+  readonly id: string;
+  readonly userId: string;
+  readonly purpose: EmailTokenPurpose;
+  readonly tokenHash: string;
+  readonly expiresAt: Date;
+  readonly createdAt: Date;
+}

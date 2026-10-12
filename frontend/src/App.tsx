@@ -11,6 +11,7 @@ import { JobDetailPage } from './pages/JobDetailPage';
 import { LoginPage, RegisterPage } from './pages/LoginPage';
 import { ProcessingPage } from './pages/ProcessingPage';
 import { RecommendationsPage } from './pages/RecommendationsPage';
+import { VerifyEmailPage } from './pages/VerifyEmailPage';
 
 export function App() {
   return (
@@ -26,6 +27,7 @@ export function App() {
             <Route path="/cv/:cvId/adaptar/:jobId" element={<AdaptCvPage />} />
             <Route path="/ingresar" element={<LoginPage />} />
             <Route path="/crear-cuenta" element={<RegisterPage />} />
+            <Route path="/verificar-email" element={<VerifyEmailPage />} />
             <Route
               path="/cuenta"
               element={

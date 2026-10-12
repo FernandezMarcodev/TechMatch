@@ -62,7 +62,10 @@ Cada etapa es una rama y deja el sistema funcionando:
 * Vencimientos: verificación 24 horas (`EMAIL_VERIFICATION_TTL_HOURS`), recuperación 30 minutos (`PASSWORD_RESET_TTL_MINUTES`).
 * **Un solo uso:** al usarse queda marcado y no sirve de nuevo. Pedir un token nuevo invalida los anteriores del mismo propósito.
 * Cambiar la contraseña por recuperación cierra todas las sesiones abiertas del usuario.
-* El link apunta al frontend (`FRONTEND_URL`), que llama a la API con el token.
+* El link apunta al frontend (`FRONTEND_URL`; si no está definida, el primer origen de `CORS_ORIGIN`, que en el despliegue habitual es la URL de Cloudflare Pages), que llama a la API con el token.
+* Si el email de verificación no se puede mandar al registrarse, la cuenta igual se crea (el error queda en el log) y la persona puede pedir el reenvío desde "Revisá tu email" o al intentar iniciar sesión.
+* `EMAIL_NOT_VERIFIED` se responde solo con la contraseña correcta: con una incorrecta, el error es el genérico, así que no revela el estado de la cuenta.
+* Las cuentas creadas antes de la etapa 3 quedan sin verificar; al intentar entrar, el login ofrece reenviar el link.
 
 ### Email
 
@@ -141,7 +144,7 @@ En la etapa 3, `register` deja de considerar la cuenta lista: manda el email de 
 ## Frontend
 
 * Páginas: **Crear cuenta** (`/crear-cuenta`), **Iniciar sesión** (`/ingresar`) y **Mi cuenta** (`/cuenta`, con el email, la fecha de alta y "Cerrar sesión"); en la etapa 3, **Verificar email** (`/verificar-email?token=…`); en la etapa 4, **Olvidé mi contraseña** y **Nueva contraseña** (`/restablecer?token=…`).
-* En la etapa 1, crear la cuenta inicia sesión automáticamente. Desde la etapa 3, primero hay que verificar el email.
+* Desde la etapa 3, crear la cuenta muestra "Revisá tu email" (con "Reenviar email de verificación") y no inicia sesión. Si alguien sin verificar intenta entrar, el error ofrece el mismo botón de reenvío. `/verificar-email` llama una sola vez a la API (el link sirve una vez) y, si sale bien, invita a iniciar sesión.
 * En la barra superior: "Iniciar sesión" para visitantes; el email (enlace a "Mi cuenta") para usuarios logueados. En el celular se muestra solo el ícono.
 * `AuthProvider` (contexto de React) guarda el usuario actual; al abrir la app, si hay token, se llama a `/api/auth/me` (si responde 401, se borra el token). El token vive en `localStorage` (`techmatch.session`); si el navegador no permite guardarlo, dura hasta cerrar la pestaña.
 * `RequireAuth` protege las páginas que requieren cuenta: redirige a "Iniciar sesión" y vuelve a la página pedida después de entrar.
@@ -158,7 +161,7 @@ En la etapa 3, `register` deja de considerar la cuenta lista: manda el email de 
 | `BREVO_API_URL` | `https://api.brevo.com/v3` | API de Brevo |
 | `BREVO_API_KEY` | — | Obligatoria con `brevo` |
 | `EMAIL_FROM` / `EMAIL_FROM_NAME` | `no-reply@techmatch.local` / `TechMatch` | Remitente |
-| `FRONTEND_URL` | `http://localhost:5173` | Base de los links de los mails |
+| `FRONTEND_URL` | primer origen de `CORS_ORIGIN` | Base de los links de los mails |
 | `EMAIL_VERIFICATION_TTL_HOURS` | `24` | Vencimiento del link de verificación |
 | `PASSWORD_RESET_TTL_MINUTES` | `30` | Vencimiento del link de recuperación |
 

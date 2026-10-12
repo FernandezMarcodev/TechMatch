@@ -2,6 +2,7 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { MemoryEmailSender } from '../src/infrastructure/email/memory-email-sender.js';
 import { createContainer, type Container } from '../src/main/container.js';
 import { PgCvRepository } from '../src/persistence/pg-cv-repository.js';
 import { makeCv } from './fixtures.js';
@@ -23,7 +24,10 @@ beforeAll(async () => {
       CV_MIN_TEXT_CHARS: 50,
       MATCHING_CONFIG_PATH: undefined,
       SESSION_TTL_DAYS: 30,
+      EMAIL_VERIFICATION_TTL_HOURS: 24,
     },
+    frontendUrl: 'http://techmatch.test',
+    emailSender: new MemoryEmailSender(),
   });
 });
 

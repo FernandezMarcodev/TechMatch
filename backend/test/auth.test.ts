@@ -2,12 +2,14 @@ import request from 'supertest';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { createApp } from '../src/api/app.js';
 import { createRoutes } from '../src/api/routes.js';
+import { MemoryEmailSender } from '../src/infrastructure/email/memory-email-sender.js';
 import { createContainer, type Container } from '../src/main/container.js';
 import { createTestPool, testLogger, truncateAll } from './helpers.js';
 
 const pool = createTestPool();
 let now = new Date('2026-05-01T12:00:00Z');
 let container: Container;
+const mailbox = new MemoryEmailSender();
 
 function appWith(authRateLimit?: { max: number; windowMs: number }) {
   return createApp({
@@ -36,7 +38,10 @@ beforeAll(() => {
       CV_MIN_TEXT_CHARS: 50,
       MATCHING_CONFIG_PATH: undefined,
       SESSION_TTL_DAYS: 30,
+      EMAIL_VERIFICATION_TTL_HOURS: 24,
     },
+    frontendUrl: 'http://techmatch.test',
+    emailSender: mailbox,
     clock: { now: () => now },
   });
   app = appWith();
@@ -45,6 +50,7 @@ beforeAll(() => {
 beforeEach(async () => {
   now = new Date('2026-05-01T12:00:00Z');
   await truncateAll(pool);
+  mailbox.sent.length = 0;
 });
 
 afterAll(async () => {
@@ -56,6 +62,18 @@ const register = (email: string, password = PASSWORD) =>
   request(app).post('/api/auth/register').send({ email, password });
 const login = (email: string, password = PASSWORD) =>
   request(app).post('/api/auth/login').send({ email, password });
+/** The token of the last link sent by email to `email`. */
+function linkToken(email: string): string {
+  const message = mailbox.sent.findLast((m) => m.to === email);
+  const match = /token=([\w-]+)/.exec(message?.text ?? '');
+  if (!match?.[1]) throw new Error(`no link sent to ${email}`);
+  return match[1];
+}
+const verify = (token: string) => request(app).post('/api/auth/verify-email').send({ token });
+async function registerVerified(email: string) {
+  await register(email);
+  await verify(linkToken(email));
+}
 const me = (token?: string) => {
   const req = request(app).get('/api/auth/me');
   return token ? req.set('Authorization', `Bearer ${token}`) : req;
@@ -71,6 +89,9 @@ describe('accounts: register → login → me → logout', () => {
       emailVerified: false,
       createdAt: '2026-05-01T12:00:00.000Z',
     });
+    const verified = await verify(linkToken('ana@example.com'));
+    expect(verified.status).toBe(200);
+    expect(verified.body.data.user.emailVerified).toBe(true);
 
     const session = await login('ANA@example.com');
     expect(session.status).toBe(200);
@@ -89,7 +110,7 @@ describe('accounts: register → login → me → logout', () => {
   });
 
   it('stores neither passwords nor tokens in plain text', async () => {
-    await register('ana@example.com');
+    await registerVerified('ana@example.com');
     const { token } = (await login('ana@example.com')).body.data;
     const { rows: users } = await pool.query('SELECT password_hash FROM users');
     const { rows: sessions } = await pool.query('SELECT token_hash FROM sessions');
@@ -107,7 +128,7 @@ describe('accounts: register → login → me → logout', () => {
 
 describe('register validation', () => {
   it('rejects an email that already has an account, ignoring case', async () => {
-    await register('ana@example.com');
+    await registerVerified('ana@example.com');
     const res = await register('ANA@example.com');
     expect(res.status).toBe(409);
     expect(res.body.error.code).toBe('EMAIL_ALREADY_REGISTERED');
@@ -135,7 +156,7 @@ describe('register validation', () => {
 
 describe('login and sessions', () => {
   it('answers the same for a wrong password and for an unknown email', async () => {
-    await register('ana@example.com');
+    await registerVerified('ana@example.com');
     const wrongPassword = await login('ana@example.com', 'otra-clave-123');
     const unknownEmail = await login('nadie@example.com');
     expect(wrongPassword.status).toBe(401);
@@ -152,7 +173,7 @@ describe('login and sessions', () => {
   });
 
   it('expires sessions after SESSION_TTL_DAYS', async () => {
-    await register('ana@example.com');
+    await registerVerified('ana@example.com');
     const { token } = (await login('ana@example.com')).body.data;
     now = new Date('2026-05-31T11:59:00Z');
     expect((await me(token)).status).toBe(200);
@@ -161,12 +182,90 @@ describe('login and sessions', () => {
   });
 
   it('keeps several sessions of the same user independent', async () => {
-    await register('ana@example.com');
+    await registerVerified('ana@example.com');
     const first = (await login('ana@example.com')).body.data.token;
     const second = (await login('ana@example.com')).body.data.token;
     await request(app).post('/api/auth/logout').set('Authorization', `Bearer ${first}`);
     expect((await me(first)).status).toBe(401);
     expect((await me(second)).status).toBe(200);
+  });
+});
+
+describe('email verification', () => {
+  it('sends a link to the web app when the account is created', async () => {
+    await register('ana@example.com');
+    expect(mailbox.sent).toHaveLength(1);
+    const [email] = mailbox.sent;
+    expect(email?.to).toBe('ana@example.com');
+    expect(email?.subject).toBe('Confirmá tu email en TechMatch');
+    expect(email?.text).toMatch(/http:\/\/techmatch\.test\/verificar-email\?token=[\w-]{43}/);
+    expect(email?.text).not.toContain(PASSWORD);
+  });
+
+  it('does not let an unverified account log in, only after the right password', async () => {
+    await register('ana@example.com');
+    const unverified = await login('ana@example.com');
+    expect(unverified.status).toBe(403);
+    expect(unverified.body.error.code).toBe('EMAIL_NOT_VERIFIED');
+    // A wrong password still gets the generic error: it does not reveal the account state.
+    expect((await login('ana@example.com', 'otra-clave-123')).body.error.code).toBe(
+      'INVALID_CREDENTIALS',
+    );
+
+    await verify(linkToken('ana@example.com'));
+    expect((await login('ana@example.com')).status).toBe(200);
+  });
+
+  it('accepts each link only once', async () => {
+    await register('ana@example.com');
+    const token = linkToken('ana@example.com');
+    expect((await verify(token)).status).toBe(200);
+    const again = await verify(token);
+    expect(again.status).toBe(400);
+    expect(again.body.error.code).toBe('INVALID_TOKEN');
+  });
+
+  it('rejects links after EMAIL_VERIFICATION_TTL_HOURS and unknown tokens', async () => {
+    await register('ana@example.com');
+    now = new Date('2026-05-02T12:00:00Z');
+    expect((await verify(linkToken('ana@example.com'))).body.error.code).toBe('INVALID_TOKEN');
+    expect((await verify('token-inventado')).status).toBe(400);
+    expect((await request(app).post('/api/auth/verify-email').send({})).status).toBe(400);
+  });
+
+  it('resends a new link that replaces the previous one', async () => {
+    await register('ana@example.com');
+    const first = linkToken('ana@example.com');
+    const res = await request(app)
+      .post('/api/auth/verify-email/resend')
+      .send({ email: 'ANA@example.com' });
+    expect(res.status).toBe(202);
+    const second = linkToken('ana@example.com');
+    expect(second).not.toBe(first);
+    expect((await verify(first)).status).toBe(400);
+    expect((await verify(second)).status).toBe(200);
+  });
+
+  it('answers the same to a resend for unknown or already verified emails, sending nothing', async () => {
+    await registerVerified('ana@example.com');
+    mailbox.sent.length = 0;
+    const resend = (email: string) =>
+      request(app).post('/api/auth/verify-email/resend').send({ email });
+    expect((await resend('ana@example.com')).status).toBe(202);
+    expect((await resend('nadie@example.com')).status).toBe(202);
+    expect(mailbox.sent).toEqual([]);
+  });
+
+  it('keeps the account when the email cannot be sent, so it can be resent', async () => {
+    const failing = mailbox.send.bind(mailbox);
+    mailbox.send = () => Promise.reject(new Error('SMTP caído'));
+    try {
+      expect((await register('ana@example.com')).status).toBe(201);
+    } finally {
+      mailbox.send = failing;
+    }
+    await request(app).post('/api/auth/verify-email/resend').send({ email: 'ana@example.com' });
+    expect((await verify(linkToken('ana@example.com'))).status).toBe(200);
   });
 });
 

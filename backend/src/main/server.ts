@@ -1,6 +1,7 @@
 import { createApp } from '../api/app.js';
 import { createRoutes } from '../api/routes.js';
-import { getEnv } from '../config/env.js';
+import { frontendUrl, getEnv } from '../config/env.js';
+import { createEmailSender } from '../infrastructure/email/create-email-sender.js';
 import { createPool } from '../infrastructure/db/pool.js';
 import { createLogger } from '../infrastructure/logging/logger.js';
 import { createContainer } from './container.js';
@@ -9,7 +10,13 @@ import { createJobSyncScheduler, createJobSyncService } from './job-sync.js';
 const env = getEnv();
 const logger = createLogger(env.LOG_LEVEL);
 const pool = createPool(env.DATABASE_URL);
-const container = createContainer({ pool, logger, env });
+const container = createContainer({
+  pool,
+  logger,
+  env,
+  frontendUrl: frontendUrl(env),
+  emailSender: createEmailSender(env),
+});
 
 const app = createApp({
   logger,

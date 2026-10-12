@@ -8,7 +8,7 @@ interface AuthState {
   /** True while a stored session is being checked on startup. */
   loading: boolean;
   login(email: string, password: string): Promise<void>;
-  /** Creates the account and logs in (accounts are active as soon as they are created). */
+  /** Creates the account; the API emails a link to verify it before the first login. */
   register(email: string, password: string): Promise<void>;
   logout(): Promise<void>;
 }
@@ -46,13 +46,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(result.user);
   }, []);
 
-  const register = useCallback(
-    async (email: string, password: string) => {
-      await api.register(email, password);
-      await login(email, password);
-    },
-    [login],
-  );
+  const register = useCallback(async (email: string, password: string) => {
+    await api.register(email, password);
+  }, []);
 
   const logout = useCallback(async () => {
     try {

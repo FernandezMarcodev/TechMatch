@@ -50,6 +50,17 @@ const envSchema = z.object({
   /** Register/login attempts allowed per client IP within each window. */
   AUTH_LIMIT_MAX: z.coerce.number().int().positive().default(10),
   AUTH_LIMIT_WINDOW_MINUTES: z.coerce.number().positive().default(15),
+  /**
+   * Base of the links sent by email (the web app). Unset: the first CORS_ORIGIN, which is
+   * the frontend's URL in the usual setup (docs/16-DESPLIEGUE.md).
+   */
+  FRONTEND_URL: z
+    .string()
+    .optional()
+    .transform((value) => (value?.trim() ? value.trim().replace(/\/+$/, '') : undefined))
+    .pipe(z.url().optional()),
+  /** Hours the email verification link stays valid. */
+  EMAIL_VERIFICATION_TTL_HOURS: z.coerce.number().positive().default(24),
   // Email (docs/17-CUENTAS-DE-USUARIO.md § Email): Mailpit over SMTP locally, Brevo's API in
   // production (Render free blocks the SMTP ports).
   EMAIL_PROVIDER: z.enum(['smtp', 'brevo']).default('smtp'),
@@ -114,6 +125,16 @@ export function loadEnv(source: NodeJS.ProcessEnv = process.env): Env {
     throw new Error(`Invalid environment configuration: ${issues}`);
   }
   return parsed.data;
+}
+
+/** Where the emails' links point: FRONTEND_URL, or else the first allowed CORS origin. */
+export function frontendUrl(env: Pick<Env, 'FRONTEND_URL' | 'CORS_ORIGIN'>): string {
+  if (env.FRONTEND_URL) return env.FRONTEND_URL;
+  const first = env.CORS_ORIGIN.split(',')
+    .map((o) => o.trim().replace(/\/+$/, ''))
+    .find((o) => o && o !== '*');
+  if (!first) throw new Error('FRONTEND_URL must be set when CORS_ORIGIN is "*"');
+  return first;
 }
 
 export function getEnv(): Env {
