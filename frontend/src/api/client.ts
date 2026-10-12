@@ -265,4 +265,11 @@ export const api = {
   resendVerification(email: string): Promise<void> {
     return postJson('/auth/verify-email/resend', { email });
   },
+  /** Always succeeds for a well-formed email: the API does not reveal which ones have an account. */
+  requestPasswordReset(email: string): Promise<void> {
+    return postJson('/auth/password-reset', { email });
+  },
+  resetPassword(token: string, password: string): Promise<void> {
+    return postJson('/auth/password-reset/confirm', { token, password });
+  },
 };

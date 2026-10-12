@@ -9,6 +9,7 @@ import { AdaptCvPage } from './pages/AdaptCvPage';
 import { HomePage } from './pages/HomePage';
 import { JobDetailPage } from './pages/JobDetailPage';
 import { LoginPage, RegisterPage } from './pages/LoginPage';
+import { ForgotPasswordPage, ResetPasswordPage } from './pages/PasswordResetPages';
 import { ProcessingPage } from './pages/ProcessingPage';
 import { RecommendationsPage } from './pages/RecommendationsPage';
 import { VerifyEmailPage } from './pages/VerifyEmailPage';
@@ -28,6 +29,8 @@ export function App() {
             <Route path="/ingresar" element={<LoginPage />} />
             <Route path="/crear-cuenta" element={<RegisterPage />} />
             <Route path="/verificar-email" element={<VerifyEmailPage />} />
+            <Route path="/olvide-contrasena" element={<ForgotPasswordPage />} />
+            <Route path="/restablecer" element={<ResetPasswordPage />} />
             <Route
               path="/cuenta"
               element={

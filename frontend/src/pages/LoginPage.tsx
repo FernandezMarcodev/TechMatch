@@ -35,6 +35,8 @@ export function LoginPage() {
         }
         footer={
           <>
+            <Link to="/olvide-contrasena">¿Olvidaste tu contraseña?</Link>
+            <br />
             ¿No tenés cuenta? <Link to="/crear-cuenta">Creá una</Link>
           </>
         }

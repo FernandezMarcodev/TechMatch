@@ -39,6 +39,7 @@ beforeAll(() => {
       MATCHING_CONFIG_PATH: undefined,
       SESSION_TTL_DAYS: 30,
       EMAIL_VERIFICATION_TTL_HOURS: 24,
+      PASSWORD_RESET_TTL_MINUTES: 30,
     },
     frontendUrl: 'http://techmatch.test',
     emailSender: mailbox,
@@ -266,6 +267,83 @@ describe('email verification', () => {
     }
     await request(app).post('/api/auth/verify-email/resend').send({ email: 'ana@example.com' });
     expect((await verify(linkToken('ana@example.com'))).status).toBe(200);
+  });
+});
+
+describe('password reset', () => {
+  const requestReset = (email: string) =>
+    request(app).post('/api/auth/password-reset').send({ email });
+  const confirm = (token: string, password: string) =>
+    request(app).post('/api/auth/password-reset/confirm').send({ token, password });
+
+  it('emails a link, sets the new password and closes every open session', async () => {
+    await registerVerified('ana@example.com');
+    const oldSession = (await login('ana@example.com')).body.data.token;
+    mailbox.sent.length = 0;
+
+    expect((await requestReset('Ana@Example.com')).status).toBe(202);
+    const [email] = mailbox.sent;
+    expect(email?.subject).toBe('Restablecé tu contraseña de TechMatch');
+    expect(email?.text).toMatch(/http:\/\/techmatch\.test\/restablecer\?token=[\w-]{43}/);
+    expect(email?.text).toContain('vence en 30 minutos');
+
+    expect((await confirm(linkToken('ana@example.com'), 'nueva-clave-456')).status).toBe(204);
+    expect((await me(oldSession)).status).toBe(401);
+    expect((await login('ana@example.com')).status).toBe(401);
+    expect((await login('ana@example.com', 'nueva-clave-456')).status).toBe(200);
+  });
+
+  it('answers the same for unknown emails, sending nothing', async () => {
+    expect((await requestReset('nadie@example.com')).status).toBe(202);
+    expect(mailbox.sent).toEqual([]);
+  });
+
+  it('accepts each link once and only within PASSWORD_RESET_TTL_MINUTES', async () => {
+    await registerVerified('ana@example.com');
+    await requestReset('ana@example.com');
+    const token = linkToken('ana@example.com');
+    expect((await confirm(token, 'nueva-clave-456')).status).toBe(204);
+    expect((await confirm(token, 'otra-clave-789')).body.error.code).toBe('INVALID_TOKEN');
+
+    await requestReset('ana@example.com');
+    now = new Date('2026-05-01T12:30:00Z');
+    expect((await confirm(linkToken('ana@example.com'), 'otra-clave-789')).status).toBe(400);
+  });
+
+  it('only the latest link works, and a verification link is not a reset link', async () => {
+    await register('ana@example.com');
+    const verificationToken = linkToken('ana@example.com');
+    expect((await confirm(verificationToken, 'nueva-clave-456')).status).toBe(400);
+
+    await requestReset('ana@example.com');
+    const first = linkToken('ana@example.com');
+    await requestReset('ana@example.com');
+    expect((await confirm(first, 'nueva-clave-456')).status).toBe(400);
+    expect((await confirm(linkToken('ana@example.com'), 'nueva-clave-456')).status).toBe(204);
+  });
+
+  it('applies the password rules and verifies the email of the account', async () => {
+    await register('ana@example.com');
+    await requestReset('ana@example.com');
+    const token = linkToken('ana@example.com');
+    const short = await confirm(token, 'corta');
+    expect(short.status).toBe(400);
+    expect(short.body.error.message).toBe('La contraseña debe tener al menos 8 caracteres.');
+
+    // The account was never verified: opening the reset link proves the email is theirs.
+    expect((await confirm(token, 'nueva-clave-456')).status).toBe(204);
+    expect((await login('ana@example.com', 'nueva-clave-456')).status).toBe(200);
+  });
+
+  it('still answers 202 when the email cannot be sent', async () => {
+    await registerVerified('ana@example.com');
+    const send = mailbox.send.bind(mailbox);
+    mailbox.send = () => Promise.reject(new Error('Brevo caído'));
+    try {
+      expect((await requestReset('ana@example.com')).status).toBe(202);
+    } finally {
+      mailbox.send = send;
+    }
   });
 });
 

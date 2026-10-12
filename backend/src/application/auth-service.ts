@@ -23,6 +23,7 @@ export interface AuthServiceDeps {
   readonly logger: Logger;
   readonly sessionTtlDays: number;
   readonly verificationTtlHours: number;
+  readonly passwordResetTtlMinutes: number;
   /** Base of the links in the emails (the web app, not the API). */
   readonly frontendUrl: string;
 }
@@ -107,6 +108,65 @@ export class AuthService {
     const user = await this.deps.users.findByEmail(normalizeEmail(email));
     if (!user || user.emailVerifiedAt) return;
     await this.sendVerification(user);
+  }
+
+  /**
+   * "Olvidé mi contraseña": emails a reset link if the account exists. Silent otherwise, and
+   * also when the email fails (logged), so the response never reveals which emails exist.
+   */
+  async requestPasswordReset(email: string): Promise<void> {
+    const { users, emailTokens, email: sender, clock, ids, logger } = this.deps;
+    const { passwordResetTtlMinutes, frontendUrl } = this.deps;
+    const user = await users.findByEmail(normalizeEmail(email));
+    if (!user) return;
+    const now = clock.now();
+    const { token, tokenHash } = newToken();
+    await emailTokens.replace({
+      id: ids.next(),
+      userId: user.id,
+      purpose: 'RESET_PASSWORD',
+      tokenHash,
+      expiresAt: new Date(now.getTime() + passwordResetTtlMinutes * 60_000),
+      createdAt: now,
+    });
+    const link = `${frontendUrl}/restablecer?token=${encodeURIComponent(token)}`;
+    try {
+      await sender.send({
+        to: user.email,
+        subject: 'Restablecé tu contraseña de TechMatch',
+        text: [
+          'Hola:',
+          '',
+          'Recibimos un pedido para restablecer la contraseña de tu cuenta en TechMatch.',
+          'Para elegir una nueva, abrí este link:',
+          '',
+          link,
+          '',
+          `El link vence en ${passwordResetTtlMinutes} minutos y sirve una sola vez.`,
+          'Si no lo pediste, ignorá este email: tu contraseña no cambia.',
+          '',
+          'El equipo de TechMatch',
+        ].join('\n'),
+      });
+      logger.info({ userId: user.id }, 'Password reset email sent');
+    } catch (err) {
+      logger.error({ err, userId: user.id }, 'Password reset email failed');
+    }
+  }
+
+  /**
+   * Sets a new password with the token of the reset link and closes every open session.
+   * Opening the link proves the person owns the email, so the email counts as verified.
+   */
+  async resetPassword(token: string, password: string): Promise<void> {
+    const { emailTokens, users, sessions, hasher, clock, logger } = this.deps;
+    const now = clock.now();
+    const userId = await emailTokens.consume(hashToken(token), 'RESET_PASSWORD', now);
+    if (!userId) throw invalidToken();
+    await users.updatePassword(userId, await hasher.hash(password), now);
+    await users.markEmailVerified(userId, now);
+    await sessions.deleteAllForUser(userId);
+    logger.info({ userId }, 'Password reset');
   }
 
   private async sendVerification(user: User): Promise<void> {

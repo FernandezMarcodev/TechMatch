@@ -156,7 +156,7 @@ La API manda mails (verificación de email y recuperación de contraseña, `17-C
 3. **SMTP & API → API Keys → Generate a new API key**. Copiarla: se muestra una sola vez.
 4. **Probarla desde tu computadora** antes de tocar Render. En `backend/.env`: `EMAIL_PROVIDER=brevo`, `BREVO_API_KEY=<la clave>` y `EMAIL_FROM=<el remitente confirmado>`. Después: `npm run send-test-email -w backend -- <tu email>`. Si Brevo rechaza el envío, el error dice por qué (clave inválida, remitente sin confirmar…). Al terminar, volver a `EMAIL_PROVIDER=smtp` para seguir usando Mailpit.
 5. En Render → `techmatch-api` → **Environment**: `EMAIL_PROVIDER=brevo`, `BREVO_API_KEY` y `EMAIL_FROM`. Los links de los mails apuntan a la URL de Cloudflare Pages que ya está en `CORS_ORIGIN`; solo hace falta `FRONTEND_URL` si el frontend está en otra dirección (por ejemplo, un dominio propio).
-6. Probar: crear una cuenta en el sitio con un email propio y abrir el link que llega. Si no llega, ver los logs de Render (`Verification email failed` trae el motivo que dio Brevo).
+6. Probar: crear una cuenta en el sitio con un email propio y abrir el link que llega; después, "¿Olvidaste tu contraseña?" desde el login. Si un email no llega, ver los logs de Render (`Verification email failed` o `Password reset email failed` traen el motivo que dio Brevo).
 
 ## Día a día
 

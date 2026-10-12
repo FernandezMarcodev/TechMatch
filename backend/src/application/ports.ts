@@ -84,6 +84,7 @@ export interface UserRepository {
   findByEmail(email: string): Promise<User | null>;
   /** Marks the email as verified (keeps the first date if it already was). */
   markEmailVerified(userId: string, now: Date): Promise<User | null>;
+  updatePassword(userId: string, passwordHash: string, now: Date): Promise<void>;
 }
 
 export interface EmailTokenRepository {
@@ -103,6 +104,8 @@ export interface SessionRepository {
   delete(tokenHash: string): Promise<void>;
   /** Removes the user's sessions that expired before `now`. */
   deleteExpired(userId: string, now: Date): Promise<void>;
+  /** Closes every session of the user (after a password change). */
+  deleteAllForUser(userId: string): Promise<void>;
 }
 
 export interface PasswordHasher {

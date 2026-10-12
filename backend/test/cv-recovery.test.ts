@@ -25,6 +25,7 @@ beforeAll(async () => {
       MATCHING_CONFIG_PATH: undefined,
       SESSION_TTL_DAYS: 30,
       EMAIL_VERIFICATION_TTL_HOURS: 24,
+      PASSWORD_RESET_TTL_MINUTES: 30,
     },
     frontendUrl: 'http://techmatch.test',
     emailSender: new MemoryEmailSender(),
