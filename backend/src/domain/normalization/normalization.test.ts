@@ -46,6 +46,24 @@ describe('extractSkillsFromText', () => {
     );
   });
 
+  it('recognizes in Spanish CV text the technologies job boards tag in English', () => {
+    const text = 'APIs RESTful con EF Core y JWT. Pruebas unitarias y procedimientos almacenados.';
+    expect(names(extractSkillsFromText(text))).toEqual([
+      'Entity Framework',
+      'JWT',
+      'REST',
+      'Stored Procedures',
+      'Unit Testing',
+    ]);
+    const tags = ['Entity Framework Core', 'RESTful API', 'Unit Testing', 'Oracle Database'];
+    expect(tags.map((t) => normalizeSkill(t)?.name)).toEqual([
+      'Entity Framework',
+      'REST',
+      'Unit Testing',
+      'Oracle',
+    ]);
+  });
+
   it('does not read the "js" in "Node.js" as JavaScript', () => {
     expect(names(extractSkillsFromText('Experiencia con Node.js y Vue.js'))).toEqual([
       'Node.js',

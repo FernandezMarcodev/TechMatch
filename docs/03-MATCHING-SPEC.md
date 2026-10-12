@@ -77,7 +77,7 @@ Node     → Node.js
 Postgres → PostgreSQL
 ```
 
-El sistema mantiene un diccionario de aliases. En texto libre, un término solo se reconoce como palabra completa: "Java" no coincide dentro de "JavaScript" y el ".js" de "Node.js" no se interpreta como JavaScript.
+El sistema mantiene un diccionario de aliases (`skill-catalog.ts`), en inglés y en español, para que las etiquetas de las fuentes coincidan con lo que escribe el candidato ("Unit Testing" ↔ "pruebas unitarias"). En texto libre, un término solo se reconoce como palabra completa: "Java" no coincide dentro de "JavaScript" y el ".js" de "Node.js" no se interpreta como JavaScript.
 
 ### Fórmula
 
