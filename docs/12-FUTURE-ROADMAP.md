@@ -39,7 +39,7 @@ Exportar PDF
 
 * Opción "disponible para mudarme" y modalidad preferida.
 * Recalcular recomendaciones cuando se sincronizan ofertas nuevas.
-* Recuperación de contraseña por email.
+* "Qué te falta": las tecnologías que más piden las ofertas y que el CV no tiene.
 
 ## Próximos pasos posibles
 
@@ -51,6 +51,7 @@ Exportar PDF
 
 ### Cuentas
 
+* Recuperación de contraseña por email.
 * Login con Google.
 * Verificación de email.
 
