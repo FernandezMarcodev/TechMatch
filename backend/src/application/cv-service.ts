@@ -76,6 +76,17 @@ export class CvService {
     return count;
   }
 
+  /**
+   * Personal data is kept only for a while: CVs older than `retentionDays` are deleted with
+   * their profile and results (docs/13-DECISIONES-TECNICAS.md). Run by `npm run purge-cvs`.
+   */
+  async purgeExpired(retentionDays: number): Promise<number> {
+    const cutoff = new Date(this.deps.clock.now().getTime() - retentionDays * 86_400_000);
+    const count = await this.deps.cvs.deleteCreatedBefore(cutoff);
+    this.deps.logger.info({ count, retentionDays }, 'Expired CVs deleted');
+    return count;
+  }
+
   async getStatus(cvId: string): Promise<CvStatus> {
     const cv = await this.deps.cvs.findById(cvId);
     if (!cv) throw new AppError('CV_NOT_FOUND', 'No se encontró el CV solicitado.');
@@ -113,6 +124,11 @@ export class CvService {
         { cvId, code, err: err instanceof AppError ? undefined : err },
         'CV processing failed',
       );
+    } finally {
+      // The PDF is only needed to extract the text: once processed (or failed) it is deleted.
+      await storage.delete(cv.storagePath).catch((err: unknown) => {
+        logger.warn({ cvId, err }, 'Could not delete the CV file');
+      });
     }
   }
 }

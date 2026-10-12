@@ -30,7 +30,7 @@ Configuración versionada en el repositorio:
 
 * `render.yaml`: los valores del servicio de Render (como referencia; el servicio se crea a mano).
 * `frontend/.env.example` y `backend/.env.example`: variables de cada parte.
-* `.github/workflows/sync-jobs.yml`: la sincronización programada.
+* `.github/workflows/sync-jobs.yml`: la sincronización programada y, después, el borrado de los CVs con más de `CV_RETENTION_DAYS` días (30 por defecto).
 
 ## Qué implica el plan gratuito
 
@@ -38,7 +38,7 @@ Configuración versionada en el repositorio:
 | --- | --- |
 | Render **duerme** el servicio tras 15 minutos sin visitas y tarda alrededor de un minuto en despertar | El frontend carga al instante (está en Cloudflare). Apenas se abre la portada, el frontend llama a `/api/health` para ir despertando la API mientras el usuario elige su CV; aun así, la primera subida después de un rato puede tardar. |
 | 512 MB de RAM y 0,1 CPU en Render | Suficiente para el uso de un proyecto personal. Procesar un CV tarda unos segundos más que en local. |
-| Disco **efímero** en Render | Los PDF subidos se borran al reiniciar o dormir. No afecta: el texto y el perfil quedan en la base y el PDF no se vuelve a leer. |
+| Disco **efímero** en Render | Los PDF subidos se borran al reiniciar o dormir. No afecta: el PDF se borra igual al terminar de procesarse, y el perfil queda en la base. |
 | 750 horas gratis por mes en Render | Alcanza para un servicio encendido todo el mes. |
 | Cloudflare Pages: 500 compilaciones por mes | Alcanza de sobra (una por push a `main`). |
 | 0,5 GB en Neon | Alcanza para miles de ofertas y CVs procesados. |
@@ -180,7 +180,7 @@ El backend también puede servir el frontend compilado en el mismo origen (`FRON
 * **Plan pago de Render** (sin dormir, más recursos): mismo servicio, cambiando el tipo de instancia.
 * **Dominio propio:** en Pages, **Custom domains**; sumarlo a `CORS_ORIGIN`.
 * **Backend en Cloudflare** con Workers + Containers (requiere el plan Workers Paid): el backend sin cambios dentro de un contenedor, con un `Dockerfile` y un Worker que rutee `/api/*`.
-* **Almacenamiento de PDFs** (si se necesita conservarlos): implementar el puerto `FileStorage` sobre un servicio de objetos (por ejemplo, Cloudflare R2).
+* **Almacenamiento de PDFs** (si en algún momento se necesita conservarlos): implementar el puerto `FileStorage` sobre un servicio de objetos (por ejemplo, Cloudflare R2).
 
 ## Referencias
 

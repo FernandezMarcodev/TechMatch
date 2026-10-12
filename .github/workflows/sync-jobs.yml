@@ -1,7 +1,7 @@
 name: Sync jobs
 
-# Production job offers sync (docs/16-DESPLIEGUE.md). The free web service sleeps when
-# idle, so the 12-hour sync runs here instead of in the backend's scheduler.
+# Production job offers sync and expired CVs cleanup (docs/16-DESPLIEGUE.md). The free web
+# service sleeps when idle, so the 12-hour sync runs here instead of in the backend's scheduler.
 on:
   schedule:
     - cron: '0 */12 * * *'
@@ -31,6 +31,16 @@ jobs:
             exit 0
           fi
           npm run sync-jobs -w backend
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+          LOG_LEVEL: info
+      # Personal data retention: CVs older than CV_RETENTION_DAYS (default 30) are deleted.
+      # Runs even if the sync failed, since it does not depend on it.
+      - name: Delete expired CVs
+        if: ${{ !cancelled() }}
+        run: |
+          if [ -z "$DATABASE_URL" ]; then exit 0; fi
+          npm run purge-cvs -w backend
         env:
           DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
           LOG_LEVEL: info

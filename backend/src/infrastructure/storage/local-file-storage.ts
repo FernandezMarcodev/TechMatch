@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import type { FileStorage } from '../../application/ports.js';
 
@@ -25,6 +25,10 @@ export class LocalFileStorage implements FileStorage {
 
   async read(storagePath: string): Promise<Buffer> {
     return readFile(this.resolve(storagePath));
+  }
+
+  async delete(storagePath: string): Promise<void> {
+    await rm(this.resolve(storagePath), { force: true });
   }
 
   private resolve(name: string): string {
