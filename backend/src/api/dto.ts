@@ -1,7 +1,7 @@
 import type { AdaptationEvaluation } from '../application/adaptation-service.js';
 import type { Recommendation } from '../application/ports.js';
 import type { AdaptationSuggestion, AdaptedDraft, CvDocument } from '../cv-adaptation/types.js';
-import type { JobOffer, MatchReason } from '../domain/entities.js';
+import type { JobOffer, MatchReason, User } from '../domain/entities.js';
 import type { CvStatus, MatchLevel, Modality } from '../domain/enums.js';
 
 /** API statuses are lowercase (docs/04-API-CONTRACTS.md); domain states are uppercase. */
@@ -118,5 +118,22 @@ export function toAdaptationEvaluationDto(e: AdaptationEvaluation): AdaptationEv
         message: r.message,
       })),
     },
+  };
+}
+
+export interface UserDto {
+  id: string;
+  email: string;
+  emailVerified: boolean;
+  createdAt: string;
+}
+
+/** Never includes the password hash or sessions. */
+export function toUserDto(user: User): UserDto {
+  return {
+    id: user.id,
+    email: user.email,
+    emailVerified: user.emailVerifiedAt !== null,
+    createdAt: user.createdAt.toISOString(),
   };
 }

@@ -20,10 +20,15 @@ const app = createApp({
     cvService: container.cvService,
     queries: container.queries,
     adaptation: container.adaptation,
+    auth: container.auth,
     maxUploadBytes: env.CV_MAX_SIZE_BYTES,
     uploadRateLimit: {
       max: env.CV_UPLOAD_LIMIT_MAX,
       windowMs: env.CV_UPLOAD_LIMIT_WINDOW_MINUTES * 60_000,
+    },
+    authRateLimit: {
+      max: env.AUTH_LIMIT_MAX,
+      windowMs: env.AUTH_LIMIT_WINDOW_MINUTES * 60_000,
     },
   }),
 });

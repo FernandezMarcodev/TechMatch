@@ -162,3 +162,23 @@ export interface MatchResult extends MatchEvaluation {
   readonly jobOfferId: string;
   readonly calculatedAt: Date;
 }
+
+/** Optional account (docs/17-CUENTAS-DE-USUARIO.md). The email is stored normalized. */
+export interface User {
+  readonly id: string;
+  readonly email: string;
+  /** `scrypt$<salt>$<hash>`; never leaves the backend. */
+  readonly passwordHash: string;
+  readonly emailVerifiedAt: Date | null;
+  readonly createdAt: Date;
+  readonly updatedAt: Date;
+}
+
+export interface Session {
+  readonly id: string;
+  readonly userId: string;
+  /** SHA-256 (hex) of the token handed to the client; the token itself is never stored. */
+  readonly tokenHash: string;
+  readonly expiresAt: Date;
+  readonly createdAt: Date;
+}

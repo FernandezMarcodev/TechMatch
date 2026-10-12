@@ -26,6 +26,6 @@ const db = new pg.Client({ connectionString: E2E_DATABASE_URL });
 await db.connect();
 await db.query(
   `TRUNCATE match_results, job_skills, job_offers, candidate_skills, skills,
-            languages, education, experiences, candidate_profiles, cvs CASCADE`,
+            languages, education, experiences, candidate_profiles, cvs, sessions, users CASCADE`,
 );
 await db.end();

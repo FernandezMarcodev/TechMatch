@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { AdaptationService } from '../application/adaptation-service.js';
+import { AuthService } from '../application/auth-service.js';
 import { CvService } from '../application/cv-service.js';
 import { MatchingService } from '../application/matching-service.js';
 import type { Clock, IdGenerator } from '../application/ports.js';
@@ -11,12 +12,14 @@ import { CvProcessor } from '../cv-processing/cv-processor.js';
 import { PdfTextExtractor, disabledOcr } from '../cv-processing/text-extraction.js';
 import type { DbPool } from '../infrastructure/db/pool.js';
 import type { Logger } from '../infrastructure/logging/logger.js';
+import { ScryptPasswordHasher } from '../infrastructure/security/scrypt-password-hasher.js';
 import { LocalFileStorage } from '../infrastructure/storage/local-file-storage.js';
 import type { MatchingConfig } from '../matching/matching-config.js';
 import { PgCandidateProfileRepository } from '../persistence/pg-candidate-profile-repository.js';
 import { PgCvRepository } from '../persistence/pg-cv-repository.js';
 import { PgJobOfferRepository } from '../persistence/pg-job-offer-repository.js';
 import { PgMatchResultRepository } from '../persistence/pg-match-result-repository.js';
+import { PgSessionRepository, PgUserRepository } from '../persistence/pg-user-repository.js';
 
 export const systemClock: Clock = { now: () => new Date() };
 export const uuidGenerator: IdGenerator = { next: () => randomUUID() };
@@ -26,7 +29,11 @@ export interface ContainerOptions {
   logger: Logger;
   env: Pick<
     Env,
-    'CV_MAX_SIZE_BYTES' | 'CV_STORAGE_DIR' | 'CV_MIN_TEXT_CHARS' | 'MATCHING_CONFIG_PATH'
+    | 'CV_MAX_SIZE_BYTES'
+    | 'CV_STORAGE_DIR'
+    | 'CV_MIN_TEXT_CHARS'
+    | 'MATCHING_CONFIG_PATH'
+    | 'SESSION_TTL_DAYS'
   >;
   clock?: Clock;
   matchingConfig?: MatchingConfig;
@@ -64,6 +71,15 @@ export function createContainer(options: ContainerOptions) {
     cvService,
     queries: new QueryService(cvs, jobs, matches),
     adaptation: new AdaptationService(cvs, profiles, jobs, matchingConfig, clock),
+    auth: new AuthService({
+      users: new PgUserRepository(pool),
+      sessions: new PgSessionRepository(pool),
+      hasher: new ScryptPasswordHasher(),
+      clock,
+      ids: uuidGenerator,
+      logger,
+      sessionTtlDays: env.SESSION_TTL_DAYS,
+    }),
     jobs,
     runner,
     clock,

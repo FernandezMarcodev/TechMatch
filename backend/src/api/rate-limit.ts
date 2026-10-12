@@ -5,6 +5,8 @@ export interface RateLimitOptions {
   /** Requests allowed per client IP within one window. */
   max: number;
   windowMs: number;
+  /** Spanish message for the 429 response. */
+  message?: string;
   /** Injectable clock for tests. */
   now?: () => number;
 }
@@ -23,6 +25,7 @@ export function createRateLimit({
   max,
   windowMs,
   now = Date.now,
+  message = 'Subiste demasiados CVs en poco tiempo. Probá de nuevo en unos minutos.',
 }: RateLimitOptions): RequestHandler {
   const windows = new Map<string, Window>();
   let lastSweep = now();
@@ -49,10 +52,6 @@ export function createRateLimit({
 
     const retryAfterSeconds = Math.ceil((current.startedAt + windowMs - time) / 1000);
     res.setHeader('Retry-After', String(retryAfterSeconds));
-    throw new AppError(
-      'RATE_LIMITED',
-      'Subiste demasiados CVs en poco tiempo. Probá de nuevo en unos minutos.',
-      { retryAfterSeconds },
-    );
+    throw new AppError('RATE_LIMITED', message, { retryAfterSeconds });
   };
 }

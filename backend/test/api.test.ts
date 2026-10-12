@@ -26,6 +26,7 @@ beforeAll(async () => {
       CV_STORAGE_DIR: storageDir,
       CV_MIN_TEXT_CHARS: 50,
       MATCHING_CONFIG_PATH: undefined,
+      SESSION_TTL_DAYS: 30,
     },
     clock: { now: () => new Date('2026-03-01T00:00:00Z') },
   });
@@ -36,6 +37,7 @@ beforeAll(async () => {
       cvService: container.cvService,
       queries: container.queries,
       adaptation: container.adaptation,
+      auth: container.auth,
       maxUploadBytes: MAX_BYTES,
     }),
   });
@@ -194,6 +196,7 @@ describe('error contract', () => {
         cvService: container.cvService,
         queries: container.queries,
         adaptation: container.adaptation,
+        auth: container.auth,
         maxUploadBytes: MAX_BYTES,
         uploadRateLimit: { max: 1, windowMs: 60_000 },
       }),

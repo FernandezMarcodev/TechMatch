@@ -5,7 +5,15 @@ export type { Logger };
 export function createLogger(level: string): Logger {
   return pino({
     level,
-    // CV contents must never reach logs; redact the obvious carriers defensively.
-    redact: ['*.extractedText', '*.text', 'req.headers.cookie'],
+    // CV contents and credentials must never reach logs; redact the obvious carriers.
+    redact: [
+      '*.extractedText',
+      '*.text',
+      '*.password',
+      '*.passwordHash',
+      '*.token',
+      'req.headers.cookie',
+      'req.headers.authorization',
+    ],
   });
 }

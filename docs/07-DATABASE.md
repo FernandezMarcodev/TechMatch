@@ -150,6 +150,29 @@ UNIQUE(cv_id, job_offer_id)
 
 Se guardan los resultados de todos los niveles. Recalcular un CV reemplaza sus resultados.
 
+## users
+
+Cuentas opcionales (`17-CUENTAS-DE-USUARIO.md`).
+
+```text
+id UUID PK
+email VARCHAR(254) UNIQUE   (normalizado: sin espacios y en minúsculas)
+password_hash TEXT          (scrypt$salt$hash)
+email_verified_at TIMESTAMPTZ NULL
+created_at TIMESTAMPTZ
+updated_at TIMESTAMPTZ
+```
+
+## sessions
+
+```text
+id UUID PK
+user_id UUID FK → users (ON DELETE CASCADE)
+token_hash CHAR(64) UNIQUE  (SHA-256 del token; el token no se guarda)
+expires_at TIMESTAMPTZ
+created_at TIMESTAMPTZ
+```
+
 ## Índices
 
 ```text

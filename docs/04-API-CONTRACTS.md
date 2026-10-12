@@ -190,6 +190,17 @@ Request: el `document` del borrador editado. Los datos personales identificatori
 }
 ```
 
+## Cuentas: /api/auth
+
+Detalle, reglas de seguridad y etapas en `17-CUENTAS-DE-USUARIO.md`. Los endpoints con sesión llevan `Authorization: Bearer <token>`; `user` es `{ id, email, emailVerified, createdAt }`.
+
+| Método y ruta | Request | Respuesta |
+| --- | --- | --- |
+| `POST /api/auth/register` | `{ email, password }` | `201 { data: { user } }` |
+| `POST /api/auth/login` | `{ email, password }` | `200 { data: { token, expiresAt, user } }` |
+| `POST /api/auth/logout` | sesión | `204` |
+| `GET /api/auth/me` | sesión | `200 { data: { user } }` |
+
 ## Error contract
 
 Todos los errores:
@@ -214,7 +225,11 @@ Todos los errores:
 | `JOB_NOT_FOUND` | 404 | oferta inexistente o id inválido |
 | `CV_NOT_PROCESSED` | 409 | el CV todavía no terminó de procesarse o falló (adaptación) |
 | `INVALID_CV_DOCUMENT` | 400 | el CV editado no cumple el formato o los límites (`details.issues`) |
-| `RATE_LIMITED` | 429 | demasiadas subidas de CV desde la misma IP; cabecera `Retry-After` y `details.retryAfterSeconds` |
+| `RATE_LIMITED` | 429 | demasiadas subidas de CV o intentos de registro/login desde la misma IP; cabecera `Retry-After` y `details.retryAfterSeconds` |
+| `INVALID_INPUT` | 400 | email con formato inválido o contraseña fuera de largo (`details.issues`) |
+| `EMAIL_ALREADY_REGISTERED` | 409 | registro con un email que ya tiene cuenta |
+| `INVALID_CREDENTIALS` | 401 | email o contraseña incorrectos (mismo error en los dos casos) |
+| `UNAUTHENTICATED` | 401 | falta el token, o la sesión venció o no existe |
 | `INTERNAL_ERROR` | 500 | error inesperado |
 
 HTTP utilizados:
@@ -223,6 +238,7 @@ HTTP utilizados:
 200 OK
 201 Created
 400 Bad Request
+401 Unauthorized
 404 Not Found
 409 Conflict
 413 Payload Too Large

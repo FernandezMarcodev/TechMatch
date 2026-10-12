@@ -22,6 +22,7 @@ beforeAll(async () => {
       CV_STORAGE_DIR: storageDir,
       CV_MIN_TEXT_CHARS: 50,
       MATCHING_CONFIG_PATH: undefined,
+      SESSION_TTL_DAYS: 30,
     },
   });
 });
