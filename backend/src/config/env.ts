@@ -50,6 +50,18 @@ const envSchema = z.object({
   /** Register/login attempts allowed per client IP within each window. */
   AUTH_LIMIT_MAX: z.coerce.number().int().positive().default(10),
   AUTH_LIMIT_WINDOW_MINUTES: z.coerce.number().positive().default(15),
+  // Email (docs/17-CUENTAS-DE-USUARIO.md § Email): Mailpit over SMTP locally, Brevo's API in
+  // production (Render free blocks the SMTP ports).
+  EMAIL_PROVIDER: z.enum(['smtp', 'brevo']).default('smtp'),
+  EMAIL_FROM: z.email().default('no-reply@techmatch.local'),
+  EMAIL_FROM_NAME: z.string().min(1).default('TechMatch'),
+  SMTP_HOST: z.string().min(1).default('localhost'),
+  SMTP_PORT: z.coerce.number().int().positive().default(1025),
+  BREVO_API_URL: z.url().default('https://api.brevo.com/v3'),
+  BREVO_API_KEY: z
+    .string()
+    .optional()
+    .transform((value) => (value ? value : undefined)),
   /** CV uploads allowed per client IP within each window. */
   CV_UPLOAD_LIMIT_MAX: z.coerce.number().int().positive().default(10),
   CV_UPLOAD_LIMIT_WINDOW_MINUTES: z.coerce.number().positive().default(15),

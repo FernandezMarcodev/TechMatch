@@ -67,10 +67,12 @@ Cada etapa es una rama y deja el sistema funcionando:
 ### Email
 
 * Puerto `EmailSender` con tres implementaciones, elegidas por `EMAIL_PROVIDER`:
-  * `smtp`: Nodemailer contra **Mailpit** (contenedor en `docker-compose`; los mails se ven en `http://localhost:8025` y nunca salen a internet). Para desarrollo y e2e.
-  * `brevo`: la **API HTTP de Brevo** (plan gratuito, 300 mails por día) con un `fetch`. Para producción, porque Render free bloquea los puertos SMTP desde septiembre de 2025.
-  * Falsa: guarda los mails en memoria. Para los tests.
-* Remitente: `EMAIL_FROM`. Sin dominio propio, es un email personal verificado como remitente en Brevo; algunos mails pueden llegar a spam, lo que se acepta para este proyecto.
+  * `smtp` (`SmtpEmailSender`): Nodemailer contra **Mailpit** (contenedor en `docker-compose`, lo levanta `npm run db:up`; los mails se ven en `http://localhost:8025` y nunca salen a internet). Para desarrollo y e2e.
+  * `brevo` (`BrevoEmailSender`): la **API HTTP de Brevo** (plan gratuito, 300 mails por día) con un `fetch`. Para producción, porque Render free bloquea los puertos SMTP desde septiembre de 2025.
+  * `MemoryEmailSender`: guarda los mails en memoria. Para los tests.
+* Están en `backend/src/infrastructure/email/`; `createEmailSender` elige según la configuración.
+* `npm run send-test-email -w backend -- <email>` manda un mail de prueba con el proveedor configurado, para comprobar la configuración.
+* Remitente: `EMAIL_FROM` (dirección) y `EMAIL_FROM_NAME` (nombre visible). Sin dominio propio, es un email personal verificado como remitente en Brevo; algunos mails pueden llegar a spam, lo que se acepta para este proyecto.
 * Los mails son en español y en texto simple con el link; nunca incluyen la contraseña.
 
 ### Datos personales
@@ -153,19 +155,16 @@ En la etapa 3, `register` deja de considerar la cuenta lista: manda el email de 
 | `AUTH_LIMIT_MAX` / `AUTH_LIMIT_WINDOW_MINUTES` | `10` / `15` | Límite de intentos por IP |
 | `EMAIL_PROVIDER` | `smtp` | `smtp` (Mailpit) o `brevo` |
 | `SMTP_HOST` / `SMTP_PORT` | `localhost` / `1025` | Mailpit |
-| `BREVO_API_KEY` | — | Solo con `brevo` |
-| `EMAIL_FROM` | `TechMatch <no-reply@techmatch.local>` | Remitente |
+| `BREVO_API_URL` | `https://api.brevo.com/v3` | API de Brevo |
+| `BREVO_API_KEY` | — | Obligatoria con `brevo` |
+| `EMAIL_FROM` / `EMAIL_FROM_NAME` | `no-reply@techmatch.local` / `TechMatch` | Remitente |
 | `FRONTEND_URL` | `http://localhost:5173` | Base de los links de los mails |
 | `EMAIL_VERIFICATION_TTL_HOURS` | `24` | Vencimiento del link de verificación |
 | `PASSWORD_RESET_TTL_MINUTES` | `30` | Vencimiento del link de recuperación |
 
-## Producción (cuando estén las etapas 2 a 4)
+## Producción
 
-1. Crear una cuenta gratuita en Brevo.
-2. En **Senders**, agregar el email remitente y confirmarlo desde el mail que llega.
-3. En **SMTP & API → API Keys**, crear una clave.
-4. En Render → `techmatch-api` → **Environment**: `EMAIL_PROVIDER=brevo`, `BREVO_API_KEY`, `EMAIL_FROM` (el remitente verificado) y `FRONTEND_URL` (la URL de Cloudflare Pages).
-5. Probar el registro y "Olvidé mi contraseña" con un email propio.
+Los pasos para configurar Brevo están en `16-DESPLIEGUE.md` (§ Emails con Brevo). Tienen que estar hechos **antes** de desplegar la etapa 3: desde ahí, la API necesita mandar mails para que alguien pueda crear una cuenta.
 
 ## Criterios de aceptación
 

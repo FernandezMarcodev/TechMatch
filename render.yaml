@@ -33,3 +33,10 @@ services:
         value: 'false'
       - key: LOG_LEVEL
         value: info
+      # Emails through Brevo's HTTP API (Render free blocks SMTP). docs/16-DESPLIEGUE.md § Emails con Brevo
+      - key: EMAIL_PROVIDER
+        value: brevo
+      - key: BREVO_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        sync: false

@@ -96,6 +96,18 @@ export interface PasswordHasher {
   verify(password: string, storedHash: string): Promise<boolean>;
 }
 
+export interface EmailMessage {
+  readonly to: string;
+  readonly subject: string;
+  /** Plain text body (Spanish). Never contains passwords. */
+  readonly text: string;
+}
+
+/** Sends transactional emails (docs/17-CUENTAS-DE-USUARIO.md § Email). */
+export interface EmailSender {
+  send(message: EmailMessage): Promise<void>;
+}
+
 export interface Clock {
   now(): Date;
 }

@@ -16,5 +16,13 @@ services:
       timeout: 3s
       retries: 10
 
+  # Development SMTP server: catches every email the backend sends (nothing leaves the machine).
+  # Web UI with the inbox: http://localhost:8025
+  mailpit:
+    image: axllent/mailpit:v1.27
+    ports:
+      - '${SMTP_PORT:-1025}:1025'
+      - '${MAILPIT_UI_PORT:-8025}:8025'
+
 volumes:
   techmatch-db:
