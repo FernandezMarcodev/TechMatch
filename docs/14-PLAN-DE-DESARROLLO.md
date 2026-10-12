@@ -19,9 +19,10 @@ Evolución de TechMatch después del MVP (`v1.0.0`), organizada por versiones y 
 * **Primero la adaptación del CV, después las cuentas.** La adaptación no depende de las cuentas y es la funcionalidad principal; así cada versión aporta valor visible por sí sola.
 * **Cuentas opcionales.** El flujo anónimo (subir CV y ver recomendaciones) se mantiene. La cuenta agrega guardar CVs, historial, CVs adaptados y borrado de datos.
 * **Autenticación:** email y contraseña, contraseñas con hash (bcrypt o argon2) y sesión en una cookie `httpOnly` guardada en PostgreSQL. Se prefiere a JWT por ser más simple y seguro para una aplicación de un solo dominio.
-* **Email:** Nodemailer detrás de un puerto `EmailSender`. En desarrollo, Mailpit (SMTP de prueba en Docker) atrapa los mails; en producción, un proveedor SMTP configurado por variables de entorno; en tests, una implementación falsa.
+* **Simplicidad:** es un proyecto universitario que se defiende en entrevistas; cada cambio tiene que poder explicarse en pocas frases. Se evitan servicios nuevos y dependencias pesadas si no son necesarias.
+* **Datos personales con vencimiento:** los CVs anónimos se borran pasado un plazo configurable. Cuando existan cuentas, el borrado automático aplica solo a los CVs sin usuario; los de un usuario viven hasta que él los borre o borre la cuenta.
 * **Adaptar no es inventar:** el CV adaptado reordena, destaca y redacta lo que el CV ya contiene. Lo que la oferta pide y el CV no tiene se muestra como sugerencia y nunca se agrega automáticamente.
-* **Fuera del plan:** login con Google, verificación de email, roles de administrador, nuevas fuentes de ofertas, OCR, IA y funcionalidades para empresas (ver `12-FUTURE-ROADMAP.md`).
+* **Fuera del plan:** recuperación de contraseña por email, login con Google, verificación de email, roles de administrador, nuevas fuentes de ofertas, OCR, IA y funcionalidades para empresas (ver `12-FUTURE-ROADMAP.md`).
 
 ## v1.0.0 — MVP
 
@@ -70,6 +71,15 @@ Carga de CV, matching determinístico explicado, ofertas de Get on Board, interf
 | --- | --- | --- |
 | — | `chore/despliegue-cloudflare-render` | Frontend en Cloudflare Pages (`VITE_API_URL`) y API en Render (`CORS_ORIGIN` con varios orígenes); la portada despierta la API; guía `16-DESPLIEGUE.md` actualizada |
 
+## v2.0.6 — Endurecimiento
+
+| # | Rama | Alcance |
+| --- | --- | --- |
+| — | `docs/plan-v2-0-6` | Esta versión en el plan; cuentas simplificadas |
+| — | `feat/limite-de-subidas` | Límite de subidas de CV por IP y ventana de tiempo (configurable); al superarlo, error `429` en español |
+| — | `feat/borrado-de-datos` | El PDF se borra al terminar de procesarse; los CVs anónimos con más de N días (configurable) se borran con sus perfiles y resultados, en el workflow de sincronización |
+| — | `feat/catalogo-skills-y-casos-de-prueba` | Más alias en el catálogo de skills y casos fijos CV + oferta con el nivel esperado como tests del matching |
+
 ## v2.1.0 — Cuentas de usuario (opcionales)
 
 | # | Rama | Alcance |
@@ -86,4 +96,4 @@ Carga de CV, matching determinístico explicado, ofertas de Get on Board, interf
 | --- | --- | --- |
 | 14 | `feat/preferencias-candidato` | "Disponible para mudarme" y modalidad preferida como entradas del matching |
 | 15 | `feat/recalculo-tras-sync` | Recalcular recomendaciones de usuarios cuando entran ofertas nuevas |
-| 16 | `feat/recuperar-contrasena` | Recuperación de contraseña por email (Nodemailer + Mailpit en desarrollo) |
+| 16 | `feat/que-te-falta` | En las recomendaciones, las tecnologías que más piden las ofertas y que el CV no tiene |
