@@ -5,8 +5,12 @@ interface MailpitSummary {
   ID: string;
 }
 
-/** The first link in the latest email sent to `to` (waits up to ~10 s for it to arrive). */
-export async function latestLinkTo(to: string): Promise<string> {
+/**
+ * The link to `path` (e.g. "/restablecer") in the latest email sent to `to`. Waits up to
+ * ~10 s: the email may not have reached Mailpit yet, and an older email to the same address
+ * (the verification one) must not be taken for it.
+ */
+export async function latestLinkTo(to: string, path: string): Promise<string> {
   for (let attempt = 0; attempt < 20; attempt++) {
     const search = await fetch(
       `${MAILPIT_URL}/api/v1/search?query=${encodeURIComponent(`to:"${to}"`)}`,
@@ -16,9 +20,9 @@ export async function latestLinkTo(to: string): Promise<string> {
       const message = await fetch(`${MAILPIT_URL}/api/v1/message/${messages[0].ID}`);
       const { Text } = (await message.json()) as { Text: string };
       const link = /https?:\/\/\S+/.exec(Text)?.[0];
-      if (link) return link;
+      if (link && new URL(link).pathname === path) return link;
     }
     await new Promise((resolve) => setTimeout(resolve, 500));
   }
-  throw new Error(`No email with a link reached Mailpit for ${to}`);
+  throw new Error(`No email with a link to ${path} reached Mailpit for ${to}`);
 }

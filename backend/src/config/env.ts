@@ -61,6 +61,8 @@ const envSchema = z.object({
     .pipe(z.url().optional()),
   /** Hours the email verification link stays valid. */
   EMAIL_VERIFICATION_TTL_HOURS: z.coerce.number().positive().default(24),
+  /** Minutes the password reset link stays valid. */
+  PASSWORD_RESET_TTL_MINUTES: z.coerce.number().positive().default(30),
   // Email (docs/17-CUENTAS-DE-USUARIO.md § Email): Mailpit over SMTP locally, Brevo's API in
   // production (Render free blocks the SMTP ports).
   EMAIL_PROVIDER: z.enum(['smtp', 'brevo']).default('smtp'),

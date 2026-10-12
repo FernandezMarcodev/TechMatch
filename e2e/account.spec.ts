@@ -9,6 +9,7 @@ test('create an account, confirm the email, log out and log in again', async ({ 
   await page.goto('/');
   await page.getByRole('link', { name: 'Iniciar sesión' }).click();
   await page.getByRole('link', { name: 'Creá una' }).click();
+  await expect(page.getByRole('heading', { name: 'Crear cuenta' })).toBeVisible();
 
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Contraseña').fill(password);
@@ -24,7 +25,7 @@ test('create an account, confirm the email, log out and log in again', async ({ 
   await expect(page.getByRole('button', { name: 'Reenviar email de verificación' })).toBeVisible();
 
   // The real email, caught by Mailpit, carries the link to the web app.
-  const link = await latestLinkTo(email);
+  const link = await latestLinkTo(email, '/verificar-email');
   expect(link).toContain('/verificar-email?token=');
   await page.goto(link);
   await expect(page.getByRole('heading', { name: '¡Email confirmado!' })).toBeVisible();
@@ -51,6 +52,41 @@ test('create an account, confirm the email, log out and log in again', async ({ 
   await expect(page.getByRole('alert')).toHaveText('Email o contraseña incorrectos.');
 
   await page.getByLabel('Contraseña').fill(password);
+  await page.getByRole('button', { name: 'Iniciar sesión' }).click();
+  await expect(page.getByRole('heading', { name: 'Mi cuenta' })).toBeVisible();
+});
+
+test('recover the password with the link sent by email', async ({ page }) => {
+  const resetEmail = `e2e-reset-${Date.now()}@example.com`;
+  await page.goto('/crear-cuenta');
+  await page.getByLabel('Email').fill(resetEmail);
+  await page.getByLabel('Contraseña').fill(password);
+  await page.getByRole('button', { name: 'Crear cuenta' }).click();
+  await expect(page.getByRole('heading', { name: 'Revisá tu email' })).toBeVisible();
+
+  await page.goto('/ingresar');
+  await page.getByRole('link', { name: '¿Olvidaste tu contraseña?' }).click();
+  // Both pages have an "Email" field: wait for the new one before typing.
+  await expect(page.getByRole('heading', { name: '¿Olvidaste tu contraseña?' })).toBeVisible();
+  await page.getByLabel('Email').fill(resetEmail);
+  await page.getByRole('button', { name: 'Enviar link' }).click();
+  await expect(page.getByText(/Si existe una cuenta con/)).toBeVisible();
+
+  const link = await latestLinkTo(resetEmail, '/restablecer');
+  expect(link).toContain('/restablecer?token=');
+  await page.goto(link);
+  await page.getByLabel(/^Nueva contraseña/).fill('nueva-clave-456');
+  await page.getByLabel('Repetir contraseña').fill('nueva-clave-456');
+  await page.getByRole('button', { name: 'Guardar contraseña' }).click();
+  await expect(page.getByRole('heading', { name: 'Contraseña actualizada' })).toBeVisible();
+
+  // The link proved the email is theirs, so the account is verified too.
+  await page.getByRole('main').getByRole('link', { name: 'Iniciar sesión' }).click();
+  await page.getByLabel('Email').fill(resetEmail);
+  await page.getByLabel('Contraseña').fill(password);
+  await page.getByRole('button', { name: 'Iniciar sesión' }).click();
+  await expect(page.getByRole('alert')).toHaveText('Email o contraseña incorrectos.');
+  await page.getByLabel('Contraseña').fill('nueva-clave-456');
   await page.getByRole('button', { name: 'Iniciar sesión' }).click();
   await expect(page.getByRole('heading', { name: 'Mi cuenta' })).toBeVisible();
 });

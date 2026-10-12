@@ -35,6 +35,9 @@ export default defineConfig({
         SMTP_HOST: 'localhost',
         SMTP_PORT: '1025',
         FRONTEND_URL: `http://localhost:${FRONTEND_PORT}`,
+        // Every test comes from the same IP: the per-IP limits would block the suite.
+        AUTH_LIMIT_MAX: '1000',
+        CV_UPLOAD_LIMIT_MAX: '1000',
       },
     },
     {

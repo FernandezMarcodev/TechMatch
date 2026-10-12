@@ -39,6 +39,7 @@ export interface ContainerOptions {
     | 'MATCHING_CONFIG_PATH'
     | 'SESSION_TTL_DAYS'
     | 'EMAIL_VERIFICATION_TTL_HOURS'
+    | 'PASSWORD_RESET_TTL_MINUTES'
   >;
   /** Base of the links in the emails (see `frontendUrl` in config/env.ts). */
   frontendUrl: string;
@@ -91,6 +92,7 @@ export function createContainer(options: ContainerOptions) {
       logger,
       sessionTtlDays: env.SESSION_TTL_DAYS,
       verificationTtlHours: env.EMAIL_VERIFICATION_TTL_HOURS,
+      passwordResetTtlMinutes: env.PASSWORD_RESET_TTL_MINUTES,
       frontendUrl: options.frontendUrl,
     }),
     jobs,

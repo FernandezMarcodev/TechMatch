@@ -34,6 +34,14 @@ const tokenSchema = z.object({
 
 const emailOnlySchema = z.object({ email });
 
+const resetSchema = z.object({
+  token: z
+    .string({ error: 'Falta el token del link.' })
+    .min(1, 'Falta el token del link.')
+    .max(200),
+  password: registerSchema.shape.password,
+});
+
 function parse<T>(schema: z.ZodType<T>, body: unknown): T {
   const parsed = schema.safeParse(body ?? {});
   if (!parsed.success) {
@@ -98,6 +106,19 @@ export function createAuthRoutes({ auth, rateLimit }: AuthRouteDeps): Router {
     const input = parse(emailOnlySchema, req.body);
     await auth.resendVerification(input.email);
     res.sendStatus(202);
+  });
+
+  // Always 202: the response does not reveal whether the email has an account.
+  router.post('/password-reset', limitAttempts, async (req, res) => {
+    const input = parse(emailOnlySchema, req.body);
+    await auth.requestPasswordReset(input.email);
+    res.sendStatus(202);
+  });
+
+  router.post('/password-reset/confirm', limitAttempts, async (req, res) => {
+    const input = parse(resetSchema, req.body);
+    await auth.resetPassword(input.token, input.password);
+    res.sendStatus(204);
   });
 
   router.post('/logout', authenticated, async (req, res) => {

@@ -202,6 +202,8 @@ Detalle, reglas de seguridad y etapas en `17-CUENTAS-DE-USUARIO.md`. Los endpoin
 | `GET /api/auth/me` | sesión | `200 { data: { user } }` |
 | `POST /api/auth/verify-email` | `{ token }` | `200 { data: { user } }` |
 | `POST /api/auth/verify-email/resend` | `{ email }` | `202`, siempre (no revela si el email tiene cuenta) |
+| `POST /api/auth/password-reset` | `{ email }` | `202`, siempre |
+| `POST /api/auth/password-reset/confirm` | `{ token, password }` | `204`; cierra todas las sesiones del usuario |
 
 ## Error contract
 
@@ -233,7 +235,7 @@ Todos los errores:
 | `INVALID_CREDENTIALS` | 401 | email o contraseña incorrectos (mismo error en los dos casos) |
 | `UNAUTHENTICATED` | 401 | falta el token, o la sesión venció o no existe |
 | `EMAIL_NOT_VERIFIED` | 403 | login con la contraseña correcta de una cuenta sin verificar |
-| `INVALID_TOKEN` | 400 | link de verificación inválido, vencido o ya usado |
+| `INVALID_TOKEN` | 400 | link de verificación o de recuperación inválido, vencido o ya usado |
 | `INTERNAL_ERROR` | 500 | error inesperado |
 
 HTTP utilizados:
