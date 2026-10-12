@@ -29,7 +29,9 @@ Exportar PDF
 ### v2.1 — Usuarios (opcionales)
 
 * Registro.
+* Verificación de email (obligatoria para entrar).
 * Login.
+* Recuperación de contraseña por email.
 * Autenticación.
 * Historial de CVs.
 * CVs adaptados guardados.
@@ -51,9 +53,7 @@ Exportar PDF
 
 ### Cuentas
 
-* Recuperación de contraseña por email.
 * Login con Google.
-* Verificación de email.
 
 ### IA asistiva
 
