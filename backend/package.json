@@ -14,13 +14,15 @@
     "test:integration": "vitest run --project integration",
     "test:watch": "vitest",
     "sync-jobs": "tsx src/main/sync-jobs.ts",
-    "purge-cvs": "tsx src/main/purge-cvs.ts"
+    "purge-cvs": "tsx src/main/purge-cvs.ts",
+    "send-test-email": "tsx src/main/send-test-email.ts"
   },
   "dependencies": {
     "cheerio": "^1.2.0",
     "express": "^5.2.1",
     "multer": "^2.4.0",
     "node-pg-migrate": "^9.0.0",
+    "nodemailer": "10.0.11",
     "pg": "^8.23.1",
     "pino": "^10.4.0",
     "unpdf": "^1.8.1",

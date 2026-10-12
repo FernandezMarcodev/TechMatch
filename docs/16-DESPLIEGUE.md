@@ -147,6 +147,16 @@ En GitHub: **Actions → Sync jobs → Run workflow**. A partir de ahí se repit
 * Si la consola muestra llamadas a otra URL (por ejemplo, otro proyecto de Render): `VITE_API_URL` de **Production** está mal. Pages usa variables distintas para Production (`main`) y Preview (otras ramas). Corregirla y volver a desplegar un deploy de `main`. Los espacios o la `/` final se ignoran.
 * Si el navegador muestra un error de CORS en la consola: revisar que `CORS_ORIGIN` sea exactamente la URL de Pages (con `https://` y sin `/` final).
 
+## Emails con Brevo
+
+La API manda mails (verificación de email y recuperación de contraseña, `17-CUENTAS-DE-USUARIO.md`). Render free bloquea los puertos SMTP, así que en producción se usa la API HTTP de Brevo, gratis hasta 300 mails por día. Hacerlo antes de desplegar la verificación de email (etapa 3).
+
+1. Crear una cuenta gratuita en [brevo.com](https://www.brevo.com).
+2. **Senders, Domains & Dedicated IPs → Senders → Add a sender**: el email desde el que salen los mails (por ejemplo, tu Gmail). Confirmarlo desde el mail que te llega. Sin dominio propio, algunos mails pueden llegar a spam.
+3. **SMTP & API → API Keys → Generate a new API key**. Copiarla: se muestra una sola vez.
+4. **Probarla desde tu computadora** antes de tocar Render. En `backend/.env`: `EMAIL_PROVIDER=brevo`, `BREVO_API_KEY=<la clave>` y `EMAIL_FROM=<el remitente confirmado>`. Después: `npm run send-test-email -w backend -- <tu email>`. Si Brevo rechaza el envío, el error dice por qué (clave inválida, remitente sin confirmar…). Al terminar, volver a `EMAIL_PROVIDER=smtp` para seguir usando Mailpit.
+5. En Render → `techmatch-api` → **Environment**: `EMAIL_PROVIDER=brevo`, `BREVO_API_KEY`, `EMAIL_FROM` y, con la etapa 3, `FRONTEND_URL` (la URL de Cloudflare Pages, para armar los links de los mails).
+
 ## Día a día
 
 * **Desplegar:** automático en los dos servicios con cada push a `main`. Render espera a que pase el CI; Cloudflare Pages compila el frontend en cada push (si el CI falla, el frontend igual se publica: conviene no mergear a `main` sin `npm run ci` en verde, como indica el flujo de trabajo).

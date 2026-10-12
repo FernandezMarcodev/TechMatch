@@ -10,12 +10,13 @@ npm workspaces: `backend/` (Node + strict TS, Express 5, ESM/NodeNext — relati
 
 ```bash
 npm install
-npm run db:up                      # Postgres 16 in Docker on localhost:5434 (also creates techmatch_test)
+npm run db:up                      # Docker: Postgres 16 on localhost:5434 (also creates techmatch_test) + Mailpit (SMTP :1025, inbox UI http://localhost:8025)
 cp backend/.env.example backend/.env
 npm run migrate -w backend         # apply SQL migrations (backend/migrations, node-pg-migrate)
 npm run dev:backend                # API on :3000 (tsx watch)
 npm run dev:frontend               # Vite on :5173, proxies /api → :3000 (override with API_PROXY_TARGET)
 npm run sync-jobs -w backend       # one sync of all job sources (real data); `-- --schedule` for the 12h scheduler
+npm run send-test-email -w backend -- you@example.com  # check the email setup (Mailpit locally, Brevo with EMAIL_PROVIDER=brevo)
 
 npm run typecheck                  # both workspaces
 npm run lint                       # ESLint (flat config at root)
@@ -46,6 +47,7 @@ Dependency direction: `api` → `application` → `domain`/`matching`; infrastru
 - `application/` — use cases: `CvService` (validate → store → async process via `TaskRunner` → profile → `MatchingService` computes results against active offers → status), `QueryService`, `AuthService` (optional accounts, `docs/17-CUENTAS-DE-USUARIO.md`: scrypt password hashes via `infrastructure/security`, random session tokens sent as `Authorization: Bearer` and stored only as SHA-256 — no cookies, frontend and API are on different domains), `AppError` with the contract's error codes.
 - `cv-processing/` — content-based PDF validation, `unpdf` text extraction rebuilt into lines (PDF y-axis is bottom-up), cleanup, section segmentation, conservative heuristic extraction (`profile-extractor.ts`). OCR is a disabled `OcrProvider` port; compression is a documented no-op.
 - `job-sources/` — `JobSourceConnector` per source (`connectors/getonboard.ts`, with a pure `mapGetOnBoardJob`) → `RawJobOffer` → `normalizer.ts` (section-aware required vs nice-to-have skills; experience/education/languages read only from requirement lines when present) → `deduplicator.ts` → `JobOfferRepository.upsert` (dedup priority externalId → URL → source+title+company+location). `JobSyncService` runs sources independently; failed/empty syncs never deactivate offers. `HttpClient` treats 401/403/429 as `SourceUnavailableError` — never retried or evaded. Adding a source = new connector + value in `JOB_SOURCES`.
+- `infrastructure/email/` — `EmailSender` port implementations chosen by `EMAIL_PROVIDER`: `SmtpEmailSender` (Nodemailer → Mailpit in dev), `BrevoEmailSender` (Brevo HTTP API in production: Render free blocks SMTP ports), `MemoryEmailSender` (tests).
 - `persistence/` — raw SQL repositories over `pg` (NUMERIC comes back as string → `toNumber`); requirements stored as newline-separated TEXT.
 - `api/` — routes (`auth-routes.ts` for `/api/auth`, with `requireUser` for endpoints that need a session) + DTO mappers (`dto.ts`): lowercase CV statuses, `{data: …}` / `{error: {code, message, details}}`, never expose entities or storage paths. Malformed UUIDs → 404 of the resource.
 
