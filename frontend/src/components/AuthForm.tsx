@@ -12,6 +12,8 @@ interface AuthFormProps {
   passwordHint?: string;
   onSubmit(email: string, password: string): Promise<void>;
   footer: ReactNode;
+  /** Extra content under an error, e.g. a resend button for EMAIL_NOT_VERIFIED. */
+  errorAction?(code: string, email: string): ReactNode;
 }
 
 /** Email + password form shared by "Iniciar sesión" and "Crear cuenta". */
@@ -19,7 +21,7 @@ export function AuthForm(props: AuthFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<{ code: string; message: string } | null>(null);
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -29,7 +31,11 @@ export function AuthForm(props: AuthFormProps) {
       await props.onSubmit(email, password);
     } catch (err) {
       // The API messages are already in Spanish and meant for the user.
-      setError(err instanceof ApiError ? err.message : 'Ocurrió un error inesperado.');
+      setError(
+        err instanceof ApiError
+          ? { code: err.code, message: err.message }
+          : { code: 'INTERNAL_ERROR', message: 'Ocurrió un error inesperado.' },
+      );
       setBusy(false);
     }
   }
@@ -66,9 +72,10 @@ export function AuthForm(props: AuthFormProps) {
       {error && (
         <p className="field-error" role="alert">
           <Icon name="alert" size={18} />
-          {error}
+          {error.message}
         </p>
       )}
+      {error && props.errorAction?.(error.code, email)}
       <button type="submit" className="button button--filled button--block" disabled={busy}>
         {busy ? (
           <>

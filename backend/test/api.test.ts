@@ -5,6 +5,7 @@ import request from 'supertest';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { createApp } from '../src/api/app.js';
 import { createRoutes } from '../src/api/routes.js';
+import { MemoryEmailSender } from '../src/infrastructure/email/memory-email-sender.js';
 import { createContainer, type Container } from '../src/main/container.js';
 import { jobSkills, makeOffer } from './fixtures.js';
 import { createTestPool, testLogger, truncateAll } from './helpers.js';
@@ -27,7 +28,10 @@ beforeAll(async () => {
       CV_MIN_TEXT_CHARS: 50,
       MATCHING_CONFIG_PATH: undefined,
       SESSION_TTL_DAYS: 30,
+      EMAIL_VERIFICATION_TTL_HOURS: 24,
     },
+    frontendUrl: 'http://techmatch.test',
+    emailSender: new MemoryEmailSender(),
     clock: { now: () => new Date('2026-03-01T00:00:00Z') },
   });
   app = createApp({

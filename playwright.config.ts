@@ -30,6 +30,11 @@ export default defineConfig({
         CV_STORAGE_DIR: path.join(os.tmpdir(), 'techmatch-e2e-cvs'),
         JOB_SYNC_ENABLED: 'false',
         LOG_LEVEL: 'warn',
+        // Emails go to Mailpit (npm run db:up; a service in CI); the tests read the links there.
+        EMAIL_PROVIDER: 'smtp',
+        SMTP_HOST: 'localhost',
+        SMTP_PORT: '1025',
+        FRONTEND_URL: `http://localhost:${FRONTEND_PORT}`,
       },
     },
     {

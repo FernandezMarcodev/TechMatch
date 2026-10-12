@@ -25,6 +25,15 @@ const loginSchema = z.object({
   password: z.string({ error: 'Ingresá tu contraseña.' }).min(1, 'Ingresá tu contraseña.').max(128),
 });
 
+const tokenSchema = z.object({
+  token: z
+    .string({ error: 'Falta el token del link.' })
+    .min(1, 'Falta el token del link.')
+    .max(200),
+});
+
+const emailOnlySchema = z.object({ email });
+
 function parse<T>(schema: z.ZodType<T>, body: unknown): T {
   const parsed = schema.safeParse(body ?? {});
   if (!parsed.success) {
@@ -76,6 +85,19 @@ export function createAuthRoutes({ auth, rateLimit }: AuthRouteDeps): Router {
     const input = parse(loginSchema, req.body);
     const { token, expiresAt, user } = await auth.login(input.email, input.password);
     res.json({ data: { token, expiresAt: expiresAt.toISOString(), user: toUserDto(user) } });
+  });
+
+  router.post('/verify-email', limitAttempts, async (req, res) => {
+    const { token } = parse(tokenSchema, req.body);
+    const user = await auth.verifyEmail(token);
+    res.json({ data: { user: toUserDto(user) } });
+  });
+
+  // Always 202: the response does not reveal whether the email has an account.
+  router.post('/verify-email/resend', limitAttempts, async (req, res) => {
+    const input = parse(emailOnlySchema, req.body);
+    await auth.resendVerification(input.email);
+    res.sendStatus(202);
   });
 
   router.post('/logout', authenticated, async (req, res) => {

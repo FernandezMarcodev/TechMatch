@@ -3,7 +3,8 @@
  *   npm run purge-cvs -w backend
  * In production it runs from .github/workflows/sync-jobs.yml, right after the offers sync.
  */
-import { getEnv } from '../config/env.js';
+import { frontendUrl, getEnv } from '../config/env.js';
+import { createEmailSender } from '../infrastructure/email/create-email-sender.js';
 import { createPool } from '../infrastructure/db/pool.js';
 import { createLogger } from '../infrastructure/logging/logger.js';
 import { createContainer } from './container.js';
@@ -11,7 +12,13 @@ import { createContainer } from './container.js';
 const env = getEnv();
 const logger = createLogger(env.LOG_LEVEL);
 const pool = createPool(env.DATABASE_URL);
-const { cvService } = createContainer({ pool, logger, env });
+const { cvService } = createContainer({
+  pool,
+  logger,
+  env,
+  frontendUrl: frontendUrl(env),
+  emailSender: createEmailSender(env),
+});
 
 try {
   await cvService.purgeExpired(env.CV_RETENTION_DAYS);

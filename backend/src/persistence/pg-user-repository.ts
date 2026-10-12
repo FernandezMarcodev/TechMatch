@@ -1,5 +1,9 @@
-import type { SessionRepository, UserRepository } from '../application/ports.js';
-import type { Session, User } from '../domain/entities.js';
+import type {
+  EmailTokenRepository,
+  SessionRepository,
+  UserRepository,
+} from '../application/ports.js';
+import type { EmailToken, EmailTokenPurpose, Session, User } from '../domain/entities.js';
 import type { Queryable } from '../infrastructure/db/pool.js';
 
 interface UserRow {
@@ -52,6 +56,45 @@ export class PgUserRepository implements UserRepository {
       [email],
     );
     return rows[0] ? toUser(rows[0]) : null;
+  }
+
+  async markEmailVerified(userId: string, now: Date): Promise<User | null> {
+    const { rows } = await this.db.query<UserRow>(
+      `UPDATE users u
+       SET email_verified_at = COALESCE(u.email_verified_at, $2), updated_at = $2
+       WHERE u.id = $1
+       RETURNING ${USER_COLUMNS}`,
+      [userId, now],
+    );
+    return rows[0] ? toUser(rows[0]) : null;
+  }
+}
+
+export class PgEmailTokenRepository implements EmailTokenRepository {
+  constructor(private readonly db: Queryable) {}
+
+  async replace(token: EmailToken): Promise<void> {
+    // A new link makes the previous unused ones useless: only the latest email works.
+    await this.db.query(
+      'DELETE FROM email_tokens WHERE user_id = $1 AND purpose = $2 AND used_at IS NULL',
+      [token.userId, token.purpose],
+    );
+    await this.db.query(
+      `INSERT INTO email_tokens (id, user_id, purpose, token_hash, expires_at, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [token.id, token.userId, token.purpose, token.tokenHash, token.expiresAt, token.createdAt],
+    );
+  }
+
+  async consume(tokenHash: string, purpose: EmailTokenPurpose, now: Date): Promise<string | null> {
+    // One UPDATE checks and marks at once: two clicks at the same time cannot both succeed.
+    const { rows } = await this.db.query<{ user_id: string }>(
+      `UPDATE email_tokens SET used_at = $3
+       WHERE token_hash = $1 AND purpose = $2 AND used_at IS NULL AND expires_at > $3
+       RETURNING user_id`,
+      [tokenHash, purpose, now],
+    );
+    return rows[0]?.user_id ?? null;
   }
 }
 

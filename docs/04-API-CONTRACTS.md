@@ -200,6 +200,8 @@ Detalle, reglas de seguridad y etapas en `17-CUENTAS-DE-USUARIO.md`. Los endpoin
 | `POST /api/auth/login` | `{ email, password }` | `200 { data: { token, expiresAt, user } }` |
 | `POST /api/auth/logout` | sesión | `204` |
 | `GET /api/auth/me` | sesión | `200 { data: { user } }` |
+| `POST /api/auth/verify-email` | `{ token }` | `200 { data: { user } }` |
+| `POST /api/auth/verify-email/resend` | `{ email }` | `202`, siempre (no revela si el email tiene cuenta) |
 
 ## Error contract
 
@@ -230,6 +232,8 @@ Todos los errores:
 | `EMAIL_ALREADY_REGISTERED` | 409 | registro con un email que ya tiene cuenta |
 | `INVALID_CREDENTIALS` | 401 | email o contraseña incorrectos (mismo error en los dos casos) |
 | `UNAUTHENTICATED` | 401 | falta el token, o la sesión venció o no existe |
+| `EMAIL_NOT_VERIFIED` | 403 | login con la contraseña correcta de una cuenta sin verificar |
+| `INVALID_TOKEN` | 400 | link de verificación inválido, vencido o ya usado |
 | `INTERNAL_ERROR` | 500 | error inesperado |
 
 HTTP utilizados:
@@ -237,8 +241,11 @@ HTTP utilizados:
 ```text
 200 OK
 201 Created
+202 Accepted
+204 No Content
 400 Bad Request
 401 Unauthorized
+403 Forbidden
 404 Not Found
 409 Conflict
 413 Payload Too Large

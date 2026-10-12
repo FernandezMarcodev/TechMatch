@@ -1,6 +1,8 @@
 import type {
   CandidateProfile,
   Cv,
+  EmailToken,
+  EmailTokenPurpose,
   EducationRequirement,
   JobOffer,
   JobSkill,
@@ -80,6 +82,18 @@ export interface UserRepository {
   /** Returns 'duplicate' (and stores nothing) when the email already has an account. */
   create(user: User): Promise<'created' | 'duplicate'>;
   findByEmail(email: string): Promise<User | null>;
+  /** Marks the email as verified (keeps the first date if it already was). */
+  markEmailVerified(userId: string, now: Date): Promise<User | null>;
+}
+
+export interface EmailTokenRepository {
+  /** Stores a new token and invalidates the user's unused ones with the same purpose. */
+  replace(token: EmailToken): Promise<void>;
+  /**
+   * Marks the token as used if it exists, has that purpose, was not used and has not expired,
+   * and returns its user id; null otherwise. Atomic, so a link works only once.
+   */
+  consume(tokenHash: string, purpose: EmailTokenPurpose, now: Date): Promise<string | null>;
 }
 
 export interface SessionRepository {

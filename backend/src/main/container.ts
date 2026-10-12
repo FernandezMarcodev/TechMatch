@@ -3,7 +3,7 @@ import { AdaptationService } from '../application/adaptation-service.js';
 import { AuthService } from '../application/auth-service.js';
 import { CvService } from '../application/cv-service.js';
 import { MatchingService } from '../application/matching-service.js';
-import type { Clock, IdGenerator } from '../application/ports.js';
+import type { Clock, EmailSender, IdGenerator } from '../application/ports.js';
 import { QueryService } from '../application/query-service.js';
 import { TaskRunner } from '../application/task-runner.js';
 import type { Env } from '../config/env.js';
@@ -19,7 +19,11 @@ import { PgCandidateProfileRepository } from '../persistence/pg-candidate-profil
 import { PgCvRepository } from '../persistence/pg-cv-repository.js';
 import { PgJobOfferRepository } from '../persistence/pg-job-offer-repository.js';
 import { PgMatchResultRepository } from '../persistence/pg-match-result-repository.js';
-import { PgSessionRepository, PgUserRepository } from '../persistence/pg-user-repository.js';
+import {
+  PgEmailTokenRepository,
+  PgSessionRepository,
+  PgUserRepository,
+} from '../persistence/pg-user-repository.js';
 
 export const systemClock: Clock = { now: () => new Date() };
 export const uuidGenerator: IdGenerator = { next: () => randomUUID() };
@@ -34,7 +38,12 @@ export interface ContainerOptions {
     | 'CV_MIN_TEXT_CHARS'
     | 'MATCHING_CONFIG_PATH'
     | 'SESSION_TTL_DAYS'
+    | 'EMAIL_VERIFICATION_TTL_HOURS'
   >;
+  /** Base of the links in the emails (see `frontendUrl` in config/env.ts). */
+  frontendUrl: string;
+  /** Built from EMAIL_PROVIDER by the entry points (`createEmailSender`); in memory in tests. */
+  emailSender: EmailSender;
   clock?: Clock;
   matchingConfig?: MatchingConfig;
 }
@@ -74,11 +83,15 @@ export function createContainer(options: ContainerOptions) {
     auth: new AuthService({
       users: new PgUserRepository(pool),
       sessions: new PgSessionRepository(pool),
+      emailTokens: new PgEmailTokenRepository(pool),
+      email: options.emailSender,
       hasher: new ScryptPasswordHasher(),
       clock,
       ids: uuidGenerator,
       logger,
       sessionTtlDays: env.SESSION_TTL_DAYS,
+      verificationTtlHours: env.EMAIL_VERIFICATION_TTL_HOURS,
+      frontendUrl: options.frontendUrl,
     }),
     jobs,
     runner,

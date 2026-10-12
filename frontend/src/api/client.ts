@@ -258,4 +258,11 @@ export const api = {
   me(): Promise<{ user: User }> {
     return request('/auth/me');
   },
+  verifyEmail(token: string): Promise<{ user: User }> {
+    return postJson('/auth/verify-email', { token });
+  },
+  /** Always succeeds for a well-formed email: the API does not reveal which ones have an account. */
+  resendVerification(email: string): Promise<void> {
+    return postJson('/auth/verify-email/resend', { email });
+  },
 };
