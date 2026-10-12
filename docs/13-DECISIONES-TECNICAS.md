@@ -60,6 +60,7 @@ El despliegue no puede tener costo (ver `16-DESPLIEGUE.md`):
 * Los requisitos de una oferta se guardan como TEXT, una línea por requisito, y se exponen como lista.
 * Los requisitos de educación e idiomas de una oferta se guardan como JSONB.
 * Recalcular el matching de un CV reemplaza sus resultados (`UNIQUE(cv_id, job_offer_id)`).
+* **Límite de subidas por IP** (`CV_UPLOAD_LIMIT_MAX` por `CV_UPLOAD_LIMIT_WINDOW_MINUTES`, por defecto 10 cada 15 minutos): la API es pública y procesar un PDF es lo más caro que hace, así que se limita solo `POST /cvs`, antes de leer el archivo. Se implementa con una ventana fija en memoria (unas 40 líneas, sin librería) porque hay una sola instancia de la API; con varias instancias los contadores tendrían que pasar a un almacén compartido (por ejemplo, la base o Redis). Detrás del proxy de Render, `TRUST_PROXY=true` hace que `req.ip` sea la IP del cliente (la primera de `X-Forwarded-For`). Limitación conocida: ese encabezado lo puede mandar el propio cliente, así que el límite frena el abuso común pero no a un atacante decidido; eso se resolvería en el borde (firewall del proveedor).
 
 ## Matching
 

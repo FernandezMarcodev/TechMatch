@@ -186,6 +186,26 @@ describe('error contract', () => {
     expect(res.body.error.code).toBe('INVALID_FILE');
   });
 
+  it('limits CV uploads per IP before reading the file', async () => {
+    const limited = createApp({
+      logger: testLogger,
+      corsOrigin: '*',
+      routes: createRoutes({
+        cvService: container.cvService,
+        queries: container.queries,
+        adaptation: container.adaptation,
+        maxUploadBytes: MAX_BYTES,
+        uploadRateLimit: { max: 1, windowMs: 60_000 },
+      }),
+    });
+    expect((await request(limited).post('/api/cvs')).status).toBe(400);
+    const res = await request(limited).post('/api/cvs');
+    expect(res.status).toBe(429);
+    expect(res.body.error.code).toBe('RATE_LIMITED');
+    // Other endpoints are not limited.
+    expect((await request(limited).get('/api/health')).status).toBe(200);
+  });
+
   it('rejects files over the configured limit', async () => {
     const big = Buffer.concat([makePdf(['x']), Buffer.alloc(MAX_BYTES)]);
     const res = await request(app).post('/api/cvs').attach('file', big, 'big.pdf');

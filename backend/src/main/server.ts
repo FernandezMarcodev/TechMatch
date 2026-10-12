@@ -14,12 +14,17 @@ const container = createContainer({ pool, logger, env });
 const app = createApp({
   logger,
   corsOrigin: env.CORS_ORIGIN,
+  trustProxy: env.TRUST_PROXY,
   frontendDir: env.FRONTEND_DIST_DIR,
   routes: createRoutes({
     cvService: container.cvService,
     queries: container.queries,
     adaptation: container.adaptation,
     maxUploadBytes: env.CV_MAX_SIZE_BYTES,
+    uploadRateLimit: {
+      max: env.CV_UPLOAD_LIMIT_MAX,
+      windowMs: env.CV_UPLOAD_LIMIT_WINDOW_MINUTES * 60_000,
+    },
   }),
 });
 

@@ -1,10 +1,11 @@
-import { Router, type Request } from 'express';
+import { Router, type Request, type RequestHandler } from 'express';
 import multer from 'multer';
 import type { AdaptationService } from '../application/adaptation-service.js';
 import type { CvService } from '../application/cv-service.js';
 import { AppError } from '../application/errors.js';
 import { evaluationDocumentSchema } from '../cv-adaptation/document-schema.js';
 import type { QueryService } from '../application/query-service.js';
+import { createRateLimit } from './rate-limit.js';
 import {
   toAdaptationEvaluationDto,
   toAdaptedDraftDto,
@@ -30,6 +31,8 @@ export interface RouteDeps {
   queries: QueryService;
   adaptation: AdaptationService;
   maxUploadBytes: number;
+  /** Limit of CV uploads per client IP; without it uploads are unlimited (tests). */
+  uploadRateLimit?: { max: number; windowMs: number };
 }
 
 export function createRoutes({
@@ -37,14 +40,19 @@ export function createRoutes({
   queries,
   adaptation,
   maxUploadBytes,
+  uploadRateLimit,
 }: RouteDeps): Router {
   const router = Router();
+  const limitUploads: RequestHandler = uploadRateLimit
+    ? createRateLimit(uploadRateLimit)
+    : (_req, _res, next) => next();
   const upload = multer({
     storage: multer.memoryStorage(),
     limits: { fileSize: maxUploadBytes, files: 1, fields: 0, parts: 2 },
   });
 
-  router.post('/cvs', upload.single('file'), async (req, res) => {
+  // The limit runs before multer, so rejected requests never read the file.
+  router.post('/cvs', limitUploads, upload.single('file'), async (req, res) => {
     if (!req.file) {
       throw new AppError('INVALID_FILE', 'Debe enviarse un archivo PDF en el campo "file".');
     }

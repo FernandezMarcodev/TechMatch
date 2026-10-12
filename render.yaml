@@ -24,6 +24,9 @@ services:
       # The Cloudflare Pages URL of the frontend, e.g. https://techmatch.pages.dev
       - key: CORS_ORIGIN
         sync: false
+      # Render's proxy sets the client as the first X-Forwarded-For address.
+      - key: TRUST_PROXY
+        value: 'true'
       - key: CV_STORAGE_DIR
         value: /tmp/techmatch-cvs
       - key: JOB_SYNC_ENABLED

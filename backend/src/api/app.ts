@@ -10,6 +10,11 @@ export interface AppDependencies {
    * (e.g. the Cloudflare Pages domain and a custom domain). Not needed for same-origin use.
    */
   corsOrigin: string;
+  /**
+   * Express `trust proxy` setting, so `req.ip` is the client and not the hosting proxy
+   * (needed by the upload rate limit). `false` when the API is reached directly.
+   */
+  trustProxy?: boolean | number;
   routes?: Router;
   /**
    * Built frontend (frontend/dist). When set, the API also serves the web app, so a single
@@ -21,6 +26,7 @@ export interface AppDependencies {
 export function createApp(deps: AppDependencies): Express {
   const app = express();
   app.disable('x-powered-by');
+  app.set('trust proxy', deps.trustProxy ?? false);
   app.use(express.json({ limit: '100kb' }));
   const origins = deps.corsOrigin
     .split(',')
