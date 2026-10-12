@@ -106,5 +106,7 @@ Los valores concretos están en `03-MATCHING-SPEC.md` y en `matching-config.ts`.
 ## Testing
 
 * **Unit:** dominio, matching, CV y fuentes, sin red ni base. Los PDFs de prueba se generan en código y los datos de la API se simulan con fixtures sintéticos de la misma forma.
+* **Casos de referencia del matching** (`backend/src/matching/golden-cases.test.ts`): pares realistas CV + oferta con el nivel que esperaría una persona (por ejemplo, un junior frente a una oferta senior da LOW). Cada caso recorre el pipeline real (extracción del CV → normalización de la oferta → motor de matching con la configuración por defecto), así que si un cambio de pesos, umbrales, catálogo o extractores rompe un resultado obvio, el test falla y muestra las razones. Es la forma de medir la calidad del algoritmo y no ajustarlo a ojo.
+* **Catálogo de skills guiado por datos:** las etiquetas en inglés que publica Get on Board ("Entity Framework Core", "Unit Testing", "RESTful API") se comparan con CVs escritos en español ("EF Core", "pruebas unitarias", "APIs RESTful"). Los alias se agregan revisando qué tecnologías concretas aparecen en las ofertas sincronizadas y no están en el catálogo; las etiquetas genéricas ("Software Development", "Testing") no se agregan porque no se pueden verificar en un CV.
 * **Integración:** persistencia, API y sincronización contra una base `techmatch_test` que se vacía en cada test.
 * **E2E:** Playwright levanta backend y frontend sobre `techmatch_e2e` y recorre carga → procesamiento → recomendaciones → detalle.

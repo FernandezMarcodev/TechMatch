@@ -28,6 +28,7 @@ Single tests:
 
 ```bash
 cd backend && npx vitest run --project unit src/matching          # unit project (src/**/*.test.ts, no DB)
+cd backend && npx vitest run --project unit src/matching/golden-cases.test.ts  # reference CV+offer cases (expected levels)
 cd backend && npx vitest run --project integration test/api.test.ts  # needs DB; migrates TEST_DATABASE_URL first
 cd backend && npx vitest run -t "remote job"                       # by test name
 cd frontend && npx vitest run src/App.test.tsx
