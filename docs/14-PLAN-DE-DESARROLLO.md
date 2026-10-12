@@ -18,11 +18,13 @@ Evolución de TechMatch después del MVP (`v1.0.0`), organizada por versiones y 
 
 * **Primero la adaptación del CV, después las cuentas.** La adaptación no depende de las cuentas y es la funcionalidad principal; así cada versión aporta valor visible por sí sola.
 * **Cuentas opcionales.** El flujo anónimo (subir CV y ver recomendaciones) se mantiene. La cuenta agrega guardar CVs, historial, CVs adaptados y borrado de datos.
-* **Autenticación:** email y contraseña, contraseñas con hash (bcrypt o argon2) y sesión en una cookie `httpOnly` guardada en PostgreSQL. Se prefiere a JWT por ser más simple y seguro para una aplicación de un solo dominio.
+* **Autenticación:** email y contraseña; contraseñas con hash `scrypt` (incluido en Node); sesión con un token aleatorio que el frontend manda en el encabezado `Authorization` y del que la base guarda solo el hash. No se usa cookie porque frontend y API están en dominios distintos y Safari bloquea las cookies de terceros (detalle en `17-CUENTAS-DE-USUARIO.md`).
+* **Email:** puerto `EmailSender`. En desarrollo, Nodemailer contra Mailpit (SMTP de prueba en Docker que atrapa los mails); en producción, la API HTTP de Brevo (plan gratuito), porque Render free bloquea los puertos SMTP; en tests, una implementación falsa.
+* **Cuentas en pasos:** primero la cuenta básica (registro y login), después el email con la verificación obligatoria para entrar, y por último la recuperación de contraseña.
 * **Simplicidad:** es un proyecto universitario que se defiende en entrevistas; cada cambio tiene que poder explicarse en pocas frases. Se evitan servicios nuevos y dependencias pesadas si no son necesarias.
 * **Datos personales con vencimiento:** los CVs anónimos se borran pasado un plazo configurable. Cuando existan cuentas, el borrado automático aplica solo a los CVs sin usuario; los de un usuario viven hasta que él los borre o borre la cuenta.
 * **Adaptar no es inventar:** el CV adaptado reordena, destaca y redacta lo que el CV ya contiene. Lo que la oferta pide y el CV no tiene se muestra como sugerencia y nunca se agrega automáticamente.
-* **Fuera del plan:** recuperación de contraseña por email, login con Google, verificación de email, roles de administrador, nuevas fuentes de ofertas, OCR, IA y funcionalidades para empresas (ver `12-FUTURE-ROADMAP.md`).
+* **Fuera del plan:** login con Google, roles de administrador, nuevas fuentes de ofertas, OCR, IA y funcionalidades para empresas (ver `12-FUTURE-ROADMAP.md`).
 
 ## v1.0.0 — MVP
 
@@ -84,16 +86,19 @@ Carga de CV, matching determinístico explicado, ofertas de Get on Board, interf
 
 | # | Rama | Alcance |
 | --- | --- | --- |
-| 9 | `docs/spec-usuarios` | Especificación: alcance, seguridad, datos personales |
+| 9 | `docs/spec-usuarios` | Especificación (`17-CUENTAS-DE-USUARIO.md`): alcance, seguridad, sesiones, email, datos personales |
 | 10 | `feat/auth-backend` | Usuarios y sesiones; registro, login, logout, usuario actual; hash de contraseñas; límite de intentos |
-| 11 | `feat/auth-frontend` | Login, registro, menú de usuario, rutas protegidas |
-| 12 | `feat/mis-cvs` | CVs vinculados al usuario (opcional); historial; borrado de CVs y de la cuenta |
-| 13 | `feat/guardar-cv-adaptado` | Guardar y reabrir CVs adaptados (usuarios logueados) |
+| 11 | `feat/auth-frontend` | Registro, login, menú de usuario, rutas protegidas |
+| 12 | `feat/email` | Puerto `EmailSender`: Mailpit en desarrollo, Brevo en producción, implementación falsa en tests |
+| 13 | `feat/verificar-email` | Email de verificación al registrarse; sin verificar no se puede entrar; reenvío del email |
+| 14 | `feat/recuperar-contrasena` | "Olvidé mi contraseña": link por email de un solo uso y con vencimiento |
+| 15 | `feat/mis-cvs` | CVs vinculados al usuario (opcional); historial; borrado de CVs y de la cuenta |
+| 16 | `feat/guardar-cv-adaptado` | Guardar y reabrir CVs adaptados (usuarios logueados) |
 
 ## v2.2.0 — Extras
 
 | # | Rama | Alcance |
 | --- | --- | --- |
-| 14 | `feat/preferencias-candidato` | "Disponible para mudarme" y modalidad preferida como entradas del matching |
-| 15 | `feat/recalculo-tras-sync` | Recalcular recomendaciones de usuarios cuando entran ofertas nuevas |
-| 16 | `feat/que-te-falta` | En las recomendaciones, las tecnologías que más piden las ofertas y que el CV no tiene |
+| 17 | `feat/preferencias-candidato` | "Disponible para mudarme" y modalidad preferida como entradas del matching |
+| 18 | `feat/recalculo-tras-sync` | Recalcular recomendaciones de usuarios cuando entran ofertas nuevas |
+| 19 | `feat/que-te-falta` | En las recomendaciones, las tecnologías que más piden las ofertas y que el CV no tiene |

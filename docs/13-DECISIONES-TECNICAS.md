@@ -103,6 +103,12 @@ Los valores concretos están en `03-MATCHING-SPEC.md` y en `matching-config.ts`.
   * paginación incremental de 15 en 15.
 * **Accesibilidad:** inputs reales con etiqueta (también en la zona de arrastre), foco visible, `aria-pressed` y `aria-expanded` en controles, y respeto de `prefers-reduced-motion`.
 
+## Cuentas de usuario
+
+* **Sesión con token en el encabezado y no con cookie:** frontend y API están en dominios distintos y Safari bloquea las cookies de terceros. El token es aleatorio, la base guarda solo su hash y logout lo invalida. Riesgo asumido y mitigaciones en `17-CUENTAS-DE-USUARIO.md`.
+* **`scrypt` de Node para las contraseñas:** algoritmo pensado para contraseñas y sin dependencias nativas (bcrypt y argon2 requieren compilar módulos).
+* **Email por API HTTP (Brevo) en producción:** Render free bloquea los puertos SMTP; en desarrollo, Nodemailer contra Mailpit para ver los mails sin mandarlos.
+
 ## Testing
 
 * **Unit:** dominio, matching, CV y fuentes, sin red ni base. Los PDFs de prueba se generan en código y los datos de la API se simulan con fixtures sintéticos de la misma forma.
