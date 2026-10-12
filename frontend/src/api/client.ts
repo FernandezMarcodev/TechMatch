@@ -122,10 +122,61 @@ export function normalizeApiUrl(value: string | undefined): string {
 
 const GENERIC_ERROR = 'No pudimos comunicarnos con el servidor. Intentá nuevamente.';
 
+export interface User {
+  id: string;
+  email: string;
+  emailVerified: boolean;
+  createdAt: string;
+}
+
+export interface LoginResult {
+  token: string;
+  expiresAt: string;
+  user: User;
+}
+
+const TOKEN_KEY = 'techmatch.session';
+
+/**
+ * Session token (docs/17-CUENTAS-DE-USUARIO.md). Frontend and API live on different domains,
+ * so the session travels in the Authorization header instead of a cookie. Storage can be
+ * unavailable (private mode, blocked site data): then the session lasts until the tab closes.
+ */
+let memoryToken: string | null = null;
+
+export const sessionToken = {
+  get(): string | null {
+    try {
+      return localStorage.getItem(TOKEN_KEY) ?? memoryToken;
+    } catch {
+      return memoryToken;
+    }
+  },
+  set(token: string): void {
+    memoryToken = token;
+    try {
+      localStorage.setItem(TOKEN_KEY, token);
+    } catch {
+      // Kept in memory only.
+    }
+  },
+  clear(): void {
+    memoryToken = null;
+    try {
+      localStorage.removeItem(TOKEN_KEY);
+    } catch {
+      // Nothing stored.
+    }
+  },
+};
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const token = sessionToken.get();
+  const headers = new Headers(init?.headers);
+  if (token) headers.set('Authorization', `Bearer ${token}`);
   let res: Response;
   try {
-    res = await fetch(`${API_URL}/api${path}`, init);
+    res = await fetch(`${API_URL}/api${path}`, { ...init, headers });
   } catch {
     throw new ApiError('NETWORK_ERROR', GENERIC_ERROR, 0);
   }
@@ -138,7 +189,16 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
       res.status,
     );
   }
-  return (body as { data: T }).data;
+  // 204 No Content (logout) has no body.
+  return (body as { data: T } | null)?.data as T;
+}
+
+function postJson<T>(path: string, body: unknown): Promise<T> {
+  return request(path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
 }
 
 export const api = {
@@ -185,5 +245,17 @@ export const api = {
   },
   getAdaptation(cvId: string, jobId: string): Promise<AdaptedDraft> {
     return request(`/cvs/${encodeURIComponent(cvId)}/adaptations/${encodeURIComponent(jobId)}`);
+  },
+  register(email: string, password: string): Promise<{ user: User }> {
+    return postJson('/auth/register', { email, password });
+  },
+  login(email: string, password: string): Promise<LoginResult> {
+    return postJson('/auth/login', { email, password });
+  },
+  logout(): Promise<void> {
+    return request('/auth/logout', { method: 'POST' });
+  },
+  me(): Promise<{ user: User }> {
+    return request('/auth/me');
   },
 };
