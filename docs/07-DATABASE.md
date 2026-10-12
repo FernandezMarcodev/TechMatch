@@ -172,6 +172,7 @@ job_skills(skill_id)
 * Estados y enumeraciones restringidos.
 * No duplicar skills normalizadas.
 * Las ofertas no se borran: se desactivan.
+* Los CVs se borran a los `CV_RETENTION_DAYS` días; la cascada borra su perfil y sus resultados. `storage_path` queda como referencia aunque el PDF ya se haya borrado.
 
 ## Bases por entorno
 

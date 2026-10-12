@@ -43,6 +43,8 @@ const envSchema = z.object({
   CV_STORAGE_DIR: z.string().min(1).default('./storage/cvs'),
   /** Below this many letters/digits the PDF is treated as having no usable text. */
   CV_MIN_TEXT_CHARS: z.coerce.number().int().positive().default(50),
+  /** Days a CV (and its profile and results) is kept before `npm run purge-cvs` deletes it. */
+  CV_RETENTION_DAYS: z.coerce.number().int().positive().default(30),
   /** CV uploads allowed per client IP within each window. */
   CV_UPLOAD_LIMIT_MAX: z.coerce.number().int().positive().default(10),
   CV_UPLOAD_LIMIT_WINDOW_MINUTES: z.coerce.number().positive().default(15),

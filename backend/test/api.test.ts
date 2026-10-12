@@ -152,10 +152,10 @@ describe('primary flow: upload → processing → recommendations → job detail
     expect(a.body.data.cvId).not.toBe(b.body.data.cvId);
   });
 
-  it('stores the file privately under a generated name', async () => {
+  it('deletes the PDF once it is processed, whether it succeeds or fails', async () => {
     await uploadAndProcess(makePdf(SAMPLE_CV_LINES));
-    const files = await readdir(storageDir);
-    expect(files.every((f) => /^[0-9a-f-]{36}\.pdf$/.test(f))).toBe(true);
+    await uploadAndProcess(makePdf([]));
+    expect(await readdir(storageDir)).toEqual([]);
   });
 
   it('marks scanned/empty PDFs as failed', async () => {

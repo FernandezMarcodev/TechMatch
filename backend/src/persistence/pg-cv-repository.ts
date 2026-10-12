@@ -78,4 +78,10 @@ export class PgCvRepository implements CvRepository {
     );
     return result.rowCount ?? 0;
   }
+
+  async deleteCreatedBefore(cutoff: Date): Promise<number> {
+    // ON DELETE CASCADE removes the candidate profile and the match results too.
+    const result = await this.db.query('DELETE FROM cvs WHERE created_at < $1', [cutoff]);
+    return result.rowCount ?? 0;
+  }
 }

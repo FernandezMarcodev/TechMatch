@@ -13,7 +13,8 @@
     "test:unit": "vitest run --project unit",
     "test:integration": "vitest run --project integration",
     "test:watch": "vitest",
-    "sync-jobs": "tsx src/main/sync-jobs.ts"
+    "sync-jobs": "tsx src/main/sync-jobs.ts",
+    "purge-cvs": "tsx src/main/purge-cvs.ts"
   },
   "dependencies": {
     "cheerio": "^1.2.0",

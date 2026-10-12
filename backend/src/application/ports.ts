@@ -15,6 +15,8 @@ export interface CvRepository {
   updateStatus(id: string, status: CvStatus, extractedText?: string | null): Promise<void>;
   /** Marks CVs left UPLOADED/PROCESSING by an interrupted process as FAILED. Returns how many. */
   failInterrupted(): Promise<number>;
+  /** Deletes CVs created before `cutoff` (profiles and results go with them). Returns how many. */
+  deleteCreatedBefore(cutoff: Date): Promise<number>;
 }
 
 export interface CandidateProfileRepository {
@@ -68,6 +70,8 @@ export interface MatchResultRepository {
 export interface FileStorage {
   save(id: string, content: Buffer): Promise<string>;
   read(storagePath: string): Promise<Buffer>;
+  /** Removes the file; a file that no longer exists is not an error. */
+  delete(storagePath: string): Promise<void>;
 }
 
 export interface Clock {
