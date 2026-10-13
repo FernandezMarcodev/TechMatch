@@ -5,6 +5,7 @@ import { useAuth } from '../auth/AuthContext';
 import { AdaptCvLink } from '../components/AdaptCvLink';
 import { Icon } from '../components/Icon';
 import { Page } from '../components/Layout';
+import { SaveCvButton } from '../components/SaveCvButton';
 import { LevelChip, LevelMeter } from '../components/MatchBadge';
 import { ReasonList } from '../components/ReasonList';
 import { StateView } from '../components/StateView';
@@ -13,7 +14,7 @@ import { MODALITY_ICONS, modalityLabel, sourceLabel } from '../components/labels
 type State =
   | { kind: 'loading' }
   | { kind: 'error'; message: string }
-  | { kind: 'ready'; items: Recommendation[]; hiddenCount: number };
+  | { kind: 'ready'; items: Recommendation[]; hiddenCount: number; saved: boolean };
 
 type LevelFilter = 'ALL' | MatchLevel;
 
@@ -136,7 +137,12 @@ export function RecommendationsPage() {
       .getRecommendations(cvId)
       .then((data) => {
         if (!cancelled) {
-          setState({ kind: 'ready', items: data.recommendations, hiddenCount: data.hiddenCount });
+          setState({
+            kind: 'ready',
+            items: data.recommendations,
+            hiddenCount: data.hiddenCount,
+            saved: data.saved,
+          });
         }
       })
       .catch((err: unknown) => {
@@ -208,7 +214,14 @@ export function RecommendationsPage() {
           <h1 className="headline-large">Ofertas recomendadas</h1>
           {total > 0 && <p className="body-muted">{summary(total, items.length)}</p>}
         </div>
-        {uploadAnother}
+        <div className="page-header__actions">
+          <SaveCvButton
+            cvId={cvId}
+            saved={state.saved}
+            onSaved={() => setState({ ...state, saved: true })}
+          />
+          {uploadAnother}
+        </div>
       </header>
 
       {total === 0 ? (

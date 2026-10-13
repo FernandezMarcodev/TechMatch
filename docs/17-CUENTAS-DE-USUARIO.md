@@ -15,7 +15,7 @@ Permitir que una persona cree una cuenta con email y contraseña para, más adel
 | Subir un CV y ver su análisis | ✓ | ✓ |
 | Recomendaciones | las primeras `ANONYMOUS_RECOMMENDATIONS_LIMIT` (3 por defecto) | todas |
 | Adaptar el CV a una oferta (borrador, editor, recálculo y PDF) | — | ✓ |
-| CVs guardados con historial (sin cuenta se borran a los 30 días) | — | ✓ |
+| Guardar CVs en la cuenta, con historial (solo si el usuario lo elige) | — | ✓ |
 
 * **Se aplican en la API**, no solo en la interfaz: ocultar un botón no alcanza, porque cualquiera puede llamar a la API directamente. Los endpoints de adaptación responden `401 UNAUTHENTICATED` sin sesión, y el de recomendaciones devuelve solo las primeras e informa cuántas quedan ocultas (`hiddenCount`).
 * En la interfaz, lo exclusivo se muestra con un candado y un llamado a "Crear cuenta" o "Iniciar sesión", que vuelve a la misma página después de entrar.
@@ -96,8 +96,11 @@ Cada etapa es una rama y deja el sistema funcionando:
 
 ### Datos personales
 
-* Borrar la cuenta (ticket `feat/mis-cvs`) borra el usuario, sus sesiones, sus tokens y sus CVs.
-* La limpieza automática de CVs (`npm run purge-cvs`) sigue aplicando a los CVs anónimos. Los de un usuario se conservan hasta que los borre él o borre la cuenta.
+* **Guardar un CV es decisión del usuario** (consentimiento explícito). Por defecto todo CV es temporal: se borra solo a los `CV_RETENTION_DAYS` días (30), tenga o no cuenta quien lo subió. En la página de recomendaciones, con sesión, aparece "Guardar en mi cuenta" (`POST /api/cvs/{cvId}/save`); sin sesión, el mismo botón con candado lleva al inicio de sesión. Solo se guardan CVs ya procesados.
+* **Un CV guardado es solo de su dueño:** cualquier otra persona, aunque tenga el link, recibe `404 CV_NOT_FOUND` (no se revela que existe) en estado, recomendaciones, adaptación y guardado. Los CVs sin guardar siguen siendo accesibles con su link (su id es un UUID aleatorio). La regla está en una sola función (`application/cv-access.ts`) que usan todos los casos de uso.
+* "Mi cuenta" muestra los CVs guardados (nombre del archivo, fecha y cantidad de recomendaciones vigentes) con "Ver recomendaciones" y "Borrar" (con confirmación). Borrar un CV lo elimina en el momento, con su perfil y sus resultados.
+* **Borrar la cuenta** (`DELETE /api/auth/account`, pide la contraseña) elimina el usuario, sus sesiones, sus links por email y sus CVs guardados, con sus perfiles y resultados (borrado en cascada). No se puede deshacer.
+* La limpieza automática (`npm run purge-cvs`) borra solo los CVs sin guardar; los guardados viven hasta que su dueño los borre o borre la cuenta.
 
 ## Modelo de datos
 

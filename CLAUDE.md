@@ -59,7 +59,7 @@ One branch per ticket from the plan (`feat/…`, `fix/…`, `chore/…`, `docs/�
 
 ## Rules that must hold
 
-- Scope: the MVP plus only what `docs/14-PLAN-DE-DESARROLLO.md` assigns to the current ticket/branch. Accounts are optional but privileged (`docs/17-CUENTAS-DE-USUARIO.md` § Privilegios): anonymous users can upload a CV and see the first recommendations; all recommendations, CV adaptation and saved CVs require a session — enforced in the API, not only hidden in the UI. Never auto-apply to jobs, never use an LLM for scoring, and an adapted CV never adds data the CV doesn't contain (missing items are suggestions only).
+- Scope: the MVP plus only what `docs/14-PLAN-DE-DESARROLLO.md` assigns to the current ticket/branch. Accounts are optional but privileged (`docs/17-CUENTAS-DE-USUARIO.md` § Privilegios): anonymous users can upload a CV and see the first recommendations; all recommendations, CV adaptation and saved CVs require a session — enforced in the API, not only hidden in the UI. Saving a CV is opt-in ("Guardar en mi cuenta"); a saved CV (`cvs.user_id`) answers 404 to anyone but its owner — every use case resolves CVs through `application/cv-access.ts` (`findVisibleCv`); unsaved CVs expire via `purge-cvs`. Never auto-apply to jobs, never use an LLM for scoring, and an adapted CV never adds data the CV doesn't contain (missing items are suggestions only).
 - Never invent candidate data: unknown → `null`/`UNKNOWN`/empty. UNKNOWN is neither match nor mismatch.
 - LOW and inactive offers are never recommended; order is score DESC.
 - Never log CV contents (pino redacts `*.text`/`*.extractedText`; log metadata only). Uploaded files are private, named `<uuid>.pdf`.

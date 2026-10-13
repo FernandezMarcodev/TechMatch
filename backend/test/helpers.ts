@@ -3,6 +3,7 @@ import { hashToken } from '../src/application/auth-service.js';
 import { getEnv } from '../src/config/env.js';
 import { createPool, type DbPool } from '../src/infrastructure/db/pool.js';
 import { createLogger } from '../src/infrastructure/logging/logger.js';
+import { ScryptPasswordHasher } from '../src/infrastructure/security/scrypt-password-hasher.js';
 
 export const testLogger = createLogger('silent');
 
@@ -21,16 +22,16 @@ export async function truncateAll(pool: DbPool): Promise<void> {
 }
 
 /**
- * A verified user with an open session, written straight to the database. Returns the
- * `Authorization` header value for endpoints that are account privileges.
+ * A verified user (with that password) and an open session, written straight to the
+ * database. Returns the `Authorization` header value for endpoints that need an account.
  */
-export async function createSession(pool: DbPool): Promise<string> {
+export async function createSession(pool: DbPool, password = 'clave-segura-123'): Promise<string> {
   const userId = randomUUID();
   const token = randomUUID();
   await pool.query(
     `INSERT INTO users (id, email, password_hash, email_verified_at)
-     VALUES ($1, $2, 'scrypt$x$y', now())`,
-    [userId, `${userId}@example.com`],
+     VALUES ($1, $2, $3, now())`,
+    [userId, `${userId}@example.com`, await new ScryptPasswordHasher().hash(password)],
   );
   await pool.query(
     `INSERT INTO sessions (id, user_id, token_hash, expires_at)

@@ -89,7 +89,7 @@ describe('upload', () => {
       },
       '/api/recommendations/cv-1': () =>
         jsonResponse(200, {
-          data: { cvId: 'cv-1', hiddenCount: 0, recommendations: [recommendation] },
+          data: { cvId: 'cv-1', hiddenCount: 0, saved: false, recommendations: [recommendation] },
         }),
     });
     renderAt('/analizar');
@@ -146,7 +146,7 @@ describe('recommendations', () => {
     mockFetch({
       '/api/recommendations/cv-1': () =>
         jsonResponse(200, {
-          data: { cvId: 'cv-1', hiddenCount: 0, recommendations: [recommendation] },
+          data: { cvId: 'cv-1', hiddenCount: 0, saved: false, recommendations: [recommendation] },
         }),
     });
     renderAt('/cv/cv-1/recomendaciones');
@@ -179,7 +179,12 @@ describe('recommendations', () => {
     mockFetch({
       '/api/recommendations/cv-1': () =>
         jsonResponse(200, {
-          data: { cvId: 'cv-1', hiddenCount: 0, recommendations: [recommendation, medium] },
+          data: {
+            cvId: 'cv-1',
+            hiddenCount: 0,
+            saved: false,
+            recommendations: [recommendation, medium],
+          },
         }),
     });
     renderAt('/cv/cv-1/recomendaciones');
@@ -222,6 +227,7 @@ describe('recommendations', () => {
           data: {
             cvId: 'cv-1',
             hiddenCount: 0,
+            saved: false,
             recommendations: [{ ...recommendation, match: { ...recommendation.match, reasons } }],
           },
         }),
@@ -240,7 +246,9 @@ describe('recommendations', () => {
   it('shows an empty state', async () => {
     mockFetch({
       '/api/recommendations/cv-1': () =>
-        jsonResponse(200, { data: { cvId: 'cv-1', hiddenCount: 0, recommendations: [] } }),
+        jsonResponse(200, {
+          data: { cvId: 'cv-1', hiddenCount: 0, saved: false, recommendations: [] },
+        }),
     });
     renderAt('/cv/cv-1/recomendaciones');
     expect(await screen.findByText(/no encontramos ofertas/i)).toBeInTheDocument();
@@ -315,8 +323,13 @@ describe('recommendations without an account', () => {
           return Promise.resolve(
             jsonResponse(200, {
               data: withSession
-                ? { cvId: 'cv-1', hiddenCount: 0, recommendations: [recommendation, second] }
-                : { cvId: 'cv-1', hiddenCount: 4, recommendations: [recommendation] },
+                ? {
+                    cvId: 'cv-1',
+                    hiddenCount: 0,
+                    saved: false,
+                    recommendations: [recommendation, second],
+                  }
+                : { cvId: 'cv-1', hiddenCount: 4, saved: false, recommendations: [recommendation] },
             }),
           );
         }

@@ -87,6 +87,7 @@ Devuelve las recomendaciones: solo `MEDIUM` y `HIGH`, de ofertas activas, ordena
   "data": {
     "cvId": "4f7c2a1e-8d3b-4c5e-9a6f-1b2c3d4e5f60",
     "hiddenCount": 0,
+    "saved": false,
     "recommendations": [
       {
         "job": {
@@ -120,6 +121,7 @@ Devuelve las recomendaciones: solo `MEDIUM` y `HIGH`, de ofertas activas, ordena
 ```
 
 * `hiddenCount`: recomendaciones que existen pero no se devuelven por falta de sesión (`0` con sesión).
+* `saved`: `true` si el CV está guardado en la cuenta de quien pregunta.
 * `modality`: `REMOTE`, `HYBRID`, `ONSITE` o `null` si se desconoce.
 * `reasons`: una por criterio (`skills`, `experience`, `seniority`, `education`, `languages`, `location`, `modality`), con estado `positive`, `negative` o `neutral`.
 
@@ -198,6 +200,16 @@ Request: el `document` del borrador editado. Los datos personales identificatori
 }
 ```
 
+## CVs guardados
+
+Guardar un CV es decisión del usuario (`17-CUENTAS-DE-USUARIO.md` § Datos personales). Un CV guardado responde `404 CV_NOT_FOUND` a cualquiera que no sea su dueño, en todos los endpoints que reciben su id. `GET /api/recommendations/{cvId}` incluye `saved` (`true` si el CV está en la cuenta de quien pregunta).
+
+| Método y ruta | Request | Respuesta |
+| --- | --- | --- |
+| `POST /api/cvs/{cvId}/save` | sesión | `200 { data: { id, saved: true } }`; `409 CV_NOT_PROCESSED` si no terminó de procesarse |
+| `GET /api/me/cvs` | sesión | `200 { data: { cvs: [{ id, originalFilename, createdAt, savedAt, recommendationCount }] } }` |
+| `DELETE /api/cvs/{cvId}` | sesión (dueño) | `204`; borra el CV con su perfil y resultados |
+
 ## Cuentas: /api/auth
 
 Detalle, reglas de seguridad y etapas en `17-CUENTAS-DE-USUARIO.md`. Los endpoints con sesión llevan `Authorization: Bearer <token>`; `user` es `{ id, email, emailVerified, createdAt }`.
@@ -212,6 +224,7 @@ Detalle, reglas de seguridad y etapas en `17-CUENTAS-DE-USUARIO.md`. Los endpoin
 | `POST /api/auth/verify-email/resend` | `{ email }` | `202`, siempre (no revela si el email tiene cuenta) |
 | `POST /api/auth/password-reset` | `{ email }` | `202`, siempre |
 | `POST /api/auth/password-reset/confirm` | `{ token, password }` | `204`; cierra todas las sesiones del usuario |
+| `DELETE /api/auth/account` | sesión + `{ password }` | `204`; borra la cuenta y sus CVs guardados (`401 INVALID_CREDENTIALS` si la contraseña no es correcta) |
 
 ## Error contract
 

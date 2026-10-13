@@ -11,6 +11,7 @@ Aplicación web que analiza un CV en PDF y recomienda ofertas de trabajo en tecn
 - **Cuenta opcional, con privilegios.** Sin registrarse se puede subir un CV y ver las primeras recomendaciones. Con una cuenta:
   - todas las recomendaciones;
   - **CV adaptado a una oferta**: editor con vista previa en formato Harvard, recálculo de la compatibilidad y descarga en PDF. Solo reordena y destaca lo que el CV ya tiene; lo que falta son sugerencias.
+  - **CVs guardados, solo si el usuario lo elige**: historial en "Mi cuenta", con borrado de cada CV y de la cuenta completa.
 - **Cuentas completas**: registro con verificación de email obligatoria, inicio de sesión, recuperación de contraseña por email.
 - Interfaz en **Material Design 3**, responsive y en español.
 
@@ -21,7 +22,7 @@ Aplicación web que analiza un CV en PDF y recomienda ofertas de trabajo en tecn
 - **Links por email** (verificación y recuperación) de un solo uso, con vencimiento y guardados como hash.
 - **Los privilegios se aplican en la API**, no solo en la interfaz.
 - **Respuestas que no revelan qué emails tienen cuenta**, y **límite de intentos por IP** en el login, el registro y la carga de CVs.
-- **Minimización de datos**: el PDF y el texto del CV se descartan al terminar el análisis (se conserva solo el perfil estructurado), y los CVs se borran a los 30 días.
+- **Minimización de datos y consentimiento**: el PDF y el texto del CV se descartan al terminar el análisis (se conserva solo el perfil estructurado). Todo CV se borra a los 30 días, salvo que el usuario elija guardarlo en su cuenta; un CV guardado solo lo ve su dueño.
 
 ## Stack
 

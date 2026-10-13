@@ -38,11 +38,11 @@ test('create an account, confirm the email, log out and log in again', async ({ 
   // After logging in, straight to the CV upload; the account is in the top bar.
   await expect(page.getByRole('heading', { name: 'Analizá tu CV' })).toBeVisible();
   await page.getByRole('link', { name: `Mi cuenta (${email})` }).click();
-  await expect(page.getByRole('heading', { name: 'Mi cuenta' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Mi cuenta', exact: true })).toBeVisible();
 
   // The session survives a reload (token stored in the browser, checked with /api/auth/me).
   await page.reload();
-  await expect(page.getByRole('heading', { name: 'Mi cuenta' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Mi cuenta', exact: true })).toBeVisible();
 
   await page.getByRole('button', { name: 'Cerrar sesión' }).click();
   await expect(page.getByRole('link', { name: 'Iniciar sesión' })).toBeVisible();
@@ -56,7 +56,7 @@ test('create an account, confirm the email, log out and log in again', async ({ 
 
   await page.getByLabel('Contraseña').fill(password);
   await page.getByRole('button', { name: 'Iniciar sesión' }).click();
-  await expect(page.getByRole('heading', { name: 'Mi cuenta' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Mi cuenta', exact: true })).toBeVisible();
 });
 
 test('recover the password with the link sent by email', async ({ page }) => {

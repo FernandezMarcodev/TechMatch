@@ -22,7 +22,7 @@ Evolución de TechMatch después del MVP (`v1.0.0`), organizada por versiones y 
 * **Email:** puerto `EmailSender`. En desarrollo, Nodemailer contra Mailpit (SMTP de prueba en Docker que atrapa los mails); en producción, la API HTTP de Brevo (plan gratuito), porque Render free bloquea los puertos SMTP; en tests, una implementación falsa.
 * **Cuentas en pasos:** primero la cuenta básica (registro y login), después el email con la verificación obligatoria para entrar, y por último la recuperación de contraseña.
 * **Simplicidad:** es un proyecto universitario que se defiende en entrevistas; cada cambio tiene que poder explicarse en pocas frases. Se evitan servicios nuevos y dependencias pesadas si no son necesarias.
-* **Datos personales con vencimiento:** los CVs anónimos se borran pasado un plazo configurable. Cuando existan cuentas, el borrado automático aplica solo a los CVs sin usuario; los de un usuario viven hasta que él los borre o borre la cuenta.
+* **Datos personales con vencimiento:** todo CV se borra pasado un plazo configurable, salvo que el usuario elija guardarlo en su cuenta; los guardados viven hasta que él los borre o borre la cuenta.
 * **Adaptar no es inventar:** el CV adaptado reordena, destaca y redacta lo que el CV ya contiene. Lo que la oferta pide y el CV no tiene se muestra como sugerencia y nunca se agrega automáticamente.
 * **Fuera del plan:** login con Google, roles de administrador, nuevas fuentes de ofertas, OCR, IA y funcionalidades para empresas (ver `12-FUTURE-ROADMAP.md`).
 
@@ -96,7 +96,8 @@ Carga de CV, matching determinístico explicado, ofertas de Get on Board, interf
 | 16 | `feat/portada-login` | La portada es la pantalla de inicio de sesión rediseñada, con "Continuar sin cuenta"; la carga del CV pasa a `/analizar` |
 | 17 | `feat/adaptar-cv-con-cuenta` | Adaptar el CV (borrador, recálculo y PDF) requiere sesión; sin cuenta se invita a registrarse |
 | 18 | `feat/recomendaciones-con-cuenta` | Sin cuenta se ven las primeras recomendaciones (cantidad configurable); el resto requiere sesión |
-| 19 | `feat/mis-cvs` | CVs vinculados al usuario; historial en "Mi cuenta"; borrado de CVs y de la cuenta |
+| — | `fix/no-guardar-texto-cv` | El texto extraído del CV no se guarda (minimización de datos) |
+| 19 | `feat/mis-cvs` | "Guardar en mi cuenta" a elección del usuario; CVs guardados visibles solo para su dueño; historial en "Mi cuenta"; borrado de CVs y de la cuenta |
 | 20 | `feat/guardar-cv-adaptado` | Guardar y reabrir CVs adaptados (usuarios logueados) |
 
 ## v2.2.0 — Extras

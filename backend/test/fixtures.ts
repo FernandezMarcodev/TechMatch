@@ -20,6 +20,8 @@ export function makeCv(overrides: Partial<Cv> = {}): Cv {
     mimeType: 'application/pdf',
     sizeBytes: 1234,
     processingStatus: 'UPLOADED',
+    userId: null,
+    savedAt: null,
     createdAt: now,
     updatedAt: now,
     ...overrides,

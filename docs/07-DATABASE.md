@@ -13,6 +13,8 @@ storage_path TEXT
 mime_type VARCHAR
 size_bytes INTEGER
 processing_status VARCHAR   (UPLOADED | PROCESSING | PROCESSED | FAILED)
+user_id UUID FK NULL        (→ users, ON DELETE CASCADE; solo si el usuario guardó el CV)
+saved_at TIMESTAMPTZ NULL
 created_at TIMESTAMPTZ
 updated_at TIMESTAMPTZ
 ```
