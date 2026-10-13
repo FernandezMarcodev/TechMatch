@@ -84,7 +84,7 @@ export function HomePage() {
             </p>
             <ul className="hero__facts">
               <li>
-                <Icon name="lock" size={18} /> Sin registro
+                <Icon name="lock" size={18} /> Sin registro obligatorio
               </li>
               <li>
                 <Icon name="bolt" size={18} /> Resultados en segundos

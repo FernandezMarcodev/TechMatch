@@ -74,7 +74,7 @@ export function JobDetailPage() {
     <Page>
       <nav className="detail-nav">
         {back}
-        <Link to="/" className="button button--tonal button--small">
+        <Link to="/analizar" className="button button--tonal button--small">
           <Icon name="upload" size={16} />
           Cargar otro CV
         </Link>

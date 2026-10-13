@@ -51,7 +51,7 @@ test.beforeAll(async () => {
 });
 
 test('upload PDF → process → recommendations → open job, without login', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/analizar');
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Encontrá ofertas');
 
   await page.getByLabel(/CV en PDF/).setInputFiles({
@@ -100,7 +100,7 @@ test('upload PDF → process → recommendations → open job, without login', a
 });
 
 test('rejects a non-PDF file with a clear message', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/analizar');
   await page.getByLabel(/CV en PDF/).setInputFiles({
     name: 'cv.pdf',
     mimeType: 'application/pdf',
@@ -112,7 +112,7 @@ test('rejects a non-PDF file with a clear message', async ({ page }) => {
 
 /** Uploads the sample CV and opens "Adaptar mi CV" on the first recommendation. */
 async function openAdaptPage(page: Page) {
-  await page.goto('/');
+  await page.goto('/analizar');
   await page.getByLabel(/CV en PDF/).setInputFiles({
     name: 'maria-fernandez.pdf',
     mimeType: 'application/pdf',

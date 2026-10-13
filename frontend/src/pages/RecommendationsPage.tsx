@@ -118,7 +118,7 @@ export function RecommendationsPage() {
   );
 
   const uploadAnother = (
-    <Link to="/" className="button button--tonal">
+    <Link to="/analizar" className="button button--tonal">
       <Icon name="upload" size={18} />
       Cargar otro CV
     </Link>

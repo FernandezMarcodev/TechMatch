@@ -195,6 +195,27 @@ describe('accounts in the frontend', () => {
     expect(authHeader(logout?.[1])).toBe('Bearer tok-1');
   });
 
+  it('opens on the login screen, with the anonymous flow one click away', async () => {
+    mockApi({ 'GET /api/health': () => json(200, { data: { status: 'ok' } }) });
+    renderAt('/');
+
+    expect(await screen.findByRole('heading', { name: 'Iniciar sesión' })).toBeInTheDocument();
+    expect(screen.getByText('Con tu cuenta, además:')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('link', { name: 'Continuar sin cuenta' }));
+    expect(await screen.findByRole('heading', { name: 'Analizá tu CV' })).toBeInTheDocument();
+  });
+
+  it('takes logged-in users from the front page straight to the CV upload', async () => {
+    localStorage.setItem(TOKEN_KEY, 'tok-1');
+    mockApi({
+      'GET /api/health': () => json(200, { data: { status: 'ok' } }),
+      'GET /api/auth/me': () => json(200, { data: { user: USER } }),
+    });
+    renderAt('/');
+    expect(await screen.findByRole('heading', { name: 'Analizá tu CV' })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Iniciar sesión' })).not.toBeInTheDocument();
+  });
+
   it('shows "Iniciar sesión" to visitors without calling the API', async () => {
     const fetchFn = mockApi({ 'GET /api/health': () => json(200, { data: { status: 'ok' } }) });
     renderAt('/');

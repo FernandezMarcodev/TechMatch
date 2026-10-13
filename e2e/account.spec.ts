@@ -6,8 +6,9 @@ const email = `e2e-${Date.now()}@example.com`;
 const password = 'clave-segura-123';
 
 test('create an account, confirm the email, log out and log in again', async ({ page }) => {
+  // The front page is the login screen.
   await page.goto('/');
-  await page.getByRole('link', { name: 'Iniciar sesión' }).click();
+  await expect(page.getByRole('heading', { name: 'Iniciar sesión' })).toBeVisible();
   await page.getByRole('link', { name: 'Creá una' }).click();
   await expect(page.getByRole('heading', { name: 'Crear cuenta' })).toBeVisible();
 
@@ -34,8 +35,10 @@ test('create an account, confirm the email, log out and log in again', async ({ 
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Contraseña').fill(password);
   await page.getByRole('button', { name: 'Iniciar sesión' }).click();
+  // After logging in, straight to the CV upload; the account is in the top bar.
+  await expect(page.getByRole('heading', { name: 'Analizá tu CV' })).toBeVisible();
+  await page.getByRole('link', { name: `Mi cuenta (${email})` }).click();
   await expect(page.getByRole('heading', { name: 'Mi cuenta' })).toBeVisible();
-  await expect(page.getByRole('link', { name: `Mi cuenta (${email})` })).toBeVisible();
 
   // The session survives a reload (token stored in the browser, checked with /api/auth/me).
   await page.reload();
@@ -88,10 +91,11 @@ test('recover the password with the link sent by email', async ({ page }) => {
   await expect(page.getByRole('alert')).toHaveText('Email o contraseña incorrectos.');
   await page.getByLabel('Contraseña').fill('nueva-clave-456');
   await page.getByRole('button', { name: 'Iniciar sesión' }).click();
-  await expect(page.getByRole('heading', { name: 'Mi cuenta' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Analizá tu CV' })).toBeVisible();
 });
 
 test('the anonymous flow does not need an account', async ({ page }) => {
   await page.goto('/');
+  await page.getByRole('link', { name: 'Continuar sin cuenta' }).click();
   await expect(page.getByRole('button', { name: 'Analizar CV' })).toBeVisible();
 });
