@@ -1,6 +1,6 @@
 # Adaptación de CV a una oferta
 
-**Versión:** v2.0 (ver `14-PLAN-DE-DESARROLLO.md`).
+**Versión:** v2.0 (ver `14-PLAN-DE-DESARROLLO.md`). Desde la v2.1, adaptar el CV es un privilegio de la cuenta: requiere sesión (`17-CUENTAS-DE-USUARIO.md` § Privilegios de la cuenta).
 
 ## Objetivo
 

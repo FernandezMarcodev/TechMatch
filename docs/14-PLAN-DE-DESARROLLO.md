@@ -17,7 +17,7 @@ Evolución de TechMatch después del MVP (`v1.0.0`), organizada por versiones y 
 ## Decisiones de alcance
 
 * **Primero la adaptación del CV, después las cuentas.** La adaptación no depende de las cuentas y es la funcionalidad principal; así cada versión aporta valor visible por sí sola.
-* **Cuentas opcionales.** El flujo anónimo (subir CV y ver recomendaciones) se mantiene. La cuenta agrega guardar CVs, historial, CVs adaptados y borrado de datos.
+* **Cuentas opcionales, con privilegios.** El flujo anónimo se mantiene: sin cuenta se puede subir un CV y ver las primeras recomendaciones. La portada es la pantalla de inicio de sesión, con "Continuar sin cuenta". Con cuenta se accede además a: **todas las recomendaciones**, **adaptar el CV** a una oferta (editor, recálculo y PDF) y **guardar los CVs** con su historial. Los privilegios se aplican en la API, no solo en la interfaz.
 * **Autenticación:** email y contraseña; contraseñas con hash `scrypt` (incluido en Node); sesión con un token aleatorio que el frontend manda en el encabezado `Authorization` y del que la base guarda solo el hash. No se usa cookie porque frontend y API están en dominios distintos y Safari bloquea las cookies de terceros (detalle en `17-CUENTAS-DE-USUARIO.md`).
 * **Email:** puerto `EmailSender`. En desarrollo, Nodemailer contra Mailpit (SMTP de prueba en Docker que atrapa los mails); en producción, la API HTTP de Brevo (plan gratuito), porque Render free bloquea los puertos SMTP; en tests, una implementación falsa.
 * **Cuentas en pasos:** primero la cuenta básica (registro y login), después el email con la verificación obligatoria para entrar, y por último la recuperación de contraseña.
@@ -92,13 +92,17 @@ Carga de CV, matching determinístico explicado, ofertas de Get on Board, interf
 | 12 | `feat/email` | Puerto `EmailSender`: Mailpit en desarrollo, Brevo en producción, implementación falsa en tests |
 | 13 | `feat/verificar-email` | Email de verificación al registrarse; sin verificar no se puede entrar; reenvío del email |
 | 14 | `feat/recuperar-contrasena` | "Olvidé mi contraseña": link por email de un solo uso y con vencimiento |
-| 15 | `feat/mis-cvs` | CVs vinculados al usuario (opcional); historial; borrado de CVs y de la cuenta |
-| 16 | `feat/guardar-cv-adaptado` | Guardar y reabrir CVs adaptados (usuarios logueados) |
+| 15 | `docs/privilegios-cuenta` | Qué agrega la cuenta (privilegios) y la portada con el inicio de sesión |
+| 16 | `feat/portada-login` | La portada es la pantalla de inicio de sesión rediseñada, con "Continuar sin cuenta"; la carga del CV pasa a `/analizar` |
+| 17 | `feat/adaptar-cv-con-cuenta` | Adaptar el CV (borrador, recálculo y PDF) requiere sesión; sin cuenta se invita a registrarse |
+| 18 | `feat/recomendaciones-con-cuenta` | Sin cuenta se ven las primeras recomendaciones (cantidad configurable); el resto requiere sesión |
+| 19 | `feat/mis-cvs` | CVs vinculados al usuario; historial en "Mi cuenta"; borrado de CVs y de la cuenta |
+| 20 | `feat/guardar-cv-adaptado` | Guardar y reabrir CVs adaptados (usuarios logueados) |
 
 ## v2.2.0 — Extras
 
 | # | Rama | Alcance |
 | --- | --- | --- |
-| 17 | `feat/preferencias-candidato` | "Disponible para mudarme" y modalidad preferida como entradas del matching |
-| 18 | `feat/recalculo-tras-sync` | Recalcular recomendaciones de usuarios cuando entran ofertas nuevas |
-| 19 | `feat/que-te-falta` | En las recomendaciones, las tecnologías que más piden las ofertas y que el CV no tiene |
+| 21 | `feat/preferencias-candidato` | "Disponible para mudarme" y modalidad preferida como entradas del matching |
+| 22 | `feat/recalculo-tras-sync` | Recalcular recomendaciones de usuarios cuando entran ofertas nuevas |
+| 23 | `feat/que-te-falta` | En las recomendaciones, las tecnologías que más piden las ofertas y que el CV no tiene |
