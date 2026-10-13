@@ -9,7 +9,7 @@ import { MemoryEmailSender } from '../src/infrastructure/email/memory-email-send
 import { createContainer, type Container } from '../src/main/container.js';
 import { PgCvRepository } from '../src/persistence/pg-cv-repository.js';
 import { jobSkills, makeCv, makeOffer } from './fixtures.js';
-import { createTestPool, testLogger, truncateAll } from './helpers.js';
+import { createSession, createTestPool, testLogger, truncateAll } from './helpers.js';
 import { SAMPLE_CV_LINES, makePdf } from './support/make-pdf.js';
 
 const pool = createTestPool();
@@ -48,8 +48,12 @@ beforeAll(async () => {
   });
 });
 
+/** Authorization header of a logged-in user: adapting a CV is an account privilege. */
+let session: string;
+
 beforeEach(async () => {
   await truncateAll(pool);
+  session = await createSession(pool);
 });
 
 afterAll(async () => {
@@ -80,12 +84,37 @@ async function offerId(): Promise<string> {
   return job!.id;
 }
 
+describe('adapting a CV is an account privilege', () => {
+  it('answers 401 without a session, also with an expired or unknown token', async () => {
+    const cvId = await processedCv();
+    const jobId = await offerId();
+    const draftUrl = `/api/cvs/${cvId}/adaptations/${jobId}`;
+
+    const anonymous = await request(app).get(draftUrl);
+    expect(anonymous.status).toBe(401);
+    expect(anonymous.body.error.code).toBe('UNAUTHENTICATED');
+    expect((await request(app).post(`${draftUrl}/evaluation`).send({})).status).toBe(401);
+    expect((await request(app).get(draftUrl).set('Authorization', 'Bearer inventado')).status).toBe(
+      401,
+    );
+    expect((await request(app).get(draftUrl).set('Authorization', session)).status).toBe(200);
+  });
+
+  it('keeps the anonymous flow: upload, status and recommendations need no session', async () => {
+    const cvId = await processedCv();
+    expect((await request(app).get(`/api/cvs/${cvId}`)).status).toBe(200);
+    expect((await request(app).get(`/api/recommendations/${cvId}`)).status).toBe(200);
+  });
+});
+
 describe('GET /api/cvs/:cvId/adaptations/:jobId', () => {
   it('returns an adapted draft built only from the CV, plus suggestions', async () => {
     const cvId = await processedCv();
     const jobId = await offerId();
 
-    const res = await request(app).get(`/api/cvs/${cvId}/adaptations/${jobId}`);
+    const res = await request(app)
+      .get(`/api/cvs/${cvId}/adaptations/${jobId}`)
+      .set('Authorization', session);
     expect(res.status).toBe(200);
     const { job, document, suggestions } = res.body.data;
 
@@ -112,7 +141,9 @@ describe('GET /api/cvs/:cvId/adaptations/:jobId', () => {
     const cv = makeCv({ processingStatus: 'FAILED' });
     await new PgCvRepository(pool).create(cv);
     const jobId = await offerId();
-    const res = await request(app).get(`/api/cvs/${cv.id}/adaptations/${jobId}`);
+    const res = await request(app)
+      .get(`/api/cvs/${cv.id}/adaptations/${jobId}`)
+      .set('Authorization', session);
     expect(res.status).toBe(409);
     expect(res.body.error.code).toBe('CV_NOT_PROCESSED');
   });
@@ -122,19 +153,31 @@ describe('GET /api/cvs/:cvId/adaptations/:jobId', () => {
     const jobId = await offerId();
     const unknown = '00000000-0000-4000-8000-000000000000';
     expect(
-      (await request(app).get(`/api/cvs/${unknown}/adaptations/${jobId}`)).body.error.code,
+      (
+        await request(app)
+          .get(`/api/cvs/${unknown}/adaptations/${jobId}`)
+          .set('Authorization', session)
+      ).body.error.code,
     ).toBe('CV_NOT_FOUND');
     expect(
-      (await request(app).get(`/api/cvs/${cvId}/adaptations/${unknown}`)).body.error.code,
+      (
+        await request(app)
+          .get(`/api/cvs/${cvId}/adaptations/${unknown}`)
+          .set('Authorization', session)
+      ).body.error.code,
     ).toBe('JOB_NOT_FOUND');
-    const malformed = await request(app).get(`/api/cvs/${cvId}/adaptations/not-a-uuid`);
+    const malformed = await request(app)
+      .get(`/api/cvs/${cvId}/adaptations/not-a-uuid`)
+      .set('Authorization', session);
     expect(malformed.status).toBe(404);
   });
 });
 
 describe('POST /api/cvs/:cvId/adaptations/:jobId/evaluation', () => {
   async function draftFor(cvId: string, jobId: string) {
-    const res = await request(app).get(`/api/cvs/${cvId}/adaptations/${jobId}`);
+    const res = await request(app)
+      .get(`/api/cvs/${cvId}/adaptations/${jobId}`)
+      .set('Authorization', session);
     return res.body.data.document;
   }
 
@@ -145,6 +188,7 @@ describe('POST /api/cvs/:cvId/adaptations/:jobId/evaluation', () => {
 
     const res = await request(app)
       .post(`/api/cvs/${cvId}/adaptations/${jobId}/evaluation`)
+      .set('Authorization', session)
       .send(document);
     expect(res.status).toBe(200);
     expect(res.body.data.adapted.level).toBe(res.body.data.original.level);
@@ -163,6 +207,7 @@ describe('POST /api/cvs/:cvId/adaptations/:jobId/evaluation', () => {
 
     const res = await request(app)
       .post(`/api/cvs/${cvId}/adaptations/${jobId}/evaluation`)
+      .set('Authorization', session)
       .send(edited);
     const skills = res.body.data.adapted.reasons.find(
       (r: { criterion: string }) => r.criterion === 'skills',
@@ -178,11 +223,13 @@ describe('POST /api/cvs/:cvId/adaptations/:jobId/evaluation', () => {
 
     const withoutPersonal = await request(app)
       .post(`/api/cvs/${cvId}/adaptations/${jobId}/evaluation`)
+      .set('Authorization', session)
       .send({ ...document, personal: { headline, location } });
     expect(withoutPersonal.status).toBe(200);
 
     const malformed = await request(app)
       .post(`/api/cvs/${cvId}/adaptations/${jobId}/evaluation`)
+      .set('Authorization', session)
       .send({ ...document, experiences: 'no es una lista' });
     expect(malformed.status).toBe(400);
     expect(malformed.body.error.code).toBe('INVALID_CV_DOCUMENT');

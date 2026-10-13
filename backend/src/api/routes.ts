@@ -6,7 +6,7 @@ import type { CvService } from '../application/cv-service.js';
 import { AppError } from '../application/errors.js';
 import { evaluationDocumentSchema } from '../cv-adaptation/document-schema.js';
 import type { QueryService } from '../application/query-service.js';
-import { createAuthRoutes } from './auth-routes.js';
+import { createAuthRoutes, requireUser } from './auth-routes.js';
 import { createRateLimit } from './rate-limit.js';
 import {
   toAdaptationEvaluationDto,
@@ -51,6 +51,8 @@ export function createRoutes({
 }: RouteDeps): Router {
   const router = Router();
   router.use('/auth', createAuthRoutes({ auth, rateLimit: authRateLimit }));
+  // Account privileges (docs/17-CUENTAS-DE-USUARIO.md § Privilegios): checked here, not only in the UI.
+  const authenticated = requireUser(auth);
   const limitUploads: RequestHandler = uploadRateLimit
     ? createRateLimit(uploadRateLimit)
     : (_req, _res, next) => next();
@@ -84,15 +86,15 @@ export function createRoutes({
     res.json({ data: { cvId, recommendations: recommendations.map(toRecommendationDto) } });
   });
 
-  // CV adaptation to an offer (docs/15-ADAPTACION-DE-CV.md).
-  router.get('/cvs/:cvId/adaptations/:jobId', async (req, res) => {
+  // CV adaptation to an offer (docs/15-ADAPTACION-DE-CV.md): an account privilege.
+  router.get('/cvs/:cvId/adaptations/:jobId', authenticated, async (req, res) => {
     const cvId = idParam(req, 'cvId', cvNotFound());
     const jobId = idParam(req, 'jobId', jobNotFound());
     const draft = await adaptation.getDraft(cvId, jobId);
     res.json({ data: toAdaptedDraftDto(draft) });
   });
 
-  router.post('/cvs/:cvId/adaptations/:jobId/evaluation', async (req, res) => {
+  router.post('/cvs/:cvId/adaptations/:jobId/evaluation', authenticated, async (req, res) => {
     const cvId = idParam(req, 'cvId', cvNotFound());
     const jobId = idParam(req, 'jobId', jobNotFound());
     const parsed = evaluationDocumentSchema.safeParse(req.body);

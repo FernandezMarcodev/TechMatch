@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ApiError, api, type MatchLevel, type Recommendation } from '../api/client';
+import { AdaptCvLink } from '../components/AdaptCvLink';
 import { Icon } from '../components/Icon';
 import { Page } from '../components/Layout';
 import { LevelChip, LevelMeter } from '../components/MatchBadge';
@@ -54,13 +55,12 @@ function RecommendationCard({ item, cvId }: { item: Recommendation; cvId: string
         <Link to={detailUrl} className="button button--outlined">
           Ver detalle
         </Link>
-        <Link
-          to={`/cv/${encodeURIComponent(cvId)}/adaptar/${job.id}`}
+        <AdaptCvLink
+          cvId={cvId}
+          jobId={job.id}
+          label="Adaptar mi CV"
           className="button button--tonal"
-        >
-          <Icon name="file" size={16} />
-          Adaptar mi CV
-        </Link>
+        />
         <a
           href={job.sourceUrl}
           target="_blank"

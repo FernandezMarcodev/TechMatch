@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { ApiError, api, type JobDetail } from '../api/client';
+import { AdaptCvLink } from '../components/AdaptCvLink';
 import { Icon } from '../components/Icon';
 import { Page } from '../components/Layout';
 import { StateView } from '../components/StateView';
@@ -145,13 +146,12 @@ export function JobDetailPage() {
                 <Icon name="external" size={16} />
               </a>
               {cvId && (
-                <Link
-                  to={`/cv/${encodeURIComponent(cvId)}/adaptar/${job.id}`}
+                <AdaptCvLink
+                  cvId={cvId}
+                  jobId={job.id}
+                  label="Adaptar mi CV a esta oferta"
                   className="button button--tonal button--block detail__adapt"
-                >
-                  <Icon name="file" size={16} />
-                  Adaptar mi CV a esta oferta
-                </Link>
+                />
               )}
               <p className="body-muted detail__note">
                 La postulación se hace en {source}. TechMatch no envía tu CV a ninguna empresa.

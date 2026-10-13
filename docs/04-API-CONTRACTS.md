@@ -153,6 +153,8 @@ El endpoint no devuelve ofertas `LOW` ni el score numérico: el score es interno
 
 ## GET /api/cvs/{cvId}/adaptations/{jobId}
 
+**Requiere sesión** (`Authorization: Bearer <token>`): adaptar el CV es un privilegio de la cuenta. Sin sesión válida responde `401 UNAUTHENTICATED`.
+
 Borrador del CV adaptado a una oferta, más sugerencias. Detalle del documento y de las reglas en `15-ADAPTACION-DE-CV.md`. No guarda nada.
 
 ```json
@@ -173,6 +175,8 @@ Borrador del CV adaptado a una oferta, más sugerencias. Detalle del documento y
 ```
 
 ## POST /api/cvs/{cvId}/adaptations/{jobId}/evaluation
+
+**Requiere sesión**, igual que el borrador.
 
 Evalúa el CV editado contra la oferta con el mismo motor de matching y lo compara con el CV original. No guarda nada.
 
@@ -233,7 +237,7 @@ Todos los errores:
 | `INVALID_INPUT` | 400 | email con formato inválido o contraseña fuera de largo (`details.issues`) |
 | `EMAIL_ALREADY_REGISTERED` | 409 | registro con un email que ya tiene cuenta |
 | `INVALID_CREDENTIALS` | 401 | email o contraseña incorrectos (mismo error en los dos casos) |
-| `UNAUTHENTICATED` | 401 | falta el token, o la sesión venció o no existe |
+| `UNAUTHENTICATED` | 401 | falta el token, o la sesión venció o no existe (también en los endpoints que son privilegios de la cuenta) |
 | `EMAIL_NOT_VERIFIED` | 403 | login con la contraseña correcta de una cuenta sin verificar |
 | `INVALID_TOKEN` | 400 | link de verificación o de recuperación inválido, vencido o ya usado |
 | `INTERNAL_ERROR` | 500 | error inesperado |

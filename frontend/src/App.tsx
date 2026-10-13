@@ -26,7 +26,14 @@ export function App() {
             <Route path="/cv/:cvId" element={<ProcessingPage />} />
             <Route path="/cv/:cvId/recomendaciones" element={<RecommendationsPage />} />
             <Route path="/ofertas/:jobId" element={<JobDetailPage />} />
-            <Route path="/cv/:cvId/adaptar/:jobId" element={<AdaptCvPage />} />
+            <Route
+              path="/cv/:cvId/adaptar/:jobId"
+              element={
+                <RequireAuth>
+                  <AdaptCvPage />
+                </RequireAuth>
+              }
+            />
             <Route path="/ingresar" element={<LoginPage />} />
             <Route path="/crear-cuenta" element={<RegisterPage />} />
             <Route path="/verificar-email" element={<VerifyEmailPage />} />
