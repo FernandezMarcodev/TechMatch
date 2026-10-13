@@ -16,7 +16,7 @@ import type { CvStatus, JobSource, Modality, Seniority } from '../domain/enums.j
 export interface CvRepository {
   create(cv: Cv): Promise<void>;
   findById(id: string): Promise<Cv | null>;
-  updateStatus(id: string, status: CvStatus, extractedText?: string | null): Promise<void>;
+  updateStatus(id: string, status: CvStatus): Promise<void>;
   /** Marks CVs left UPLOADED/PROCESSING by an interrupted process as FAILED. Returns how many. */
   failInterrupted(): Promise<number>;
   /** Deletes CVs created before `cutoff` (profiles and results go with them). Returns how many. */

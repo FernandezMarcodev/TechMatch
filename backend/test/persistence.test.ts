@@ -29,10 +29,13 @@ describe('PgCvRepository', () => {
     await cvs.create(cv);
     expect((await cvs.findById(cv.id))?.processingStatus).toBe('UPLOADED');
 
-    await cvs.updateStatus(cv.id, 'PROCESSED', 'texto');
-    const updated = await cvs.findById(cv.id);
-    expect(updated?.processingStatus).toBe('PROCESSED');
-    expect(updated?.extractedText).toBe('texto');
+    await cvs.updateStatus(cv.id, 'PROCESSED');
+    expect((await cvs.findById(cv.id))?.processingStatus).toBe('PROCESSED');
+    // The CV text is never stored (data minimization): there is no column for it.
+    const { rows } = await pool.query(
+      `SELECT 1 FROM information_schema.columns WHERE table_name = 'cvs' AND column_name = 'extracted_text'`,
+    );
+    expect(rows).toEqual([]);
   });
 
   it('returns null for unknown ids', async () => {

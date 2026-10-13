@@ -17,7 +17,6 @@ export interface Cv {
   readonly storagePath: string;
   readonly mimeType: string;
   readonly sizeBytes: number;
-  readonly extractedText: string | null;
   readonly processingStatus: CvStatus;
   readonly createdAt: Date;
   readonly updatedAt: Date;

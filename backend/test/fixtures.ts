@@ -19,7 +19,6 @@ export function makeCv(overrides: Partial<Cv> = {}): Cv {
     storagePath: `${id}.pdf`,
     mimeType: 'application/pdf',
     sizeBytes: 1234,
-    extractedText: null,
     processingStatus: 'UPLOADED',
     createdAt: now,
     updatedAt: now,

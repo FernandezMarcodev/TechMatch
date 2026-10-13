@@ -32,7 +32,7 @@ Se ejecutan en la request de carga:
 * firma `%PDF-` en el contenido, sin confiar en el tipo MIME ni en la extensión declarados;
 * apertura real del documento: un PDF dañado o protegido se rechaza con `PDF_NOT_PROCESSABLE`.
 
-El archivo se guarda en un directorio privado, no servido por HTTP, con el nombre `<uuid>.pdf`. El nombre original solo se conserva saneado como dato descriptivo. El PDF solo sirve para extraer el texto: al terminar el procesamiento (con éxito o con error) se borra. El CV, su perfil y sus resultados se borran a los `CV_RETENTION_DAYS` días (30 por defecto) con `npm run purge-cvs`.
+El archivo se guarda en un directorio privado, no servido por HTTP, con el nombre `<uuid>.pdf`. El nombre original solo se conserva saneado como dato descriptivo. El PDF solo sirve para extraer el texto: al terminar el procesamiento (con éxito o con error) se borra. El texto extraído tampoco se guarda: se usa para armar el perfil y se descarta. El CV, su perfil y sus resultados se borran a los `CV_RETENTION_DAYS` días (30 por defecto) con `npm run purge-cvs`.
 
 ## Procesamiento asíncrono
 

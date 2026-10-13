@@ -12,7 +12,6 @@ original_filename VARCHAR
 storage_path TEXT
 mime_type VARCHAR
 size_bytes INTEGER
-extracted_text TEXT NULL
 processing_status VARCHAR   (UPLOADED | PROCESSING | PROCESSED | FAILED)
 created_at TIMESTAMPTZ
 updated_at TIMESTAMPTZ
