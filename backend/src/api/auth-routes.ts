@@ -42,6 +42,13 @@ const resetSchema = z.object({
   password: registerSchema.shape.password,
 });
 
+const deleteAccountSchema = z.object({
+  password: z
+    .string({ error: 'Ingresá tu contraseña para confirmar.' })
+    .min(1, 'Ingresá tu contraseña para confirmar.')
+    .max(128),
+});
+
 function parse<T>(schema: z.ZodType<T>, body: unknown): T {
   const parsed = schema.safeParse(body ?? {});
   if (!parsed.success) {
@@ -125,6 +132,13 @@ export function createAuthRoutes({ auth, rateLimit }: AuthRouteDeps): Router {
     // `authenticated` already checked that the token exists and is valid.
     const token = bearerToken(req);
     if (token) await auth.logout(token);
+    res.sendStatus(204);
+  });
+
+  // Deleting the account is irreversible: the password confirms it is really the owner.
+  router.delete('/account', authenticated, async (req, res) => {
+    const { password } = parse(deleteAccountSchema, req.body);
+    await auth.deleteAccount(res.locals.user as User, password);
     res.sendStatus(204);
   });
 

@@ -193,12 +193,21 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return (body as { data: T } | null)?.data as T;
 }
 
-function postJson<T>(path: string, body: unknown): Promise<T> {
+function postJson<T>(path: string, body: unknown, method: 'POST' | 'DELETE' = 'POST'): Promise<T> {
   return request(path, {
-    method: 'POST',
+    method,
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   });
+}
+
+/** A CV the user chose to save in their account. */
+export interface SavedCv {
+  id: string;
+  originalFilename: string;
+  createdAt: string;
+  savedAt: string;
+  recommendationCount: number;
 }
 
 export const api = {
@@ -219,12 +228,30 @@ export const api = {
   },
   /**
    * Without a session the API returns only the first recommendations and counts the rest in
-   * `hiddenCount` (an account privilege); with a session, all of them.
+   * `hiddenCount` (an account privilege); with a session, all of them. `saved`: the CV is in
+   * the user's account.
    */
-  getRecommendations(
-    cvId: string,
-  ): Promise<{ cvId: string; recommendations: Recommendation[]; hiddenCount: number }> {
+  getRecommendations(cvId: string): Promise<{
+    cvId: string;
+    recommendations: Recommendation[];
+    hiddenCount: number;
+    saved: boolean;
+  }> {
     return request(`/recommendations/${encodeURIComponent(cvId)}`);
+  },
+  /** "Guardar en mi cuenta": saving is the user's choice; unsaved CVs expire. */
+  saveCv(cvId: string): Promise<{ id: string; saved: boolean }> {
+    return request(`/cvs/${encodeURIComponent(cvId)}/save`, { method: 'POST' });
+  },
+  deleteCv(cvId: string): Promise<void> {
+    return request(`/cvs/${encodeURIComponent(cvId)}`, { method: 'DELETE' });
+  },
+  getMyCvs(): Promise<{ cvs: SavedCv[] }> {
+    return request('/me/cvs');
+  },
+  /** Irreversible: deletes the account and its saved CVs. The password confirms it. */
+  deleteAccount(password: string): Promise<void> {
+    return postJson('/auth/account', { password }, 'DELETE');
   },
   getJob(jobId: string): Promise<JobDetail> {
     return request(`/jobs/${encodeURIComponent(jobId)}`);

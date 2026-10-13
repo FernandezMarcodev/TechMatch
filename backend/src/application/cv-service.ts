@@ -5,9 +5,10 @@ import {
   type UploadedFile,
 } from '../cv-processing/pdf-validation.js';
 import type { TextExtractor } from '../cv-processing/text-extraction.js';
-import type { Cv } from '../domain/entities.js';
+import type { Cv, SavedCv } from '../domain/entities.js';
 import type { CvStatus } from '../domain/enums.js';
 import type { Logger } from '../infrastructure/logging/logger.js';
+import { findVisibleCv } from './cv-access.js';
 import { AppError } from './errors.js';
 import type { MatchingService } from './matching-service.js';
 import type {
@@ -52,6 +53,9 @@ export class CvService {
       mimeType: 'application/pdf', // verified from content, not taken from the client
       sizeBytes: file.content.length,
       processingStatus: 'UPLOADED',
+      // Unsaved until the user chooses "Guardar en mi cuenta".
+      userId: null,
+      savedAt: null,
       createdAt: now,
       updatedAt: now,
     };
@@ -86,10 +90,40 @@ export class CvService {
     return count;
   }
 
-  async getStatus(cvId: string): Promise<CvStatus> {
-    const cv = await this.deps.cvs.findById(cvId);
-    if (!cv) throw new AppError('CV_NOT_FOUND', 'No se encontró el CV solicitado.');
+  async getStatus(cvId: string, viewerId: string | null): Promise<CvStatus> {
+    const cv = await findVisibleCv(this.deps.cvs, cvId, viewerId);
     return cv.processingStatus;
+  }
+
+  /**
+   * "Guardar en mi cuenta": the user chooses to keep the analysis. Saved CVs belong to the
+   * account (only the owner sees them) and no longer expire after CV_RETENTION_DAYS.
+   */
+  async saveToAccount(cvId: string, userId: string): Promise<void> {
+    const { cvs, clock, logger } = this.deps;
+    const cv = await findVisibleCv(cvs, cvId, userId);
+    if (cv.processingStatus !== 'PROCESSED') {
+      throw new AppError(
+        'CV_NOT_PROCESSED',
+        'El CV todavía no terminó de procesarse o no se pudo procesar.',
+      );
+    }
+    if (cv.userId === userId) return;
+    await cvs.saveForUser(cvId, userId, clock.now());
+    logger.info({ cvId, userId }, 'CV saved in account');
+  }
+
+  listSaved(userId: string): Promise<SavedCv[]> {
+    return this.deps.cvs.findSavedByUser(userId);
+  }
+
+  /** Deletes a saved CV right away, with its profile and results. Only its owner can. */
+  async deleteSaved(cvId: string, userId: string): Promise<void> {
+    const cv = await findVisibleCv(this.deps.cvs, cvId, userId);
+    if (cv.userId !== userId)
+      throw new AppError('CV_NOT_FOUND', 'No se encontró el CV solicitado.');
+    await this.deps.cvs.delete(cvId);
+    this.deps.logger.info({ cvId, userId }, 'Saved CV deleted');
   }
 
   async process(cvId: string): Promise<void> {

@@ -426,6 +426,91 @@ p {
   }
 }
 
+/* Page header with several actions (e.g. "Guardar en mi cuenta" + "Cargar otro CV"). */
+.page-header__actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.save-cv {
+  display: grid;
+  gap: 6px;
+}
+
+.saved-badge {
+  color: var(--accent-green);
+}
+
+/* Saved CVs in "Mi cuenta". */
+.account-page {
+  display: grid;
+  gap: 16px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.account-section {
+  display: grid;
+  gap: 12px;
+}
+
+.account-section__title {
+  font-size: 1.125rem;
+  font-weight: 500;
+}
+
+.saved-cvs {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.saved-cv {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 4px 12px;
+  padding: 14px 16px;
+  border-radius: var(--md-shape-md);
+  border: 1px solid var(--md-outline-variant);
+}
+
+.saved-cv__icon {
+  grid-row: span 2;
+  color: var(--md-primary);
+  margin-top: 2px;
+}
+
+.saved-cv__name {
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.saved-cv__actions {
+  grid-column: 2;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.button--danger {
+  background: transparent;
+  color: var(--md-error);
+  border: 1px solid color-mix(in srgb, var(--md-error) 50%, transparent);
+}
+
+.button--danger-filled {
+  background: var(--md-error);
+  color: var(--md-on-error);
+}
+
 /* Recommendations hidden from visitors (account privilege). */
 .locked-recommendations {
   margin-top: 16px;
@@ -1858,7 +1943,10 @@ p {
     flex: 1;
   }
 
-  .page-header > .button {
+  .page-header > .button,
+  .page-header__actions,
+  .page-header__actions .button,
+  .page-header__actions .save-cv {
     width: 100%;
   }
 }

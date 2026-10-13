@@ -6,6 +6,7 @@ import type { CandidateProfile, JobOffer, MatchReason } from '../domain/entities
 import type { MatchLevel } from '../domain/enums.js';
 import type { MatchingConfig } from '../matching/matching-config.js';
 import { evaluateMatch } from '../matching/matching-engine.js';
+import { findVisibleCv } from './cv-access.js';
 import { AppError } from './errors.js';
 import type {
   CandidateProfileRepository,
@@ -34,8 +35,12 @@ export class AdaptationService {
     private readonly clock: Clock,
   ) {}
 
-  async getDraft(cvId: string, jobId: string): Promise<AdaptedDraft & { job: JobOffer }> {
-    const { profile, job } = await this.load(cvId, jobId);
+  async getDraft(
+    cvId: string,
+    jobId: string,
+    viewerId: string,
+  ): Promise<AdaptedDraft & { job: JobOffer }> {
+    const { profile, job } = await this.load(cvId, jobId, viewerId);
     return { ...buildAdaptedDraft(profile, job), job };
   }
 
@@ -47,9 +52,10 @@ export class AdaptationService {
   async evaluate(
     cvId: string,
     jobId: string,
+    viewerId: string,
     document: EvaluationDocument,
   ): Promise<AdaptationEvaluation> {
-    const { profile, job } = await this.load(cvId, jobId);
+    const { profile, job } = await this.load(cvId, jobId, viewerId);
     const adaptedProfile = documentToProfile(document, { id: profile.id, cvId }, this.clock.now());
     const original = evaluateMatch(profile, job, this.config);
     const adapted = evaluateMatch(adaptedProfile, job, this.config);
@@ -60,9 +66,8 @@ export class AdaptationService {
   }
 
   /** Loads a processed CV's profile and the offer, or fails with the contract's errors. */
-  async load(cvId: string, jobId: string): Promise<AdaptationContext> {
-    const cv = await this.cvs.findById(cvId);
-    if (!cv) throw new AppError('CV_NOT_FOUND', 'No se encontró el CV solicitado.');
+  async load(cvId: string, jobId: string, viewerId: string): Promise<AdaptationContext> {
+    const cv = await findVisibleCv(this.cvs, cvId, viewerId);
     const job = await this.jobs.findById(jobId);
     if (!job) throw new AppError('JOB_NOT_FOUND', 'No se encontró la oferta solicitada.');
     const profile =

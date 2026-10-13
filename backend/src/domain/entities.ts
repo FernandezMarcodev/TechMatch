@@ -18,8 +18,21 @@ export interface Cv {
   readonly mimeType: string;
   readonly sizeBytes: number;
   readonly processingStatus: CvStatus;
+  /** Owner, only when the user chose to save the CV in their account; null otherwise. */
+  readonly userId: string | null;
+  readonly savedAt: Date | null;
   readonly createdAt: Date;
   readonly updatedAt: Date;
+}
+
+/** A saved CV in the account's history. */
+export interface SavedCv {
+  readonly id: string;
+  readonly originalFilename: string;
+  readonly createdAt: Date;
+  readonly savedAt: Date;
+  /** MEDIUM/HIGH results on offers that are still active. */
+  readonly recommendationCount: number;
 }
 
 export interface Skill {

@@ -8,6 +8,7 @@ import type {
   JobSkill,
   LanguageRequirement,
   MatchResult,
+  SavedCv,
   Session,
   User,
 } from '../domain/entities.js';
@@ -19,8 +20,17 @@ export interface CvRepository {
   updateStatus(id: string, status: CvStatus): Promise<void>;
   /** Marks CVs left UPLOADED/PROCESSING by an interrupted process as FAILED. Returns how many. */
   failInterrupted(): Promise<number>;
-  /** Deletes CVs created before `cutoff` (profiles and results go with them). Returns how many. */
+  /**
+   * Deletes unsaved CVs created before `cutoff` (profiles and results go with them); CVs
+   * saved in an account are kept. Returns how many.
+   */
   deleteCreatedBefore(cutoff: Date): Promise<number>;
+  /** Links the CV to the user's account. */
+  saveForUser(cvId: string, userId: string, now: Date): Promise<void>;
+  /** The user's saved CVs, most recently saved first. */
+  findSavedByUser(userId: string): Promise<SavedCv[]>;
+  /** Deletes the CV with its profile and results. */
+  delete(cvId: string): Promise<void>;
 }
 
 export interface CandidateProfileRepository {
@@ -85,6 +95,8 @@ export interface UserRepository {
   /** Marks the email as verified (keeps the first date if it already was). */
   markEmailVerified(userId: string, now: Date): Promise<User | null>;
   updatePassword(userId: string, passwordHash: string, now: Date): Promise<void>;
+  /** Deletes the account: sessions, email links and saved CVs go with it (cascade). */
+  delete(userId: string): Promise<void>;
 }
 
 export interface EmailTokenRepository {

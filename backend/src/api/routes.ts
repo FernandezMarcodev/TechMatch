@@ -1,9 +1,10 @@
-import { Router, type Request, type RequestHandler } from 'express';
+import { Router, type Request, type RequestHandler, type Response } from 'express';
 import multer from 'multer';
 import type { AdaptationService } from '../application/adaptation-service.js';
 import type { AuthService } from '../application/auth-service.js';
 import type { CvService } from '../application/cv-service.js';
 import { AppError } from '../application/errors.js';
+import type { User } from '../domain/entities.js';
 import { evaluationDocumentSchema } from '../cv-adaptation/document-schema.js';
 import type { QueryService } from '../application/query-service.js';
 import { bearerToken, createAuthRoutes, requireUser } from './auth-routes.js';
@@ -14,6 +15,7 @@ import {
   toCvStatusDto,
   toJobDetailDto,
   toRecommendationDto,
+  toSavedCvDto,
 } from './dto.js';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -77,30 +79,59 @@ export function createRoutes({
     res.status(201).json({ data: { cvId: result.cvId, status: toCvStatusDto(result.status) } });
   });
 
+  /** Who is asking, when the session is optional: a user id, or null for visitors. */
+  async function viewerId(req: Request): Promise<string | null> {
+    return (await auth.currentUser(bearerToken(req)))?.id ?? null;
+  }
+  const currentUserId = (res: Response) => (res.locals.user as User).id;
+
   router.get('/cvs/:cvId', async (req, res) => {
     const cvId = idParam(req, 'cvId', cvNotFound());
-    const status = await cvService.getStatus(cvId);
+    const status = await cvService.getStatus(cvId, await viewerId(req));
     res.json({ data: { id: cvId, status: toCvStatusDto(status) } });
   });
 
   router.get('/recommendations/:cvId', async (req, res) => {
     const cvId = idParam(req, 'cvId', cvNotFound());
     // With an account, all of them; without one (or with an expired session), the first ones.
-    const user = await auth.currentUser(bearerToken(req));
-    const { recommendations, hiddenCount } = await queries.getRecommendations(
+    const { recommendations, hiddenCount, saved } = await queries.getRecommendations(
       cvId,
-      user ? null : anonymousRecommendationsLimit,
+      await viewerId(req),
+      anonymousRecommendationsLimit,
     );
     res.json({
-      data: { cvId, recommendations: recommendations.map(toRecommendationDto), hiddenCount },
+      data: {
+        cvId,
+        recommendations: recommendations.map(toRecommendationDto),
+        hiddenCount,
+        saved,
+      },
     });
+  });
+
+  // Saved CVs (docs/17-CUENTAS-DE-USUARIO.md § Privilegios): saving is the user's choice.
+  router.post('/cvs/:cvId/save', authenticated, async (req, res) => {
+    const cvId = idParam(req, 'cvId', cvNotFound());
+    await cvService.saveToAccount(cvId, currentUserId(res));
+    res.json({ data: { id: cvId, saved: true } });
+  });
+
+  router.delete('/cvs/:cvId', authenticated, async (req, res) => {
+    const cvId = idParam(req, 'cvId', cvNotFound());
+    await cvService.deleteSaved(cvId, currentUserId(res));
+    res.sendStatus(204);
+  });
+
+  router.get('/me/cvs', authenticated, async (_req, res) => {
+    const cvs = await cvService.listSaved(currentUserId(res));
+    res.json({ data: { cvs: cvs.map(toSavedCvDto) } });
   });
 
   // CV adaptation to an offer (docs/15-ADAPTACION-DE-CV.md): an account privilege.
   router.get('/cvs/:cvId/adaptations/:jobId', authenticated, async (req, res) => {
     const cvId = idParam(req, 'cvId', cvNotFound());
     const jobId = idParam(req, 'jobId', jobNotFound());
-    const draft = await adaptation.getDraft(cvId, jobId);
+    const draft = await adaptation.getDraft(cvId, jobId, currentUserId(res));
     res.json({ data: toAdaptedDraftDto(draft) });
   });
 
@@ -116,7 +147,7 @@ export function createRoutes({
         })),
       });
     }
-    const evaluation = await adaptation.evaluate(cvId, jobId, parsed.data);
+    const evaluation = await adaptation.evaluate(cvId, jobId, currentUserId(res), parsed.data);
     res.json({ data: toAdaptationEvaluationDto(evaluation) });
   });
 

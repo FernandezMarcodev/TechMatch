@@ -69,6 +69,10 @@ export class PgUserRepository implements UserRepository {
     return rows[0] ? toUser(rows[0]) : null;
   }
 
+  async delete(userId: string): Promise<void> {
+    await this.db.query('DELETE FROM users WHERE id = $1', [userId]);
+  }
+
   async updatePassword(userId: string, passwordHash: string, now: Date): Promise<void> {
     await this.db.query('UPDATE users SET password_hash = $2, updated_at = $3 WHERE id = $1', [
       userId,

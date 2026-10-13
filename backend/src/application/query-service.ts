@@ -1,4 +1,5 @@
 import type { JobOffer } from '../domain/entities.js';
+import { findVisibleCv } from './cv-access.js';
 import { AppError } from './errors.js';
 import type {
   CvRepository,
@@ -16,21 +17,26 @@ export class QueryService {
 
   /**
    * MEDIUM/HIGH matches on active offers, best first. Empty until the CV is processed.
-   * `visibleLimit`: how many a visitor without an account sees (null = all, for accounts);
-   * the rest are only counted, so the order and the hidden ones never reach the client.
+   * Visitors without an account see the first `anonymousLimit` (an account privilege); the
+   * rest are only counted, so the hidden ones never reach the client. `saved`: the CV is in
+   * the viewer's account.
    */
   async getRecommendations(
     cvId: string,
-    visibleLimit: number | null = null,
-  ): Promise<{ recommendations: Recommendation[]; hiddenCount: number }> {
-    const cv = await this.cvs.findById(cvId);
-    if (!cv) throw new AppError('CV_NOT_FOUND', 'No se encontró el CV solicitado.');
-    if (cv.processingStatus !== 'PROCESSED') return { recommendations: [], hiddenCount: 0 };
+    viewerId: string | null,
+    anonymousLimit: number,
+  ): Promise<{ recommendations: Recommendation[]; hiddenCount: number; saved: boolean }> {
+    const cv = await findVisibleCv(this.cvs, cvId, viewerId);
+    const saved = cv.userId !== null && cv.userId === viewerId;
+    if (cv.processingStatus !== 'PROCESSED') {
+      return { recommendations: [], hiddenCount: 0, saved };
+    }
     const all = await this.matches.findRecommendations(cvId);
-    if (visibleLimit === null) return { recommendations: all, hiddenCount: 0 };
+    if (viewerId) return { recommendations: all, hiddenCount: 0, saved };
     return {
-      recommendations: all.slice(0, visibleLimit),
-      hiddenCount: Math.max(0, all.length - visibleLimit),
+      recommendations: all.slice(0, anonymousLimit),
+      hiddenCount: Math.max(0, all.length - anonymousLimit),
+      saved,
     };
   }
 

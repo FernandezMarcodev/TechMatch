@@ -244,6 +244,18 @@ export class AuthService {
     return this.deps.sessions.findUser(hashToken(token), this.deps.clock.now());
   }
 
+  /**
+   * Deletes the account after confirming the password: sessions, email links and saved CVs
+   * (with their profiles and results) go with it.
+   */
+  async deleteAccount(user: User, password: string): Promise<void> {
+    if (!(await this.deps.hasher.verify(password, user.passwordHash))) {
+      throw new AppError('INVALID_CREDENTIALS', 'La contraseña no es correcta.');
+    }
+    await this.deps.users.delete(user.id);
+    this.deps.logger.info({ userId: user.id }, 'Account deleted');
+  }
+
   async logout(token: string): Promise<void> {
     await this.deps.sessions.delete(hashToken(token));
   }

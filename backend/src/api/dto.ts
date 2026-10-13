@@ -1,7 +1,7 @@
 import type { AdaptationEvaluation } from '../application/adaptation-service.js';
 import type { Recommendation } from '../application/ports.js';
 import type { AdaptationSuggestion, AdaptedDraft, CvDocument } from '../cv-adaptation/types.js';
-import type { JobOffer, MatchReason, User } from '../domain/entities.js';
+import type { JobOffer, MatchReason, SavedCv, User } from '../domain/entities.js';
 import type { CvStatus, MatchLevel, Modality } from '../domain/enums.js';
 
 /** API statuses are lowercase (docs/04-API-CONTRACTS.md); domain states are uppercase. */
@@ -135,5 +135,23 @@ export function toUserDto(user: User): UserDto {
     email: user.email,
     emailVerified: user.emailVerifiedAt !== null,
     createdAt: user.createdAt.toISOString(),
+  };
+}
+
+export interface SavedCvDto {
+  id: string;
+  originalFilename: string;
+  createdAt: string;
+  savedAt: string;
+  recommendationCount: number;
+}
+
+export function toSavedCvDto(cv: SavedCv): SavedCvDto {
+  return {
+    id: cv.id,
+    originalFilename: cv.originalFilename,
+    createdAt: cv.createdAt.toISOString(),
+    savedAt: cv.savedAt.toISOString(),
+    recommendationCount: cv.recommendationCount,
   };
 }

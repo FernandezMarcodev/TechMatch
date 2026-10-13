@@ -356,6 +356,7 @@ describe('entry points', () => {
             data: {
               cvId: 'cv-1',
               hiddenCount: 0,
+              saved: false,
               recommendations: [
                 {
                   job: {
@@ -436,6 +437,7 @@ describe('without an account', () => {
             data: {
               cvId: 'cv-1',
               hiddenCount: 0,
+              saved: false,
               recommendations: [
                 {
                   job: {
