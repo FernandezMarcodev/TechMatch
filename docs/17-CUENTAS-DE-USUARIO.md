@@ -6,7 +6,20 @@
 
 Permitir que una persona cree una cuenta con email y contraseña para, más adelante, guardar sus CVs, ver su historial y reabrir sus CVs adaptados.
 
-**La cuenta es opcional.** El flujo anónimo (subir un CV y ver recomendaciones) sigue funcionando igual, sin registrarse.
+**La cuenta es opcional, pero tiene privilegios.** Sin registrarse se puede subir un CV y ver las primeras recomendaciones.
+
+## Privilegios de la cuenta
+
+| Función | Sin cuenta | Con cuenta |
+| --- | --- | --- |
+| Subir un CV y ver su análisis | ✓ | ✓ |
+| Recomendaciones | las primeras `ANONYMOUS_RECOMMENDATIONS_LIMIT` (3 por defecto) | todas |
+| Adaptar el CV a una oferta (borrador, editor, recálculo y PDF) | — | ✓ |
+| CVs guardados con historial (sin cuenta se borran a los 30 días) | — | ✓ |
+
+* **Se aplican en la API**, no solo en la interfaz: ocultar un botón no alcanza, porque cualquiera puede llamar a la API directamente. Los endpoints de adaptación responden `401 UNAUTHENTICATED` sin sesión, y el de recomendaciones devuelve solo las primeras e informa cuántas quedan ocultas (`hiddenCount`).
+* En la interfaz, lo exclusivo se muestra con un candado y un llamado a "Crear cuenta" o "Iniciar sesión", que vuelve a la misma página después de entrar.
+* **Portada:** al entrar al sitio se ve la pantalla de inicio de sesión (con la propuesta de TechMatch y lo que suma la cuenta) y un enlace "Continuar sin cuenta" que lleva a la carga del CV (`/analizar`). Con la sesión iniciada, la portada lleva directo a `/analizar`.
 
 ## Etapas
 
