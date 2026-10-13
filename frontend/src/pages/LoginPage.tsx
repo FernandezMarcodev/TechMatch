@@ -2,27 +2,33 @@ import { useState } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { AuthForm } from '../components/AuthForm';
+import { AuthLayout, GuestAccess } from '../components/AuthLayout';
 import { Icon } from '../components/Icon';
-import { Page } from '../components/Layout';
 import { ResendVerification } from '../components/ResendVerification';
 
-/** Where to go after logging in: the page that asked for it, or the account page. */
+/** Where to go after logging in: the page that asked for it, or the CV upload. */
 function useReturnPath(): string {
   const state = useLocation().state as { from?: string } | null;
-  return state?.from ?? '/cuenta';
+  return state?.from ?? '/analizar';
 }
 
+/**
+ * Login. Also the site's front page ("/"): visitors see it first, with "Continuar sin cuenta"
+ * one click away; logged-in users go straight to the CV upload.
+ */
 export function LoginPage() {
-  const { user, login } = useAuth();
+  const { user, loading, login } = useAuth();
   const navigate = useNavigate();
   const returnPath = useReturnPath();
   if (user) return <Navigate to={returnPath} replace />;
+  // A stored session is being checked: avoid flashing the form to someone already logged in.
+  if (loading) return null;
 
   return (
-    <Page narrow>
+    <AuthLayout>
       <AuthForm
         title="Iniciar sesión"
-        subtitle="Entrá a tu cuenta de TechMatch."
+        subtitle="Entrá a tu cuenta para ver todas tus recomendaciones y adaptar tu CV."
         submitLabel="Iniciar sesión"
         busyLabel="Ingresando…"
         passwordAutoComplete="current-password"
@@ -41,18 +47,19 @@ export function LoginPage() {
           </>
         }
       />
-    </Page>
+      <GuestAccess />
+    </AuthLayout>
   );
 }
 
 export function RegisterPage() {
   const { user, register } = useAuth();
   const [registeredEmail, setRegisteredEmail] = useState<string | null>(null);
-  if (user) return <Navigate to="/cuenta" replace />;
+  if (user) return <Navigate to="/analizar" replace />;
 
   if (registeredEmail) {
     return (
-      <Page narrow>
+      <AuthLayout>
         <section className="upload-card auth-card">
           <span className="state-view__icon">
             <Icon name="check" size={32} />
@@ -69,15 +76,15 @@ export function RegisterPage() {
             ¿Ya lo confirmaste? <Link to="/ingresar">Iniciá sesión</Link>
           </p>
         </section>
-      </Page>
+      </AuthLayout>
     );
   }
 
   return (
-    <Page narrow>
+    <AuthLayout>
       <AuthForm
         title="Crear cuenta"
-        subtitle="La cuenta es opcional: podés analizar tu CV sin registrarte."
+        subtitle="Es gratis. Solo necesitás un email y una contraseña."
         submitLabel="Crear cuenta"
         busyLabel="Creando cuenta…"
         passwordAutoComplete="new-password"
@@ -92,6 +99,7 @@ export function RegisterPage() {
           </>
         }
       />
-    </Page>
+      <GuestAccess />
+    </AuthLayout>
   );
 }

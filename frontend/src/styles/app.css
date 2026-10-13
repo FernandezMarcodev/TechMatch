@@ -286,6 +286,130 @@ p {
   overflow-wrap: anywhere;
 }
 
+/* Login / sign-up screen (also the front page): form + what TechMatch and an account offer. */
+.auth-layout {
+  background:
+    radial-gradient(
+      circle at 85% 15%,
+      color-mix(in srgb, var(--md-primary-container) 70%, transparent),
+      transparent 55%
+    ),
+    radial-gradient(
+      circle at 10% 90%,
+      color-mix(in srgb, var(--accent-green-soft) 90%, transparent),
+      transparent 50%
+    );
+}
+
+.auth-layout__inner {
+  max-width: var(--layout-max);
+  margin: 0 auto;
+  padding: clamp(32px, 6vw, 72px) var(--layout-gutter);
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 440px);
+  gap: clamp(32px, 6vw, 80px);
+  align-items: center;
+}
+
+/* Form on the right on wide screens, first on phones. */
+.auth-layout__form {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.auth-showcase {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.auth-showcase__title {
+  margin-top: 16px;
+}
+
+.auth-showcase__subtitle {
+  margin-top: 32px;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.auth-perks {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0;
+  display: grid;
+  gap: 10px;
+}
+
+.auth-perk {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 14px 16px;
+  border-radius: var(--md-shape-md);
+  background: color-mix(in srgb, var(--md-surface-container-lowest) 80%, transparent);
+  border: 1px solid var(--md-outline-variant);
+}
+
+.auth-perk__icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--md-shape-sm);
+  background: var(--md-primary-container);
+  color: var(--md-on-primary-container);
+}
+
+.auth-perk__title {
+  font-weight: 500;
+}
+
+.auth-guest {
+  display: grid;
+  gap: 10px;
+  text-align: center;
+}
+
+.auth-guest__divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--md-on-surface-variant);
+  font-size: 0.875rem;
+}
+
+.auth-guest__divider::before,
+.auth-guest__divider::after {
+  content: '';
+  flex: 1;
+  border-top: 1px solid var(--md-outline-variant);
+}
+
+.auth-guest__hint {
+  color: var(--md-on-surface-variant);
+  font-size: 0.8125rem;
+}
+
+@media (max-width: 900px) {
+  .auth-layout__inner {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .auth-layout__form,
+  .auth-showcase {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .auth-showcase .hero__lead {
+    font-size: 1rem;
+  }
+}
+
 /* ---------- Buttons (M3 common buttons) ---------- */
 
 .button {

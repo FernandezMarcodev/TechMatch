@@ -48,7 +48,7 @@ export function ProcessingPage() {
           tone="error"
           title="No se pudo procesar el CV"
           actions={
-            <Link to="/" className="button button--filled">
+            <Link to="/analizar" className="button button--filled">
               <Icon name="upload" size={18} />
               Cargar otro CV
             </Link>

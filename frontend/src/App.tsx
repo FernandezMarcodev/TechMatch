@@ -21,7 +21,8 @@ export function App() {
         <TopAppBar />
         <main className="app-main">
           <Routes>
-            <Route path="/" element={<HomePage />} />
+            <Route path="/" element={<LoginPage />} />
+            <Route path="/analizar" element={<HomePage />} />
             <Route path="/cv/:cvId" element={<ProcessingPage />} />
             <Route path="/cv/:cvId/recomendaciones" element={<RecommendationsPage />} />
             <Route path="/ofertas/:jobId" element={<JobDetailPage />} />

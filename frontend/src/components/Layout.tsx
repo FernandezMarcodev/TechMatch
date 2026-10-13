@@ -42,10 +42,10 @@ export function TopAppBar() {
           TechMatch
         </Link>
         <nav className="top-app-bar__nav" aria-label="Principal">
-          <a href="/#como-funciona" className="nav-link">
+          <a href="/analizar#como-funciona" className="nav-link">
             Cómo funciona
           </a>
-          <NavLink to="/" end className="button button--tonal button--small">
+          <NavLink to="/analizar" className="button button--tonal button--small">
             <Icon name="upload" size={18} />
             Analizar CV
           </NavLink>

@@ -65,7 +65,7 @@ afterEach(() => {
 describe('upload', () => {
   it('rejects non-PDF files before uploading', async () => {
     const fetchFn = mockFetch({});
-    renderAt('/');
+    renderAt('/analizar');
     await userEvent.upload(
       screen.getByLabelText(/CV en PDF/),
       new File(['hola'], 'cv.txt', { type: 'text/plain' }),
@@ -90,7 +90,7 @@ describe('upload', () => {
       '/api/recommendations/cv-1': () =>
         jsonResponse(200, { data: { cvId: 'cv-1', recommendations: [recommendation] } }),
     });
-    renderAt('/');
+    renderAt('/analizar');
     await userEvent.upload(
       screen.getByLabelText(/CV en PDF/),
       new File(['%PDF-1.4'], 'cv.pdf', { type: 'application/pdf' }),
@@ -113,7 +113,7 @@ describe('upload', () => {
           },
         }),
     });
-    renderAt('/');
+    renderAt('/analizar');
     await userEvent.upload(
       screen.getByLabelText(/CV en PDF/),
       new File(['x'], 'cv.pdf', { type: 'application/pdf' }),
@@ -132,7 +132,10 @@ describe('processing', () => {
     });
     renderAt('/cv/cv-1');
     expect(await screen.findByRole('alert')).toHaveTextContent('No pudimos procesar tu CV');
-    expect(screen.getByRole('link', { name: 'Cargar otro CV' })).toHaveAttribute('href', '/');
+    expect(screen.getByRole('link', { name: 'Cargar otro CV' })).toHaveAttribute(
+      'href',
+      '/analizar',
+    );
   });
 });
 
@@ -158,7 +161,10 @@ describe('recommendations', () => {
     const original = screen.getByRole('link', { name: 'Ver oferta original' });
     expect(original).toHaveAttribute('href', 'https://example.com/job');
     expect(original).toHaveAttribute('rel', 'noopener noreferrer');
-    expect(screen.getByRole('link', { name: 'Cargar otro CV' })).toHaveAttribute('href', '/');
+    expect(screen.getByRole('link', { name: 'Cargar otro CV' })).toHaveAttribute(
+      'href',
+      '/analizar',
+    );
   });
 
   it('filters by level and remote modality without changing the order', async () => {
