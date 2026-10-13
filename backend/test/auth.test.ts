@@ -21,6 +21,7 @@ function appWith(authRateLimit?: { max: number; windowMs: number }) {
       adaptation: container.adaptation,
       auth: container.auth,
       maxUploadBytes: 1_000_000,
+      anonymousRecommendationsLimit: 3,
       authRateLimit,
     }),
   });

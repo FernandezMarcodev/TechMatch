@@ -6,7 +6,7 @@ import type { CvService } from '../application/cv-service.js';
 import { AppError } from '../application/errors.js';
 import { evaluationDocumentSchema } from '../cv-adaptation/document-schema.js';
 import type { QueryService } from '../application/query-service.js';
-import { createAuthRoutes, requireUser } from './auth-routes.js';
+import { bearerToken, createAuthRoutes, requireUser } from './auth-routes.js';
 import { createRateLimit } from './rate-limit.js';
 import {
   toAdaptationEvaluationDto,
@@ -34,6 +34,8 @@ export interface RouteDeps {
   adaptation: AdaptationService;
   auth: AuthService;
   maxUploadBytes: number;
+  /** Recommendations a visitor without an account sees; the rest need a session. */
+  anonymousRecommendationsLimit: number;
   /** Limit of CV uploads per client IP; without it uploads are unlimited (tests). */
   uploadRateLimit?: { max: number; windowMs: number };
   /** Limit of register/login attempts per client IP; without it they are unlimited (tests). */
@@ -46,6 +48,7 @@ export function createRoutes({
   adaptation,
   auth,
   maxUploadBytes,
+  anonymousRecommendationsLimit,
   uploadRateLimit,
   authRateLimit,
 }: RouteDeps): Router {
@@ -82,8 +85,15 @@ export function createRoutes({
 
   router.get('/recommendations/:cvId', async (req, res) => {
     const cvId = idParam(req, 'cvId', cvNotFound());
-    const recommendations = await queries.getRecommendations(cvId);
-    res.json({ data: { cvId, recommendations: recommendations.map(toRecommendationDto) } });
+    // With an account, all of them; without one (or with an expired session), the first ones.
+    const user = await auth.currentUser(bearerToken(req));
+    const { recommendations, hiddenCount } = await queries.getRecommendations(
+      cvId,
+      user ? null : anonymousRecommendationsLimit,
+    );
+    res.json({
+      data: { cvId, recommendations: recommendations.map(toRecommendationDto), hiddenCount },
+    });
   });
 
   // CV adaptation to an offer (docs/15-ADAPTACION-DE-CV.md): an account privilege.

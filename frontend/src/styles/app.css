@@ -426,6 +426,45 @@ p {
   }
 }
 
+/* Recommendations hidden from visitors (account privilege). */
+.locked-recommendations {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: center;
+  padding: 20px;
+  border-radius: var(--md-shape-lg);
+  border: 1px dashed var(--md-outline);
+  background: var(--md-surface-container-low);
+}
+
+.locked-recommendations__icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--md-shape-full);
+  background: var(--md-primary-container);
+  color: var(--md-on-primary-container);
+}
+
+.locked-recommendations__actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 700px) {
+  .locked-recommendations {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .locked-recommendations__actions .button {
+    flex: 1;
+  }
+}
+
 /* ---------- Buttons (M3 common buttons) ---------- */
 
 .button {

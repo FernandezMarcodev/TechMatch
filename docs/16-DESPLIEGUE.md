@@ -96,6 +96,7 @@ En el repositorio: **Settings → Secrets and variables → Actions → New repo
    | `DATABASE_URL` | la cadena de conexión de Neon |
    | `CORS_ORIGIN` | por ahora `http://localhost:5173`; se cambia en el paso 5 |
    | `TRUST_PROXY` | `true` (para que el límite de subidas vea la IP del cliente) |
+   | `ANONYMOUS_RECOMMENDATIONS_LIMIT` | opcional; cuántas recomendaciones se ven sin cuenta (3 por defecto) |
    | `CV_STORAGE_DIR` | `/tmp/techmatch-cvs` |
    | `JOB_SYNC_ENABLED` | `false` |
    | `LOG_LEVEL` | `info` |

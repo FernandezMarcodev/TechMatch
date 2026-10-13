@@ -29,6 +29,7 @@ const app = createApp({
     adaptation: container.adaptation,
     auth: container.auth,
     maxUploadBytes: env.CV_MAX_SIZE_BYTES,
+    anonymousRecommendationsLimit: env.ANONYMOUS_RECOMMENDATIONS_LIMIT,
     uploadRateLimit: {
       max: env.CV_UPLOAD_LIMIT_MAX,
       windowMs: env.CV_UPLOAD_LIMIT_WINDOW_MINUTES * 60_000,

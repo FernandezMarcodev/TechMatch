@@ -217,7 +217,13 @@ export const api = {
   getCvStatus(cvId: string): Promise<{ id: string; status: CvStatus }> {
     return request(`/cvs/${encodeURIComponent(cvId)}`);
   },
-  getRecommendations(cvId: string): Promise<{ cvId: string; recommendations: Recommendation[] }> {
+  /**
+   * Without a session the API returns only the first recommendations and counts the rest in
+   * `hiddenCount` (an account privilege); with a session, all of them.
+   */
+  getRecommendations(
+    cvId: string,
+  ): Promise<{ cvId: string; recommendations: Recommendation[]; hiddenCount: number }> {
     return request(`/recommendations/${encodeURIComponent(cvId)}`);
   },
   getJob(jobId: string): Promise<JobDetail> {
