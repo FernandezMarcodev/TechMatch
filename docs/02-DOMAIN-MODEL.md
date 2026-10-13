@@ -13,7 +13,6 @@ CV
 ├── storagePath
 ├── mimeType
 ├── sizeBytes
-├── extractedText
 ├── processingStatus
 ├── createdAt
 └── updatedAt

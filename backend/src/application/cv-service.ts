@@ -51,7 +51,6 @@ export class CvService {
       storagePath,
       mimeType: 'application/pdf', // verified from content, not taken from the client
       sizeBytes: file.content.length,
-      extractedText: null,
       processingStatus: 'UPLOADED',
       createdAt: now,
       updatedAt: now,
@@ -100,10 +99,10 @@ export class CvService {
     const startedAt = Date.now();
     try {
       const content = await storage.read(cv.storagePath);
-      const { text, profile } = await processor.process(content, clock.now());
+      // The extracted text only feeds the profile: like the PDF, it is not stored.
+      const { profile } = await processor.process(content, clock.now());
       const fullProfile = { ...profile, id: ids.next(), cvId };
       await profiles.save(fullProfile);
-      await cvs.updateStatus(cvId, 'PROCESSING', text);
       const results = await matching.computeForProfile(fullProfile);
       await cvs.updateStatus(cvId, 'PROCESSED');
       // Only metadata is logged: CV contents never reach the logs.
