@@ -8,7 +8,7 @@ import { createRoutes } from '../src/api/routes.js';
 import { MemoryEmailSender } from '../src/infrastructure/email/memory-email-sender.js';
 import { createContainer, type Container } from '../src/main/container.js';
 import { jobSkills, makeOffer } from './fixtures.js';
-import { createTestPool, testLogger, truncateAll } from './helpers.js';
+import { createSession, createTestPool, testLogger, truncateAll } from './helpers.js';
 import { SAMPLE_CV_LINES, makePdf } from './support/make-pdf.js';
 
 const pool = createTestPool();
@@ -44,6 +44,7 @@ beforeAll(async () => {
       adaptation: container.adaptation,
       auth: container.auth,
       maxUploadBytes: MAX_BYTES,
+      anonymousRecommendationsLimit: 3,
     }),
   });
 });
@@ -173,6 +174,59 @@ describe('primary flow: upload → processing → recommendations → job detail
   });
 });
 
+describe('recommendations are an account privilege beyond the first ones', () => {
+  /** Five offers the sample CV matches, with decreasing compatibility. */
+  async function seedFiveMatches() {
+    const seenAt = new Date('2026-02-28T00:00:00Z');
+    const stacks = [
+      ['Java', 'Spring Boot', 'PostgreSQL'],
+      ['Java', 'Spring Boot', 'Docker'],
+      ['Java', 'Spring', 'MySQL'],
+      ['Java', 'Node.js', 'AWS'],
+      ['Java', 'Docker', 'React', 'Angular'],
+    ];
+    for (const [i, skills] of stacks.entries()) {
+      await container.jobs.upsert(
+        makeOffer({ title: `Oferta ${i + 1}`, skills: jobSkills(skills) }),
+        seenAt,
+      );
+    }
+  }
+
+  it('shows visitors the first ANONYMOUS_RECOMMENDATIONS_LIMIT, best first, and counts the rest', async () => {
+    await seedFiveMatches();
+    const cvId = (await uploadAndProcess(makePdf(SAMPLE_CV_LINES))).body.data.cvId as string;
+    const session = await createSession(pool);
+
+    const all = await request(app)
+      .get(`/api/recommendations/${cvId}`)
+      .set('Authorization', session);
+    const allTitles = all.body.data.recommendations.map(
+      (r: { job: { title: string } }) => r.job.title,
+    );
+    expect(all.body.data.hiddenCount).toBe(0);
+    expect(allTitles.length).toBeGreaterThan(3);
+
+    const visitor = await request(app).get(`/api/recommendations/${cvId}`);
+    expect(visitor.status).toBe(200);
+    expect(
+      visitor.body.data.recommendations.map((r: { job: { title: string } }) => r.job.title),
+    ).toEqual(allTitles.slice(0, 3));
+    expect(visitor.body.data.hiddenCount).toBe(allTitles.length - 3);
+  });
+
+  it('treats an expired or unknown session as a visitor instead of failing', async () => {
+    await seedFiveMatches();
+    const cvId = (await uploadAndProcess(makePdf(SAMPLE_CV_LINES))).body.data.cvId as string;
+    const res = await request(app)
+      .get(`/api/recommendations/${cvId}`)
+      .set('Authorization', 'Bearer vencido');
+    expect(res.status).toBe(200);
+    expect(res.body.data.recommendations).toHaveLength(3);
+    expect(res.body.data.hiddenCount).toBeGreaterThan(0);
+  });
+});
+
 describe('error contract', () => {
   it('rejects non-PDF files regardless of declared type', async () => {
     const res = await request(app)
@@ -203,6 +257,7 @@ describe('error contract', () => {
         adaptation: container.adaptation,
         auth: container.auth,
         maxUploadBytes: MAX_BYTES,
+        anonymousRecommendationsLimit: 3,
         uploadRateLimit: { max: 1, windowMs: 60_000 },
       }),
     });

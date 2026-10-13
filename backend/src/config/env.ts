@@ -45,6 +45,8 @@ const envSchema = z.object({
   CV_MIN_TEXT_CHARS: z.coerce.number().int().positive().default(50),
   /** Days a CV (and its profile and results) is kept before `npm run purge-cvs` deletes it. */
   CV_RETENTION_DAYS: z.coerce.number().int().positive().default(30),
+  /** Recommendations shown without an account; all of them need a session (account privilege). */
+  ANONYMOUS_RECOMMENDATIONS_LIMIT: z.coerce.number().int().min(0).default(3),
   /** Days a login session lasts. */
   SESSION_TTL_DAYS: z.coerce.number().positive().default(30),
   /** Register/login attempts allowed per client IP within each window. */

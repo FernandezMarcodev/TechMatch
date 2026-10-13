@@ -80,10 +80,13 @@ failed
 
 Devuelve las recomendaciones: solo `MEDIUM` y `HIGH`, de ofertas activas, ordenadas por score descendente. Mientras el CV no esté procesado, la lista está vacía.
 
+**Sesión opcional** (privilegio de la cuenta): con `Authorization: Bearer <token>` válido devuelve todas; sin sesión (o con una vencida, que se trata como visitante y no da error) devuelve solo las primeras `ANONYMOUS_RECOMMENDATIONS_LIMIT` (3 por defecto) y cuenta el resto en `hiddenCount`. Las ocultas nunca llegan al cliente.
+
 ```json
 {
   "data": {
     "cvId": "4f7c2a1e-8d3b-4c5e-9a6f-1b2c3d4e5f60",
+    "hiddenCount": 0,
     "recommendations": [
       {
         "job": {
@@ -116,6 +119,7 @@ Devuelve las recomendaciones: solo `MEDIUM` y `HIGH`, de ofertas activas, ordena
 }
 ```
 
+* `hiddenCount`: recomendaciones que existen pero no se devuelven por falta de sesión (`0` con sesión).
 * `modality`: `REMOTE`, `HYBRID`, `ONSITE` o `null` si se desconoce.
 * `reasons`: una por criterio (`skills`, `experience`, `seniority`, `education`, `languages`, `location`, `modality`), con estado `positive`, `negative` o `neutral`.
 

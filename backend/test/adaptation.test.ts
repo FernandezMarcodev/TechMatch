@@ -44,6 +44,7 @@ beforeAll(async () => {
       adaptation: container.adaptation,
       auth: container.auth,
       maxUploadBytes: 1_000_000,
+      anonymousRecommendationsLimit: 3,
     }),
   });
 });

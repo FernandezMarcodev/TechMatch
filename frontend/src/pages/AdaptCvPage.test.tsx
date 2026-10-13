@@ -355,6 +355,7 @@ describe('entry points', () => {
           respond(200, {
             data: {
               cvId: 'cv-1',
+              hiddenCount: 0,
               recommendations: [
                 {
                   job: {
@@ -434,6 +435,7 @@ describe('without an account', () => {
           respond(200, {
             data: {
               cvId: 'cv-1',
+              hiddenCount: 0,
               recommendations: [
                 {
                   job: {

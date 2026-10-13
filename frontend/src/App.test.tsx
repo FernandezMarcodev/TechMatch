@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -88,7 +88,9 @@ describe('upload', () => {
         });
       },
       '/api/recommendations/cv-1': () =>
-        jsonResponse(200, { data: { cvId: 'cv-1', recommendations: [recommendation] } }),
+        jsonResponse(200, {
+          data: { cvId: 'cv-1', hiddenCount: 0, recommendations: [recommendation] },
+        }),
     });
     renderAt('/analizar');
     await userEvent.upload(
@@ -143,7 +145,9 @@ describe('recommendations', () => {
   it('shows title, company, location, modality, level, reasons and source link — no numeric score', async () => {
     mockFetch({
       '/api/recommendations/cv-1': () =>
-        jsonResponse(200, { data: { cvId: 'cv-1', recommendations: [recommendation] } }),
+        jsonResponse(200, {
+          data: { cvId: 'cv-1', hiddenCount: 0, recommendations: [recommendation] },
+        }),
     });
     renderAt('/cv/cv-1/recomendaciones');
     expect(await screen.findByRole('link', { name: 'Backend Developer' })).toHaveAttribute(
@@ -174,7 +178,9 @@ describe('recommendations', () => {
     };
     mockFetch({
       '/api/recommendations/cv-1': () =>
-        jsonResponse(200, { data: { cvId: 'cv-1', recommendations: [recommendation, medium] } }),
+        jsonResponse(200, {
+          data: { cvId: 'cv-1', hiddenCount: 0, recommendations: [recommendation, medium] },
+        }),
     });
     renderAt('/cv/cv-1/recomendaciones');
     expect(await screen.findByText('2 ofertas compatibles', { exact: false })).toBeInTheDocument();
@@ -215,6 +221,7 @@ describe('recommendations', () => {
         jsonResponse(200, {
           data: {
             cvId: 'cv-1',
+            hiddenCount: 0,
             recommendations: [{ ...recommendation, match: { ...recommendation.match, reasons } }],
           },
         }),
@@ -233,7 +240,7 @@ describe('recommendations', () => {
   it('shows an empty state', async () => {
     mockFetch({
       '/api/recommendations/cv-1': () =>
-        jsonResponse(200, { data: { cvId: 'cv-1', recommendations: [] } }),
+        jsonResponse(200, { data: { cvId: 'cv-1', hiddenCount: 0, recommendations: [] } }),
     });
     renderAt('/cv/cv-1/recomendaciones');
     expect(await screen.findByText(/no encontramos ofertas/i)).toBeInTheDocument();
@@ -273,5 +280,82 @@ describe('job detail', () => {
         '/cv/cv-1/recomendaciones',
       ),
     );
+  });
+});
+
+describe('recommendations without an account', () => {
+  it('shows the first ones, invites to log in and shows all of them afterwards', async () => {
+    const second = {
+      ...recommendation,
+      job: { ...recommendation.job, id: 'job-2', title: 'Otra oferta' },
+    };
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
+        const url = String(input);
+        if (url === '/api/auth/login' && init?.method === 'POST') {
+          return Promise.resolve(
+            jsonResponse(200, {
+              data: {
+                token: 'tok-1',
+                expiresAt: '2026-06-01T00:00:00Z',
+                user: {
+                  id: 'u1',
+                  email: 'ana@example.com',
+                  emailVerified: true,
+                  createdAt: '2026-05-01T00:00:00Z',
+                },
+              },
+            }),
+          );
+        }
+        if (url === '/api/recommendations/cv-1') {
+          // The API decides with the session: the frontend only shows what it gets.
+          const withSession = new Headers(init?.headers).get('Authorization') === 'Bearer tok-1';
+          return Promise.resolve(
+            jsonResponse(200, {
+              data: withSession
+                ? { cvId: 'cv-1', hiddenCount: 0, recommendations: [recommendation, second] }
+                : { cvId: 'cv-1', hiddenCount: 4, recommendations: [recommendation] },
+            }),
+          );
+        }
+        return Promise.resolve(jsonResponse(404, { error: { code: 'X', message: 'no' } }));
+      }),
+    );
+    renderAt('/cv/cv-1/recomendaciones');
+
+    expect(
+      await screen.findByRole('heading', { name: 'Hay 4 ofertas más para vos' }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/5 ofertas compatibles/)).toHaveTextContent(
+      'Sin cuenta ves la primera.',
+    );
+    expect(screen.getAllByRole('link', { name: 'Crear cuenta' })[0]).toHaveAttribute(
+      'href',
+      '/crear-cuenta',
+    );
+
+    const locked = screen.getByRole('region', { name: 'Hay 4 ofertas más para vos' });
+    await userEvent.click(within(locked).getByRole('link', { name: 'Iniciar sesión' }));
+    await userEvent.type(await screen.findByLabelText('Email'), 'ana@example.com');
+    await userEvent.type(screen.getByLabelText('Contraseña'), 'clave-segura-123');
+    await userEvent.click(screen.getByRole('button', { name: 'Iniciar sesión' }));
+
+    expect(await screen.findByRole('link', { name: 'Otra oferta' })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: /ofertas más para vos/ })).not.toBeInTheDocument();
+    localStorage.clear();
+  });
+});
+
+describe('recommendations summary', () => {
+  it('reads well in singular, plural and for visitors', async () => {
+    const { summary } = await import('./pages/RecommendationsPage');
+    expect(summary(1, 1)).toBe('1 oferta compatible.');
+    expect(summary(5, 5)).toBe('5 ofertas compatibles, ordenadas de mayor a menor compatibilidad.');
+    expect(summary(5, 3)).toMatch(/Sin cuenta ves las primeras 3\.$/);
+    expect(summary(5, 1)).toMatch(/Sin cuenta ves la primera\.$/);
+    // Nothing visible: the lock card explains it, no "las primeras 0".
+    expect(summary(2, 0)).toBe('2 ofertas compatibles, ordenadas de mayor a menor compatibilidad.');
   });
 });

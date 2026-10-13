@@ -233,10 +233,15 @@ export class AuthService {
 
   /** The user of a valid session token; UNAUTHENTICATED otherwise. */
   async authenticate(token: string | null): Promise<User> {
-    if (!token) throw unauthenticated();
-    const user = await this.deps.sessions.findUser(hashToken(token), this.deps.clock.now());
+    const user = await this.currentUser(token);
     if (!user) throw unauthenticated();
     return user;
+  }
+
+  /** The user of a valid session token, or null (visitor, expired or unknown token). */
+  async currentUser(token: string | null): Promise<User | null> {
+    if (!token) return null;
+    return this.deps.sessions.findUser(hashToken(token), this.deps.clock.now());
   }
 
   async logout(token: string): Promise<void> {
