@@ -1,12 +1,18 @@
 import { expect, test, type Page } from '@playwright/test';
 import { extractText, getDocumentProxy } from 'unpdf';
 import { createPool } from '../backend/src/infrastructure/db/pool.js';
+import { randomUUID } from 'node:crypto';
+import { ScryptPasswordHasher } from '../backend/src/infrastructure/security/scrypt-password-hasher.js';
 import { PgJobOfferRepository } from '../backend/src/persistence/pg-job-offer-repository.js';
+import { PgUserRepository } from '../backend/src/persistence/pg-user-repository.js';
 import { normalizeJobOffer } from '../backend/src/job-sources/normalizer.js';
 import { SAMPLE_CV_LINES, makePdf } from '../backend/test/support/make-pdf.js';
 import { E2E_DATABASE_URL } from './e2e-env.js';
 
 const SEEN_AT = new Date();
+// Adapting a CV is an account privilege: a verified account created straight in the database.
+const USER_EMAIL = `e2e-adapt-${Date.now()}@example.com`;
+const USER_PASSWORD = 'clave-segura-123';
 
 test.beforeAll(async () => {
   // Offers go through the same normalizer the source connectors use.
@@ -47,6 +53,16 @@ test.beforeAll(async () => {
       SEEN_AT,
     );
   }
+  const users = new PgUserRepository(pool);
+  const id = randomUUID();
+  await users.create({
+    id,
+    email: USER_EMAIL,
+    passwordHash: await new ScryptPasswordHasher().hash(USER_PASSWORD),
+    emailVerifiedAt: SEEN_AT,
+    createdAt: SEEN_AT,
+    updatedAt: SEEN_AT,
+  });
   await pool.end();
 });
 
@@ -110,7 +126,10 @@ test('rejects a non-PDF file with a clear message', async ({ page }) => {
   await expect(page.getByRole('alert')).toHaveText('El archivo debe estar en formato PDF.');
 });
 
-/** Uploads the sample CV and opens "Adaptar mi CV" on the first recommendation. */
+/**
+ * Uploads the sample CV without an account and opens "Adaptar mi CV" on the first
+ * recommendation: it asks to log in and, after logging in, comes back to the adaptation.
+ */
 async function openAdaptPage(page: Page) {
   await page.goto('/analizar');
   await page.getByLabel(/CV en PDF/).setInputFiles({
@@ -128,6 +147,11 @@ async function openAdaptPage(page: Page) {
     .first()
     .getByRole('link', { name: 'Adaptar mi CV' })
     .click();
+
+  await expect(page.getByRole('status')).toContainText('Esta función es para usuarios con cuenta');
+  await page.getByLabel('Email').fill(USER_EMAIL);
+  await page.getByLabel('Contraseña').fill(USER_PASSWORD);
+  await page.getByRole('button', { name: 'Iniciar sesión' }).click();
   await expect(page.getByRole('heading', { name: 'Adaptá tu CV' })).toBeVisible();
 }
 

@@ -1,3 +1,5 @@
+import { randomUUID } from 'node:crypto';
+import { hashToken } from '../src/application/auth-service.js';
 import { getEnv } from '../src/config/env.js';
 import { createPool, type DbPool } from '../src/infrastructure/db/pool.js';
 import { createLogger } from '../src/infrastructure/logging/logger.js';
@@ -16,4 +18,24 @@ export async function truncateAll(pool: DbPool): Promise<void> {
               languages, education, experiences, projects, candidate_profiles, cvs,
               sessions, users CASCADE`,
   );
+}
+
+/**
+ * A verified user with an open session, written straight to the database. Returns the
+ * `Authorization` header value for endpoints that are account privileges.
+ */
+export async function createSession(pool: DbPool): Promise<string> {
+  const userId = randomUUID();
+  const token = randomUUID();
+  await pool.query(
+    `INSERT INTO users (id, email, password_hash, email_verified_at)
+     VALUES ($1, $2, 'scrypt$x$y', now())`,
+    [userId, `${userId}@example.com`],
+  );
+  await pool.query(
+    `INSERT INTO sessions (id, user_id, token_hash, expires_at)
+     VALUES ($1, $2, $3, now() + interval '1 day')`,
+    [randomUUID(), userId, hashToken(token)],
+  );
+  return `Bearer ${token}`;
 }

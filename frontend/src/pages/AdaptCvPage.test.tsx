@@ -63,11 +63,27 @@ function respond(status: number, body: unknown): Response {
   });
 }
 
-function mockDraft(status = 200, body: unknown = { data: draft }) {
+const USER = {
+  id: 'u1',
+  email: 'ana@example.com',
+  emailVerified: true,
+  createdAt: '2026-05-01T12:00:00.000Z',
+};
+
+/** Adapting a CV needs an account: every test runs logged in unless it says otherwise. */
+function stubFetch(handler: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>) {
   vi.stubGlobal(
     'fetch',
-    vi.fn(() => Promise.resolve(respond(status, body))),
+    vi.fn((input: RequestInfo | URL, init?: RequestInit) =>
+      String(input) === '/api/auth/me'
+        ? Promise.resolve(respond(200, { data: { user: USER } }))
+        : handler(input, init),
+    ),
   );
+}
+
+function mockDraft(status = 200, body: unknown = { data: draft }) {
+  stubFetch(vi.fn(() => Promise.resolve(respond(status, body))));
 }
 
 function renderAdapt() {
@@ -82,6 +98,7 @@ const preview = () => screen.getByRole('article', { name: 'Vista previa del CV' 
 
 beforeEach(() => {
   window.localStorage.clear();
+  window.localStorage.setItem('techmatch.session', 'tok-1');
 });
 
 afterEach(() => {
@@ -259,7 +276,7 @@ describe('re-evaluating the adapted CV', () => {
       }
       return Promise.resolve(respond(200, { data: draft }));
     });
-    vi.stubGlobal('fetch', fetchFn);
+    stubFetch(fetchFn);
     return fetchFn;
   }
 
@@ -332,8 +349,7 @@ describe('PDF download', () => {
 
 describe('entry points', () => {
   it('offers "Adaptar mi CV" on each recommendation', async () => {
-    vi.stubGlobal(
-      'fetch',
+    stubFetch(
       vi.fn(() =>
         Promise.resolve(
           respond(200, {
@@ -366,6 +382,85 @@ describe('entry points', () => {
     expect(await screen.findByRole('link', { name: 'Adaptar mi CV' })).toHaveAttribute(
       'href',
       '/cv/cv-1/adaptar/job-1',
+    );
+  });
+});
+
+describe('without an account', () => {
+  it('shows a lock, asks to log in and comes back to the adaptation afterwards', async () => {
+    window.localStorage.clear();
+    let loggedIn = false;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
+        const url = String(input);
+        if (url === '/api/auth/login' && init?.method === 'POST') {
+          loggedIn = true;
+          return Promise.resolve(
+            respond(200, {
+              data: { token: 'tok-1', expiresAt: '2026-06-01T00:00:00Z', user: USER },
+            }),
+          );
+        }
+        if (url.endsWith('/adaptations/job-1')) {
+          return Promise.resolve(
+            loggedIn
+              ? respond(200, { data: draft })
+              : respond(401, { error: { code: 'UNAUTHENTICATED', message: 'Sin sesión' } }),
+          );
+        }
+        return Promise.resolve(respond(200, { data: {} }));
+      }),
+    );
+    renderAdapt();
+
+    expect(await screen.findByRole('heading', { name: 'Iniciar sesión' })).toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent(
+      'Esta función es para usuarios con cuenta',
+    );
+    await userEvent.type(screen.getByLabelText('Email'), 'ana@example.com');
+    await userEvent.type(screen.getByLabelText('Contraseña'), 'clave-segura-123');
+    await userEvent.click(screen.getByRole('button', { name: 'Iniciar sesión' }));
+
+    expect(await screen.findByRole('article', { name: 'Vista previa del CV' })).toBeInTheDocument();
+  });
+
+  it('marks "Adaptar mi CV" with a lock for visitors', async () => {
+    window.localStorage.clear();
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() =>
+        Promise.resolve(
+          respond(200, {
+            data: {
+              cvId: 'cv-1',
+              recommendations: [
+                {
+                  job: {
+                    id: 'job-1',
+                    title: 'Backend Developer',
+                    company: 'Empresa X',
+                    location: null,
+                    modality: 'REMOTE',
+                    source: 'getonboard',
+                    sourceUrl: 'https://example.com/job',
+                  },
+                  match: { level: 'HIGH', reasons: [] },
+                },
+              ],
+            },
+          }),
+        ),
+      ),
+    );
+    render(
+      <MemoryRouter initialEntries={['/cv/cv-1/recomendaciones']}>
+        <App />
+      </MemoryRouter>,
+    );
+    expect(await screen.findByRole('link', { name: 'Adaptar mi CV' })).toHaveAttribute(
+      'title',
+      'Requiere una cuenta',
     );
   });
 });

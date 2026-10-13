@@ -6,10 +6,9 @@ import { AuthLayout, GuestAccess } from '../components/AuthLayout';
 import { Icon } from '../components/Icon';
 import { ResendVerification } from '../components/ResendVerification';
 
-/** Where to go after logging in: the page that asked for it, or the CV upload. */
-function useReturnPath(): string {
-  const state = useLocation().state as { from?: string } | null;
-  return state?.from ?? '/analizar';
+/** The page that sent the visitor here (a page that needs an account), if any. */
+function useFrom(): string | undefined {
+  return (useLocation().state as { from?: string } | null)?.from;
 }
 
 /**
@@ -19,13 +18,22 @@ function useReturnPath(): string {
 export function LoginPage() {
   const { user, loading, login } = useAuth();
   const navigate = useNavigate();
-  const returnPath = useReturnPath();
+  const from = useFrom();
+  // After logging in: back to the page that asked for it, or the CV upload.
+  const returnPath = from ?? '/analizar';
   if (user) return <Navigate to={returnPath} replace />;
   // A stored session is being checked: avoid flashing the form to someone already logged in.
   if (loading) return null;
 
   return (
     <AuthLayout>
+      {from && (
+        <p className="auth-notice" role="status">
+          <Icon name="lock" size={18} />
+          Esta función es para usuarios con cuenta. Iniciá sesión o creá una gratis; después volvés
+          a donde estabas.
+        </p>
+      )}
       <AuthForm
         title="Iniciar sesión"
         subtitle="Entrá a tu cuenta para ver todas tus recomendaciones y adaptar tu CV."

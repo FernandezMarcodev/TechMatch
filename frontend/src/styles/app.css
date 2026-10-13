@@ -394,6 +394,22 @@ p {
   font-size: 0.8125rem;
 }
 
+.auth-notice {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 12px 16px;
+  border-radius: var(--md-shape-md);
+  background: var(--md-primary-container);
+  color: var(--md-on-primary-container);
+  font-size: 0.875rem;
+}
+
+.auth-notice .icon {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
 @media (max-width: 900px) {
   .auth-layout__inner {
     grid-template-columns: minmax(0, 1fr);
