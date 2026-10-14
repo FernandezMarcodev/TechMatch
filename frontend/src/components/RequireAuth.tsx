@@ -12,8 +12,11 @@ export function RequireAuth({ children }: { children: ReactNode }) {
       <Page>
         <div className="loading-row">
           <span className="spinner" aria-hidden="true" />
-          <p>Cargando…</p>
+          <p>Verificando tu sesión…</p>
         </div>
+        <p className="body-muted">
+          Si el servidor estaba inactivo, puede tardar hasta un minuto en responder.
+        </p>
       </Page>
     );
   }

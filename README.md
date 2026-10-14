@@ -4,6 +4,8 @@
 
 Aplicación web que analiza un CV en PDF y recomienda ofertas de trabajo en tecnología compatibles, explicando por qué encaja cada una.
 
+**Demo:** <https://techmatch-ynl.pages.dev> — la API está en el plan gratuito de Render y se duerme cuando no se usa: la primera carga puede tardar hasta un minuto.
+
 ## Funcionalidades
 
 - **Matching determinístico y explicable**: tecnologías, seniority, experiencia, educación, idiomas, ubicación y modalidad. El mismo CV y la misma oferta siempre dan el mismo resultado, y cada recomendación muestra el porqué. Sin IA en el cálculo.
