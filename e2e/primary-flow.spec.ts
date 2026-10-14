@@ -238,3 +238,11 @@ test('the PDF pages do not depend on how the screen measured the preview', async
   await expect(caption).not.toContainText('2 páginas');
   expect(await pdfPages()).toEqual(expected);
 });
+
+test('the public trends dashboard summarizes the active offers', async ({ page }) => {
+  await page.goto('/analizar');
+  await page.getByRole('link', { name: 'Tendencias del mercado' }).click();
+  await expect(page.getByRole('heading', { name: 'Tendencias del mercado tech' })).toBeVisible();
+  await expect(page.getByText('ofertas activas', { exact: true })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Tecnologías más pedidas' })).toContainText('Java');
+});

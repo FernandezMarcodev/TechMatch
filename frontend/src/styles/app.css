@@ -205,6 +205,10 @@ p {
   gap: 8px;
 }
 
+.top-app-bar__nav .button {
+  white-space: nowrap;
+}
+
 .nav-link {
   padding: 8px 12px;
   border-radius: var(--md-shape-full);
@@ -509,6 +513,113 @@ p {
 .button--danger-filled {
   background: var(--md-error);
   color: var(--md-on-error);
+}
+
+/* Public trends dashboard (/tendencias): tiles and CSS bar charts, no chart library. */
+.trend-tiles {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.trend-tile {
+  display: grid;
+  gap: 2px;
+  padding: 16px;
+  border-radius: var(--md-shape-md);
+  background: var(--md-surface-container-low);
+  border: 1px solid var(--md-outline-variant);
+  color: var(--md-primary);
+}
+
+.trend-tile__value {
+  font-size: 2rem;
+  font-weight: 500;
+  color: var(--md-on-surface);
+  line-height: 1.2;
+}
+
+.trend-tile__label {
+  color: var(--md-on-surface-variant);
+  font-size: 0.875rem;
+}
+
+.trend-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+
+.trend-column {
+  display: grid;
+  gap: 16px;
+}
+
+.trend-card {
+  padding: 20px;
+  border-radius: var(--md-shape-lg);
+  border: 1px solid var(--md-outline-variant);
+  background: var(--md-surface-container-lowest);
+}
+
+.trend-card__title {
+  font-size: 1.125rem;
+  font-weight: 500;
+}
+
+.trend-card__note {
+  margin-top: 2px;
+  font-size: 0.8125rem;
+}
+
+.bar-chart {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0;
+  /* One grid for all rows, so every bar starts and ends at the same place. */
+  display: grid;
+  grid-template-columns: minmax(80px, max-content) minmax(40px, 1fr) max-content;
+  gap: 8px 10px;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.bar-chart__row {
+  display: contents;
+}
+
+.bar-chart__label {
+  max-width: 14em;
+  overflow-wrap: anywhere;
+}
+
+.bar-chart__track {
+  height: 10px;
+  border-radius: var(--md-shape-full);
+  background: var(--md-surface-container-highest);
+  overflow: hidden;
+}
+
+.bar-chart__bar {
+  display: block;
+  height: 100%;
+  border-radius: var(--md-shape-full);
+  background: var(--md-primary);
+}
+
+.bar-chart__value {
+  color: var(--md-on-surface-variant);
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .trend-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 /* Recommendations hidden from visitors (account privilege). */
@@ -1918,9 +2029,13 @@ p {
     display: none;
   }
 
-  /* Icon-only account button on phones; its aria-label keeps it accessible. */
+  /* Icon-only account and trends buttons on phones; their aria-label keeps them accessible. */
   .top-app-bar__label {
     display: none;
+  }
+
+  .top-app-bar__nav {
+    gap: 2px;
   }
 
   .page {

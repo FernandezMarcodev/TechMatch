@@ -14,7 +14,8 @@ import type { RawJobOffer } from './types.js';
 
 const MAX_DESCRIPTION_CHARS = 20_000;
 const MAX_FIELD_CHARS = 255;
-const UNKNOWN_COMPANY = 'Empresa no especificada';
+/** Company name stored when the source does not give one. */
+export const UNKNOWN_COMPANY = 'Empresa no especificada';
 
 const OPTIONAL_MARKERS =
   /\b(deseable|deseables|valorable|valorables|se valorara|plus|suma|sumara|nice to have|preferentemente|no excluyente)\b/;

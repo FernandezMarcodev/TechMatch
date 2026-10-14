@@ -127,6 +127,28 @@ Devuelve las recomendaciones: solo `MEDIUM` y `HIGH`, de ofertas activas, ordena
 
 El endpoint no devuelve ofertas `LOW` ni el score numérico: el score es interno (clasificación y orden) y el usuario solo ve el nivel.
 
+## GET /api/stats/offers
+
+Panel público de tendencias (`18-PANEL-DE-TENDENCIAS.md`): agregaciones sobre las ofertas activas, sin datos de usuarios ni de CVs. No requiere sesión. Se recalcula como mucho cada `STATS_CACHE_MINUTES`.
+
+```json
+{
+  "data": {
+    "generatedAt": "2026-10-14T12:00:00.000Z",
+    "totals": { "offers": 311, "companies": 105, "remotePercent": 47, "englishPercent": 23 },
+    "topSkills": [{ "name": "REST", "count": 147, "percent": 47 }],
+    "seniority": [{ "level": "SENIOR", "count": 146, "avgExperienceYears": 4.7 }],
+    "modality": [{ "modality": "REMOTE", "count": 147 }],
+    "sources": [{ "source": "getonboard", "count": 296 }],
+    "topCompanies": [{ "name": "Despegar", "count": 10 }]
+  }
+}
+```
+
+* `topSkills`: solo tecnologías requeridas (no las deseables); `percent` es sobre el total de ofertas activas.
+* `seniority`: sin `UNKNOWN`, de junior a manager; `avgExperienceYears` es `null` si ninguna oferta del nivel indica años.
+* `modality`: `null` agrupa las ofertas sin modalidad especificada.
+
 ## GET /api/jobs/{jobId}
 
 ```json

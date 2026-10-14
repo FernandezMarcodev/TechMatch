@@ -28,6 +28,7 @@ const app = createApp({
     queries: container.queries,
     adaptation: container.adaptation,
     auth: container.auth,
+    stats: container.stats,
     maxUploadBytes: env.CV_MAX_SIZE_BYTES,
     anonymousRecommendationsLimit: env.ANONYMOUS_RECOMMENDATIONS_LIMIT,
     uploadRateLimit: {

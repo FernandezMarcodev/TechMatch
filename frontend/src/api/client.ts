@@ -201,6 +201,17 @@ function postJson<T>(path: string, body: unknown, method: 'POST' | 'DELETE' = 'P
   });
 }
 
+/** Public market trends over the active offers (docs/18-PANEL-DE-TENDENCIAS.md). */
+export interface OfferStats {
+  generatedAt: string;
+  totals: { offers: number; companies: number; remotePercent: number; englishPercent: number };
+  topSkills: { name: string; count: number; percent: number }[];
+  seniority: { level: string; count: number; avgExperienceYears: number | null }[];
+  modality: { modality: Modality; count: number }[];
+  sources: { source: string; count: number }[];
+  topCompanies: { name: string; count: number }[];
+}
+
 /** A CV the user chose to save in their account. */
 export interface SavedCv {
   id: string;
@@ -245,6 +256,9 @@ export const api = {
   },
   deleteCv(cvId: string): Promise<void> {
     return request(`/cvs/${encodeURIComponent(cvId)}`, { method: 'DELETE' });
+  },
+  getOfferStats(): Promise<OfferStats> {
+    return request('/stats/offers');
   },
   getMyCvs(): Promise<{ cvs: SavedCv[] }> {
     return request('/me/cvs');
