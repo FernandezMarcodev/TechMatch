@@ -9,7 +9,7 @@ Aplicación web que analiza un CV en PDF y recomienda ofertas de trabajo en tecn
 ## Funcionalidades
 
 - **Matching determinístico y explicable**: tecnologías, seniority, experiencia, educación, idiomas, ubicación y modalidad. El mismo CV y la misma oferta siempre dan el mismo resultado, y cada recomendación muestra el porqué. Sin IA en el cálculo.
-- **Ofertas reales** de la **API pública de Get on Board** (sin scraping), actualizadas cada 12 horas.
+- **Ofertas reales** de la **API pública de Get on Board** y de las **páginas de empleo de empresas** que publican con Lever o Greenhouse (por ejemplo Despegar, Kavak y Clara), filtradas a puestos de tecnología en Argentina o remotos. Sin scraping; se actualizan cada 12 horas.
 - **Cuenta opcional, con privilegios.** Sin registrarse se puede subir un CV y ver las primeras recomendaciones. Con una cuenta:
   - todas las recomendaciones;
   - **CV adaptado a una oferta**: editor con vista previa en formato Harvard, recálculo de la compatibilidad y descarga en PDF. Solo reordena y destaca lo que el CV ya tiene; lo que falta son sugerencias.

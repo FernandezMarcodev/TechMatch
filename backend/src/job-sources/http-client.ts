@@ -16,7 +16,16 @@ const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve,
 
 const REFUSED_STATUSES = new Set([401, 403, 429]);
 
-class NonRetryableError extends Error {}
+/** A 4xx answer other than a refusal: not retried. `status` lets callers tell 404 apart. */
+export class HttpStatusError extends Error {
+  constructor(
+    readonly status: number,
+    url: string,
+  ) {
+    super(`HTTP ${status} for ${url}`);
+    this.name = 'HttpStatusError';
+  }
+}
 
 /**
  * HTTP client for source APIs: identifies itself, applies timeouts, spaces requests and
@@ -44,10 +53,10 @@ export class HttpClient {
         if (REFUSED_STATUSES.has(res.status))
           throw new SourceUnavailableError(this.source, res.status);
         if (res.status >= 500) throw new Error(`HTTP ${res.status} for ${url}`);
-        if (!res.ok) throw new NonRetryableError(`HTTP ${res.status} for ${url}`);
+        if (!res.ok) throw new HttpStatusError(res.status, url);
         return (await res.json()) as T;
       } catch (err) {
-        if (err instanceof SourceUnavailableError || err instanceof NonRetryableError) throw err;
+        if (err instanceof SourceUnavailableError || err instanceof HttpStatusError) throw err;
         if (attempt >= this.options.maxRetries) throw err;
         attempt += 1;
         await sleep(this.options.backoffBaseMs * 2 ** (attempt - 1));

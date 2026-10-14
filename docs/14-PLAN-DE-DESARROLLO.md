@@ -119,3 +119,4 @@ Carga de CV, matching determinístico explicado, ofertas de Get on Board, interf
 | 21 | `feat/preferencias-candidato` | "Disponible para mudarme" y modalidad preferida como entradas del matching |
 | 22 | `feat/recalculo-tras-sync` | Recalcular recomendaciones de usuarios cuando entran ofertas nuevas |
 | 23 | `feat/que-te-falta` | En las recomendaciones, las tecnologías que más piden las ofertas y que el CV no tiene |
+| 27 | `fix/matching-pocas-tecnologias` | Ofertas con muy pocas tecnologías detectadas (1 o 2) quedan en HIGH con una sola coincidencia: exigir una cantidad mínima de coincidencias o bajar el nivel cuando la evidencia es escasa |

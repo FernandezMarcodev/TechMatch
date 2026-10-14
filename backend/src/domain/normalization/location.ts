@@ -94,6 +94,22 @@ export function isRecognizedLocation(raw: string): boolean {
   return n.region !== null && Object.values(REGION_ALIASES).includes(n.region);
 }
 
+/**
+ * True when the place is in Argentina: the country is named, or it is CABA or a province.
+ * Several places separated by ";" (some job boards) count if any of them is.
+ */
+export function isArgentineLocation(raw: string | null): boolean {
+  if (!raw) return false;
+  return raw.split(';').some((place) => {
+    if (/\bargentina\b/.test(foldText(place))) return true;
+    const n = normalizeLocation(place);
+    return (
+      n.city === 'caba' ||
+      (n.region !== null && !n.region.startsWith('pais:') && isRecognizedLocation(place))
+    );
+  });
+}
+
 /** Compares two locations without assuming compatibility when information is missing. */
 export function compareLocations(a: NormalizedLocation, b: NormalizedLocation): LocationRelation {
   if (a.city && b.city && a.city === b.city) return 'SAME_CITY';

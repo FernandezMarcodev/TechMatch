@@ -71,6 +71,14 @@ export function Footer() {
           Ofertas provistas por{' '}
           <a href="https://www.getonbrd.com" target="_blank" rel="noopener noreferrer">
             Get on Board
+          </a>{' '}
+          y por las páginas de empleo de empresas que publican con{' '}
+          <a href="https://www.lever.co" target="_blank" rel="noopener noreferrer">
+            Lever
+          </a>{' '}
+          y{' '}
+          <a href="https://www.greenhouse.com" target="_blank" rel="noopener noreferrer">
+            Greenhouse
           </a>
           .
         </p>

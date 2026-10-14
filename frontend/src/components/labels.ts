@@ -21,6 +21,11 @@ export const LEVEL_LABELS: Record<MatchLevel, string> = {
 
 export const SOURCES: Record<string, { label: string; url: string }> = {
   getonboard: { label: 'Get on Board', url: 'https://www.getonbrd.com' },
+  lever: { label: 'la página de empleos de la empresa (Lever)', url: 'https://www.lever.co' },
+  greenhouse: {
+    label: 'la página de empleos de la empresa (Greenhouse)',
+    url: 'https://www.greenhouse.com',
+  },
 };
 
 export const CRITERIA: Record<string, { label: string; icon: IconName; description: string }> = {

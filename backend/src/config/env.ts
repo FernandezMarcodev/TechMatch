@@ -108,6 +108,14 @@ const envSchema = z.object({
     'cybersecurity',
   ]),
   GETONBOARD_PER_PAGE: z.coerce.number().int().min(1).max(100).default(50),
+
+  // Company job boards (docs/05-FUENTES-DE-OFERTAS.md): "slug:Nombre" separated by commas.
+  LEVER_ENABLED: booleanString.default(true),
+  LEVER_API_URL: z.url().default('https://api.lever.co/v0'),
+  LEVER_COMPANIES: commaList.default(['despegar:Despegar', 'kavak:Kavak']),
+  GREENHOUSE_ENABLED: booleanString.default(true),
+  GREENHOUSE_API_URL: z.url().default('https://boards-api.greenhouse.io/v1'),
+  GREENHOUSE_COMPANIES: commaList.default(['clara:Clara']),
 });
 
 export type Env = z.infer<typeof envSchema>;
