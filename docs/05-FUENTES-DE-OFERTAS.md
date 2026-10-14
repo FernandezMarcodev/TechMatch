@@ -52,6 +52,31 @@ GET /api/v0/categories/{categoria}/jobs
 * Seniority: "Sin experiencia" → Trainee; "Expert" → Lead; el resto se reconoce por nombre.
 * Ubicación: ciudad y país de la oferta (por ejemplo "Santiago, Chile"); las ofertas remotas no tienen ubicación restrictiva.
 
+## Fuentes de empresas: Lever y Greenhouse (v2.2)
+
+Muchas empresas publican sus búsquedas con un sistema de selección (ATS) que ofrece una **API pública de su página de empleos**, pensada para mostrar esas ofertas en otros sitios: sin clave y de solo lectura.
+
+| Fuente | Endpoint | Empresas configuradas |
+| --- | --- | --- |
+| `lever` | `https://api.lever.co/v0/postings/{empresa}?mode=json` | `LEVER_COMPANIES` (por defecto `despegar:Despegar,kavak:Kavak`) |
+| `greenhouse` | `https://boards-api.greenhouse.io/v1/boards/{empresa}/jobs?content=true` | `GREENHOUSE_COMPANIES` (por defecto `clara:Clara`) |
+
+* **La API es por empresa:** no hay un listado general, así que las empresas se configuran como `identificador:Nombre` separados por coma. Sumar una empresa es cambiar una variable de entorno. El nombre se toma de la configuración porque Lever no lo incluye en sus datos.
+* **Filtro de relevancia** (antes de normalizar): estas páginas traen búsquedas de todas las áreas y países, así que solo se guardan las ofertas que son **de tecnología** (por el área o el título) **y** que son **remotas o en Argentina** (`isArgentineLocation` en la normalización compartida). Una oferta presencial en otro país nunca se recomendaría (el matching la deja en LOW), así que guardarla solo ensuciaría la base y las métricas.
+* **Una empresa inexistente** (404) se registra en el log y se saltea; cualquier otro error corta la sincronización de esa fuente, y una sincronización fallida no desactiva ofertas.
+* Lever: el área sale de `categories.department`/`team`, la modalidad de `workplaceType` y los requisitos de las listas de la oferta. Greenhouse: el área sale de `departments`, la ubicación de `location.name` y el texto de `content` (HTML escapado).
+
+### Fuentes evaluadas y descartadas
+
+| Fuente | Motivo |
+| --- | --- |
+| Remotive | Sus términos prohíben mostrar sus ofertas para conseguir registros, y TechMatch muestra todas las recomendaciones solo con cuenta. Además, el feed gratuito trae pocas ofertas de desarrollo y con 24 h de retraso |
+| We Work Remotely | Sus términos prohíben armar un servicio de búsqueda de empleo con sus datos |
+| Himalayas, RemoteOK, Arbeitnow | Remotos globales, muchos solo para Estados Unidos; términos encontrados solo en fuentes de terceros. Quedan para más adelante, con filtro de ubicación |
+| Jooble, Careerjet | Requieren clave de partner; sin términos oficiales verificables |
+| Bumeran, Computrabajo, Zona Jobs, LinkedIn | No ofrecen API pública: solo se podrían obtener con scraping, que el proyecto no hace |
+| Ashby | API pública igual a Lever y Greenhouse; se puede sumar cuando haya empresas argentinas que la usen |
+
 ## Arquitectura
 
 Cada fuente implementa el mismo contrato:
