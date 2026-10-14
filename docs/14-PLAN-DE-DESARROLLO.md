@@ -24,6 +24,8 @@ Evolución de TechMatch después del MVP (`v1.0.0`), organizada por versiones y 
 * **Simplicidad:** es un proyecto universitario que se defiende en entrevistas; cada cambio tiene que poder explicarse en pocas frases. Se evitan servicios nuevos y dependencias pesadas si no son necesarias.
 * **Datos personales con vencimiento:** todo CV se borra pasado un plazo configurable, salvo que el usuario elija guardarlo en su cuenta; los guardados viven hasta que él los borre o borre la cuenta.
 * **Adaptar no es inventar:** el CV adaptado reordena, destaca y redacta lo que el CV ya contiene. Lo que la oferta pide y el CV no tiene se muestra como sugerencia y nunca se agrega automáticamente.
+* **Fuentes de ofertas:** solo APIs públicas o feeds pensados para acceso automatizado (nunca scraping), cuyos términos permitan mostrar las ofertas con link al original. Se suman como conectores, tocando lo mínimo del resto del sistema.
+* **Análisis de datos en SQL:** las métricas son agregaciones (conteos, promedios, agrupaciones) que PostgreSQL resuelve donde están los datos; no se suma otro lenguaje ni servicio (por ejemplo, Python/pandas) para eso.
 * **Fuera del plan:** login con Google, roles de administrador, nuevas fuentes de ofertas, OCR, IA y funcionalidades para empresas (ver `12-FUTURE-ROADMAP.md`).
 
 ## v1.0.0 — MVP
@@ -98,12 +100,22 @@ Carga de CV, matching determinístico explicado, ofertas de Get on Board, interf
 | 18 | `feat/recomendaciones-con-cuenta` | Sin cuenta se ven las primeras recomendaciones (cantidad configurable); el resto requiere sesión |
 | — | `fix/no-guardar-texto-cv` | El texto extraído del CV no se guarda (minimización de datos) |
 | 19 | `feat/mis-cvs` | "Guardar en mi cuenta" a elección del usuario; CVs guardados visibles solo para su dueño; historial en "Mi cuenta"; borrado de CVs y de la cuenta |
-| 20 | `feat/guardar-cv-adaptado` | Guardar y reabrir CVs adaptados (usuarios logueados) |
+| — | `docs/readme-actualizado` | README con cuentas, seguridad y despliegue |
+| — | `fix/portada-en-blanco` | La portada nunca queda en blanco mientras despierta la API; URLs reales del despliegue |
 
-## v2.2.0 — Extras
+## v2.2.0 — Más fuentes y tendencias
 
 | # | Rama | Alcance |
 | --- | --- | --- |
+| 24 | `docs/fuentes-ats` | Investigación de fuentes con API pública y decisiones (`05-FUENTES-DE-OFERTAS.md`, `18-PANEL-DE-TENDENCIAS.md`) |
+| 25 | `feat/fuentes-ats` | Conectores de Lever y Greenhouse (APIs públicas de empleo por empresa), con lista de empresas configurable y filtro de puestos de tecnología en Argentina o remotos |
+| 26 | `feat/panel-tendencias` | Panel público de métricas de las ofertas (`/tendencias`): agregaciones en SQL, sin datos personales |
+
+## v2.3.0 — Extras
+
+| # | Rama | Alcance |
+| --- | --- | --- |
+| 20 | `feat/guardar-cv-adaptado` | Guardar y reabrir CVs adaptados (usuarios logueados) |
 | 21 | `feat/preferencias-candidato` | "Disponible para mudarme" y modalidad preferida como entradas del matching |
 | 22 | `feat/recalculo-tras-sync` | Recalcular recomendaciones de usuarios cuando entran ofertas nuevas |
 | 23 | `feat/que-te-falta` | En las recomendaciones, las tecnologías que más piden las ofertas y que el CV no tiene |

@@ -39,7 +39,11 @@ La fuente elegida es **Get on Board**:
 
 La arquitectura de conectores permite sumar fuentes sin tocar el resto del sistema (ver `05-FUENTES-DE-OFERTAS.md`).
 
-Limitación conocida: la mayoría de las ofertas son remotas o de otros países de la región, con pocas sedes en Argentina. Ampliar fuentes está en el roadmap.
+Limitación conocida: la mayoría de las ofertas son remotas o de otros países de la región, con pocas sedes en Argentina.
+
+**v2.2: Lever y Greenhouse.** Sus APIs públicas por empresa están pensadas para mostrar ofertas en otros sitios, no requieren clave y traen búsquedas con sede en Argentina (por ejemplo, Despegar). Como incluyen todas las áreas y países de cada empresa, se filtran a tecnología en Argentina o remoto antes de guardar. Remotive se descartó porque sus términos prohíben usar sus ofertas para conseguir registros, algo incompatible con los privilegios de la cuenta. La investigación completa está en `05-FUENTES-DE-OFERTAS.md`.
+
+**Métricas en SQL, no en Python.** El panel de tendencias (`18-PANEL-DE-TENDENCIAS.md`) son agregaciones sobre datos que ya están en PostgreSQL. Resolverlas con SQL evita sumar otro lenguaje, otro servicio en el despliegue gratuito y otra comunicación entre procesos. Pandas tendría sentido para análisis exploratorio fuera de producción o estadística pesada.
 
 ## Despliegue gratuito
 
