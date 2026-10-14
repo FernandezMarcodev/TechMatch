@@ -30,7 +30,7 @@ export type CvStatus = (typeof CV_STATUSES)[number];
 export const MATCH_LEVELS = ['LOW', 'MEDIUM', 'HIGH'] as const;
 export type MatchLevel = (typeof MATCH_LEVELS)[number];
 
-export const JOB_SOURCES = ['getonboard'] as const;
+export const JOB_SOURCES = ['getonboard', 'lever', 'greenhouse'] as const;
 export type JobSource = (typeof JOB_SOURCES)[number];
 
 export function isKnownSeniority(value: Seniority): value is KnownSeniority {
