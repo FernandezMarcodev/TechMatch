@@ -12,9 +12,9 @@
 | Sincronización de ofertas cada 12 h | GitHub Actions programado | Gratis (repositorio público) |
 
 ```text
-Navegador ──► https://techmatch.pages.dev          (Cloudflare Pages: HTML, JS, CSS)
+Navegador ──► https://techmatch-ynl.pages.dev      (Cloudflare Pages: HTML, JS, CSS)
     │
-    └──── fetch ──► https://techmatch-api.onrender.com/api/*   (Render: Express)
+    └──── fetch ──► https://techmatch-suv6.onrender.com/api/*   (Render: Express)
                                    │
                                    ▼
                      Neon (PostgreSQL free) ◄── GitHub Actions cada 12 h (sync-jobs)
@@ -43,6 +43,15 @@ Configuración versionada en el repositorio:
 | Cloudflare Pages: 500 compilaciones por mes | Alcanza de sobra (una por push a `main`). |
 | 0,5 GB en Neon | Alcanza para miles de ofertas y CVs procesados. |
 | Una sola instancia | Coincide con el diseño actual: el procesamiento de CVs es en memoria (ver `13-DECISIONES-TECNICAS.md`). |
+
+## URLs del despliegue actual
+
+| Servicio | URL |
+| --- | --- |
+| Frontend (Cloudflare Pages) | <https://techmatch-ynl.pages.dev> (también <https://techmatchs.pages.dev>) |
+| API (Render) | <https://techmatch-suv6.onrender.com> |
+
+> **Ojo: `techmatch.pages.dev` y `techmatch-api.onrender.com` no son de este proyecto.** Los subdominios de `pages.dev` y `onrender.com` son únicos en todo el mundo: si el nombre ya está tomado, Cloudflare y Render agregan un sufijo (`-ynl`, `-suv6`). La URL real figura en el panel de cada servicio y en el aviso de despliegue que Cloudflare deja en cada commit de GitHub. En los pasos de abajo, `techmatch.pages.dev` y `techmatch-api.onrender.com` son nombres de ejemplo.
 
 ## Paso a paso (primera vez)
 

@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { api } from '../api/client';
 import { useAuth } from '../auth/AuthContext';
 import { AuthForm } from '../components/AuthForm';
 import { AuthLayout, GuestAccess } from '../components/AuthLayout';
@@ -21,9 +22,27 @@ export function LoginPage() {
   const from = useFrom();
   // After logging in: back to the page that asked for it, or the CV upload.
   const returnPath = from ?? '/analizar';
+  // This is the front page: start waking the free API up (it sleeps when idle) right away.
+  useEffect(() => api.wakeUp(), []);
   if (user) return <Navigate to={returnPath} replace />;
-  // A stored session is being checked: avoid flashing the form to someone already logged in.
-  if (loading) return null;
+  // A stored session is being checked; the sleeping API can take up to a minute to answer.
+  // Never a blank page: say what is happening and keep the anonymous flow at hand.
+  if (loading) {
+    return (
+      <AuthLayout>
+        <section className="upload-card auth-card" aria-busy="true">
+          <div className="loading-row">
+            <span className="spinner spinner--small" aria-hidden="true" />
+            <p>Verificando tu sesión…</p>
+          </div>
+          <p className="body-muted">
+            Si el servidor estaba inactivo, puede tardar hasta un minuto en responder.
+          </p>
+        </section>
+        <GuestAccess />
+      </AuthLayout>
+    );
+  }
 
   return (
     <AuthLayout>
