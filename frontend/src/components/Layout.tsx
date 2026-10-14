@@ -45,6 +45,14 @@ export function TopAppBar() {
           <a href="/analizar#como-funciona" className="nav-link">
             Cómo funciona
           </a>
+          <NavLink
+            to="/tendencias"
+            className="button button--text button--small"
+            aria-label="Tendencias del mercado"
+          >
+            <Icon name="trending" size={18} />
+            <span className="top-app-bar__label">Tendencias</span>
+          </NavLink>
           <NavLink to="/analizar" className="button button--tonal button--small">
             <Icon name="upload" size={18} />
             Analizar CV

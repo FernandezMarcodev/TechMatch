@@ -13,6 +13,22 @@ export const MODALITY_ICONS: Record<Exclude<Modality, null>, IconName> = {
   ONSITE: 'home',
 };
 
+export const SENIORITY_LABELS: Record<string, string> = {
+  INTERN: 'Trainee',
+  JUNIOR: 'Junior',
+  SEMI_SENIOR: 'Semi Senior',
+  SENIOR: 'Senior',
+  LEAD: 'Lead',
+  MANAGER: 'Manager',
+};
+
+/** Short source names for charts ("Publicada en …" uses SOURCES[…].label). */
+export const SOURCE_NAMES: Record<string, string> = {
+  getonboard: 'Get on Board',
+  lever: 'Empresas en Lever',
+  greenhouse: 'Empresas en Greenhouse',
+};
+
 export const LEVEL_LABELS: Record<MatchLevel, string> = {
   HIGH: 'Alta compatibilidad',
   MEDIUM: 'Compatibilidad media',

@@ -5,6 +5,7 @@ import { CvService } from '../application/cv-service.js';
 import { MatchingService } from '../application/matching-service.js';
 import type { Clock, EmailSender, IdGenerator } from '../application/ports.js';
 import { QueryService } from '../application/query-service.js';
+import { StatsService } from '../application/stats-service.js';
 import { TaskRunner } from '../application/task-runner.js';
 import type { Env } from '../config/env.js';
 import { loadMatchingConfig } from '../config/load-matching-config.js';
@@ -19,6 +20,7 @@ import { PgCandidateProfileRepository } from '../persistence/pg-candidate-profil
 import { PgCvRepository } from '../persistence/pg-cv-repository.js';
 import { PgJobOfferRepository } from '../persistence/pg-job-offer-repository.js';
 import { PgMatchResultRepository } from '../persistence/pg-match-result-repository.js';
+import { PgOfferStatsRepository } from '../persistence/pg-offer-stats-repository.js';
 import {
   PgEmailTokenRepository,
   PgSessionRepository,
@@ -40,6 +42,9 @@ export interface ContainerOptions {
     | 'SESSION_TTL_DAYS'
     | 'EMAIL_VERIFICATION_TTL_HOURS'
     | 'PASSWORD_RESET_TTL_MINUTES'
+    | 'STATS_CACHE_MINUTES'
+    | 'STATS_TOP_SKILLS'
+    | 'STATS_TOP_COMPANIES'
   >;
   /** Base of the links in the emails (see `frontendUrl` in config/env.ts). */
   frontendUrl: string;
@@ -80,6 +85,11 @@ export function createContainer(options: ContainerOptions) {
   return {
     cvService,
     queries: new QueryService(cvs, jobs, matches),
+    stats: new StatsService(new PgOfferStatsRepository(pool), clock, {
+      cacheMinutes: env.STATS_CACHE_MINUTES,
+      topSkills: env.STATS_TOP_SKILLS,
+      topCompanies: env.STATS_TOP_COMPANIES,
+    }),
     adaptation: new AdaptationService(cvs, profiles, jobs, matchingConfig, clock),
     auth: new AuthService({
       users: new PgUserRepository(pool),

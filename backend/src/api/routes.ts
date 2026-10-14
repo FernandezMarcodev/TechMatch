@@ -2,6 +2,7 @@ import { Router, type Request, type RequestHandler, type Response } from 'expres
 import multer from 'multer';
 import type { AdaptationService } from '../application/adaptation-service.js';
 import type { AuthService } from '../application/auth-service.js';
+import type { StatsService } from '../application/stats-service.js';
 import type { CvService } from '../application/cv-service.js';
 import { AppError } from '../application/errors.js';
 import type { User } from '../domain/entities.js';
@@ -15,6 +16,7 @@ import {
   toCvStatusDto,
   toJobDetailDto,
   toRecommendationDto,
+  toOfferStatsDto,
   toSavedCvDto,
 } from './dto.js';
 
@@ -35,6 +37,7 @@ export interface RouteDeps {
   queries: QueryService;
   adaptation: AdaptationService;
   auth: AuthService;
+  stats: StatsService;
   maxUploadBytes: number;
   /** Recommendations a visitor without an account sees; the rest need a session. */
   anonymousRecommendationsLimit: number;
@@ -49,6 +52,7 @@ export function createRoutes({
   queries,
   adaptation,
   auth,
+  stats,
   maxUploadBytes,
   anonymousRecommendationsLimit,
   uploadRateLimit,
@@ -149,6 +153,11 @@ export function createRoutes({
     }
     const evaluation = await adaptation.evaluate(cvId, jobId, currentUserId(res), parsed.data);
     res.json({ data: toAdaptationEvaluationDto(evaluation) });
+  });
+
+  // Public market trends (docs/18-PANEL-DE-TENDENCIAS.md): aggregated offer data only.
+  router.get('/stats/offers', async (_req, res) => {
+    res.json({ data: toOfferStatsDto(await stats.getOfferStats()) });
   });
 
   router.get('/jobs/:jobId', async (req, res) => {

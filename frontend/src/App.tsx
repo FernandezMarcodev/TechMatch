@@ -12,6 +12,7 @@ import { LoginPage, RegisterPage } from './pages/LoginPage';
 import { ForgotPasswordPage, ResetPasswordPage } from './pages/PasswordResetPages';
 import { ProcessingPage } from './pages/ProcessingPage';
 import { RecommendationsPage } from './pages/RecommendationsPage';
+import { TrendsPage } from './pages/TrendsPage';
 import { VerifyEmailPage } from './pages/VerifyEmailPage';
 
 export function App() {
@@ -23,6 +24,7 @@ export function App() {
           <Routes>
             <Route path="/" element={<LoginPage />} />
             <Route path="/analizar" element={<HomePage />} />
+            <Route path="/tendencias" element={<TrendsPage />} />
             <Route path="/cv/:cvId" element={<ProcessingPage />} />
             <Route path="/cv/:cvId/recomendaciones" element={<RecommendationsPage />} />
             <Route path="/ofertas/:jobId" element={<JobDetailPage />} />

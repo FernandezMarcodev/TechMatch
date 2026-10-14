@@ -1,4 +1,5 @@
 import type { AdaptationEvaluation } from '../application/adaptation-service.js';
+import type { OfferStats } from '../application/stats-service.js';
 import type { Recommendation } from '../application/ports.js';
 import type { AdaptationSuggestion, AdaptedDraft, CvDocument } from '../cv-adaptation/types.js';
 import type { JobOffer, MatchReason, SavedCv, User } from '../domain/entities.js';
@@ -153,5 +154,27 @@ export function toSavedCvDto(cv: SavedCv): SavedCvDto {
     createdAt: cv.createdAt.toISOString(),
     savedAt: cv.savedAt.toISOString(),
     recommendationCount: cv.recommendationCount,
+  };
+}
+
+/** Public market trends: aggregated offer data only (docs/18-PANEL-DE-TENDENCIAS.md). */
+export function toOfferStatsDto(stats: OfferStats) {
+  return {
+    generatedAt: stats.generatedAt.toISOString(),
+    totals: stats.totals,
+    topSkills: stats.topSkills,
+    seniority: stats.seniority,
+    // Merges "UNKNOWN" and missing modalities, as null like everywhere in the API.
+    modality: Object.entries(
+      stats.modality.reduce<Record<string, number>>((acc, m) => {
+        const key = toModalityDto(m.modality) ?? 'null';
+        acc[key] = (acc[key] ?? 0) + m.count;
+        return acc;
+      }, {}),
+    )
+      .map(([key, count]) => ({ modality: key === 'null' ? null : (key as ModalityDto), count }))
+      .sort((a, b) => b.count - a.count),
+    sources: stats.sources,
+    topCompanies: stats.topCompanies,
   };
 }
