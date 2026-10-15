@@ -1,6 +1,6 @@
 # Panel de tendencias
 
-**Versión:** v2.2 (ver `14-PLAN-DE-DESARROLLO.md`, ticket 26).
+**Versión:** v2.2 (ver `14-PLAN-DE-DESARROLLO.md`, ticket 26); gráficos y métricas nuevas en v2.3 (ticket 28).
 
 ## Objetivo
 
@@ -13,7 +13,7 @@ Mostrar qué está pidiendo el mercado tech, a partir de las ofertas activas que
 * **Determinístico y explicable:** cada número es un conteo o un promedio directo sobre la base, sin estimaciones.
 * **Agregaciones en SQL** (decisión en `13-DECISIONES-TECNICAS.md`): `COUNT`, `AVG` y `GROUP BY` sobre `job_offers` y `job_skills`. Sin servicios ni lenguajes adicionales.
 * **Caché en memoria** de `STATS_CACHE_MINUTES` (60 por defecto): las ofertas cambian cada 12 h, así que no hace falta recalcular en cada visita. Los tamaños de las listas son configurables: `STATS_TOP_SKILLS` y `STATS_TOP_COMPANIES` (12 cada una, así las dos tarjetas quedan de la misma altura).
-* **Capas:** `StatsService` (aplicación: porcentajes y caché) usa el puerto `OfferStatsRepository`, implementado en `persistence/pg-offer-stats-repository.ts` con seis consultas de agregación que corren en paralelo.
+* **Capas:** `StatsService` (aplicación: porcentajes y caché) usa el puerto `OfferStatsRepository`, implementado en `persistence/pg-offer-stats-repository.ts` con seis consultas de agregación que corren en paralelo. El área de cada tecnología sale del catálogo de skills (`domain/normalization/skill-catalog.ts`), así que la agrupación por área se hace en `StatsService`, no en SQL.
 
 ## Métricas
 
@@ -24,7 +24,8 @@ Mostrar qué está pidiendo el mercado tech, a partir de las ofertas activas que
 | % remotas | Ofertas `REMOTE` sobre el total |
 | % piden inglés | Ofertas con algún requisito de inglés sobre el total |
 | Tecnologías más pedidas | Las 12 skills requeridas que más aparecen (cantidad y % de ofertas) |
-| Seniority | Ofertas por nivel (sin `UNKNOWN`) y años de experiencia mínimos promedio de cada nivel |
+| Tecnologías por área | Menciones de skills requeridas agrupadas por área del catálogo (Lenguajes, Frontend, Backend, Datos, Cloud y DevOps, Metodologías y herramientas), con % sobre el total de menciones reconocidas. Las skills fuera del catálogo (etiquetas genéricas como "Software Architecture") no tienen área y no se cuentan |
+| Seniority | Ofertas por nivel (sin `UNKNOWN`), años de experiencia mínimos promedio y % de ofertas del nivel que piden inglés |
 | Modalidad | Ofertas por modalidad |
 | Fuentes | Ofertas por fuente |
 | Empresas que más publican | Las 12 con más ofertas activas |
@@ -39,7 +40,10 @@ Mostrar qué está pidiendo el mercado tech, a partir de las ofertas activas que
     "generatedAt": "2026-10-14T12:00:00.000Z",
     "totals": { "offers": 295, "companies": 101, "remotePercent": 53, "englishPercent": 41 },
     "topSkills": [{ "name": "React", "count": 122, "percent": 41 }],
-    "seniority": [{ "level": "SENIOR", "count": 166, "avgExperienceYears": 4.8 }],
+    "skillAreas": [{ "area": "BACKEND", "count": 588, "percent": 24 }],
+    "seniority": [
+      { "level": "SENIOR", "count": 166, "avgExperienceYears": 4.8, "englishPercent": 30 }
+    ],
     "modality": [{ "modality": "REMOTE", "count": 155 }],
     "sources": [{ "source": "getonboard", "count": 280 }],
     "topCompanies": [{ "name": "Empresa X", "count": 12 }]
@@ -52,6 +56,16 @@ Los porcentajes son enteros redondeados; `avgExperienceYears` tiene un decimal o
 ## Frontend
 
 * Página `/tendencias`, enlazada desde la barra superior ("Tendencias"; en el celular, solo el ícono).
-* Números destacados (ofertas, empresas, % remotas, % piden inglés) y barras horizontales hechas con CSS: sin librería de gráficos.
-* Distribución simétrica: una fila con los dos rankings de la misma altura (tecnologías y empresas) y otra con las tres distribuciones (seniority, modalidad y fuentes) en columnas iguales. En el celular, una columna.
+* Gráficos hechos con CSS, sin librería (`components/Charts.tsx`); un tipo de gráfico según el dato:
+
+  | Dato | Gráfico | Por qué |
+  | --- | --- | --- |
+  | Tecnologías y empresas | Ranking: barras horizontales numeradas (los tres primeros destacados) | Mejor lectura para listas ordenadas con nombres largos |
+  | Tecnologías por área y modalidad | Anillo (`conic-gradient`) con el total en el centro | Son partes de un total |
+  | Seniority | Columnas verticales de Trainee a Manager, con años promedio e inglés debajo | Es una escala ordenada |
+  | Fuentes | Una barra apilada al 100 % | Pocas partes; ocupa poco |
+
+* Las formas son decorativas (`aria-hidden`): cada valor también está escrito como texto en la leyenda o junto a su etiqueta.
+* Paleta de gráficos en `styles/tokens.css` (`--chart-*`), con contraste de al menos 3:1 sobre blanco. Cada categoría mantiene su color (remoto siempre verde, presencial siempre naranja); los colores están en `components/labels.ts`.
+* Distribución: números destacados (con un borde de color cada uno); los dos rankings lado a lado; los dos anillos lado a lado; seniority y fuentes a lo ancho. En el celular, una columna.
 * Textos en español; los niveles y modalidades usan las mismas etiquetas que el resto de la app.

@@ -23,6 +23,15 @@
   --accent-cyan-soft: #dff3ff;
   --accent-amber: #b06d00;
   --accent-amber-soft: #fff2d6;
+
+  /* Chart palette: distinct hues with at least 3:1 contrast on white (WCAG, graphics). */
+  --chart-blue: #1a73e8;
+  --chart-green: #1e8e3e;
+  --chart-orange: #c26401;
+  --chart-violet: #8430ce;
+  --chart-teal: #007b83;
+  --chart-red: #d93025;
+  --chart-gray: #80868b;
   --md-warning: #c27c00;
   --md-warning-container: #ffe3a3;
   --md-on-warning-container: #261a00;

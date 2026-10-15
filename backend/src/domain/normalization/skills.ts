@@ -1,6 +1,6 @@
 import type { Skill } from '../entities.js';
 import { escapeRegExp, foldText } from '../text.js';
-import { SKILL_CATALOG } from './skill-catalog.js';
+import { SKILL_CATALOG, type SkillArea } from './skill-catalog.js';
 
 const EDGE_PUNCTUATION = /^[\s,;:!?()[\]{}"'*\u2022\u00b7-]+|[\s,;:!?()[\]{}"'*\u2022\u00b7-]+$/g;
 
@@ -20,6 +20,16 @@ const aliasIndex: ReadonlyMap<string, string> = (() => {
   }
   return map;
 })();
+
+const areaIndex: ReadonlyMap<string, SkillArea> = new Map(
+  SKILL_CATALOG.map((def) => [skillKey(def.name), def.area]),
+);
+
+/** Area of a catalog skill (by canonical name or alias); null for skills outside the catalog. */
+export function skillArea(name: string): SkillArea | null {
+  const canonical = aliasIndex.get(skillKey(name));
+  return canonical ? (areaIndex.get(skillKey(canonical)) ?? null) : null;
+}
 
 /**
  * Normalizes a skill name: resolves aliases (JS -> JavaScript, Postgres -> PostgreSQL)

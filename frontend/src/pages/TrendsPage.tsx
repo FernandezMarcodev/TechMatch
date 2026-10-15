@@ -1,45 +1,18 @@
-import { useEffect, useId, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ApiError, api, type OfferStats } from '../api/client';
-import { Icon } from '../components/Icon';
+import { ChartCard, ColumnChart, DonutChart, RankingChart, StackedBar } from '../components/Charts';
+import { Icon, type IconName } from '../components/Icon';
 import { Page } from '../components/Layout';
 import { StateView } from '../components/StateView';
-import { MODALITY_LABELS, SENIORITY_LABELS, SOURCE_NAMES } from '../components/labels';
-
-interface Bar {
-  label: string;
-  value: number;
-  /** Text after the bar, e.g. "41 %" or "12 ofertas". */
-  detail: string;
-}
-
-/** Horizontal bars drawn with CSS (no chart library). Widths are relative to the largest. */
-function BarChart({ title, bars, note }: { title: string; bars: Bar[]; note?: string }) {
-  const max = Math.max(1, ...bars.map((b) => b.value));
-  const titleId = useId();
-  return (
-    <section className="trend-card" aria-labelledby={titleId}>
-      <h2 id={titleId} className="trend-card__title">
-        {title}
-      </h2>
-      {note && <p className="body-muted trend-card__note">{note}</p>}
-      {bars.length === 0 ? (
-        <p className="body-muted">Todavía no hay datos.</p>
-      ) : (
-        <ul className="bar-chart">
-          {bars.map((bar) => (
-            <li key={bar.label} className="bar-chart__row">
-              <span className="bar-chart__label">{bar.label}</span>
-              <span className="bar-chart__track" aria-hidden="true">
-                <span className="bar-chart__bar" style={{ width: `${(bar.value / max) * 100}%` }} />
-              </span>
-              <span className="bar-chart__value">{bar.detail}</span>
-            </li>
-          ))}
-        </ul>
-      )}
-    </section>
-  );
-}
+import {
+  MODALITY_COLORS,
+  MODALITY_LABELS,
+  SENIORITY_LABELS,
+  SKILL_AREAS,
+  SOURCE_COLORS,
+  SOURCE_NAMES,
+  UNKNOWN_COLOR,
+} from '../components/labels';
 
 type State =
   { kind: 'loading' } | { kind: 'error'; message: string } | { kind: 'ready'; stats: OfferStats };
@@ -88,17 +61,33 @@ export function TrendsPage() {
     );
   }
 
-  const { totals, topSkills, seniority, modality, sources, topCompanies, generatedAt } =
+  const { totals, topSkills, skillAreas, seniority, modality, sources, topCompanies, generatedAt } =
     state.stats;
-  const tiles: {
-    icon: 'briefcase' | 'home' | 'globe' | 'language';
-    value: string;
-    label: string;
-  }[] = [
-    { icon: 'briefcase', value: String(totals.offers), label: 'ofertas activas' },
-    { icon: 'home', value: String(totals.companies), label: 'empresas' },
-    { icon: 'globe', value: `${totals.remotePercent} %`, label: 'son remotas' },
-    { icon: 'language', value: `${totals.englishPercent} %`, label: 'piden inglés' },
+  const tiles: { icon: IconName; color: string; value: string; label: string }[] = [
+    {
+      icon: 'briefcase',
+      color: 'var(--chart-blue)',
+      value: String(totals.offers),
+      label: 'ofertas activas',
+    },
+    {
+      icon: 'home',
+      color: 'var(--chart-violet)',
+      value: String(totals.companies),
+      label: 'empresas',
+    },
+    {
+      icon: 'globe',
+      color: 'var(--chart-green)',
+      value: `${totals.remotePercent} %`,
+      label: 'son remotas',
+    },
+    {
+      icon: 'language',
+      color: 'var(--chart-orange)',
+      value: `${totals.englishPercent} %`,
+      label: 'piden inglés',
+    },
   ];
   const updated = new Intl.DateTimeFormat('es-AR', {
     dateStyle: 'long',
@@ -118,7 +107,7 @@ export function TrendsPage() {
 
       <ul className="trend-tiles">
         {tiles.map((tile) => (
-          <li key={tile.label} className="trend-tile">
+          <li key={tile.label} className="trend-tile" style={{ color: tile.color }}>
             <Icon name={tile.icon} size={22} />
             <span className="trend-tile__value">{tile.value}</span>
             <span className="trend-tile__label">{tile.label}</span>
@@ -127,52 +116,103 @@ export function TrendsPage() {
       </ul>
 
       <div className="trend-grid trend-grid--2">
-        <BarChart
+        <ChartCard
           title="Tecnologías más pedidas"
+          icon="code"
+          color="var(--chart-blue)"
           note="Porcentaje de ofertas que la exigen (sin contar las deseables)."
-          bars={topSkills.map((s) => ({ label: s.name, value: s.count, detail: `${s.percent} %` }))}
-        />
-        <BarChart
+        >
+          <RankingChart
+            items={topSkills.map((s) => ({
+              label: s.name,
+              value: s.count,
+              detail: `${s.percent} %`,
+            }))}
+          />
+        </ChartCard>
+        <ChartCard
           title="Empresas que más publican"
+          icon="briefcase"
+          color="var(--chart-violet)"
           note="Cantidad de ofertas activas de cada empresa."
-          bars={topCompanies.map((c) => ({
-            label: c.name,
-            value: c.count,
-            detail: String(c.count),
-          }))}
-        />
+        >
+          <RankingChart
+            items={topCompanies.map((c) => ({
+              label: c.name,
+              value: c.count,
+              detail: String(c.count),
+            }))}
+          />
+        </ChartCard>
       </div>
-      <div className="trend-grid trend-grid--3">
-        <BarChart
-          title="Seniority"
-          note="Ofertas por nivel y años de experiencia que piden en promedio."
-          bars={seniority.map((s) => ({
-            label: SENIORITY_LABELS[s.level] ?? s.level,
-            value: s.count,
-            detail:
-              s.avgExperienceYears === null
-                ? String(s.count)
-                : `${s.count} · ${s.avgExperienceYears.toLocaleString('es-AR')} años`,
-          }))}
-        />
-        <BarChart
+
+      <div className="trend-grid trend-grid--2">
+        <ChartCard
+          title="Tecnologías por área"
+          icon="target"
+          color="var(--chart-teal)"
+          note="De todas las tecnologías exigidas que reconocemos, cuántas son de cada área."
+        >
+          <DonutChart
+            centerLabel="menciones"
+            parts={skillAreas.map((a) => ({
+              label: SKILL_AREAS[a.area].label,
+              value: a.count,
+              color: SKILL_AREAS[a.area].color,
+            }))}
+          />
+        </ChartCard>
+        <ChartCard
           title="Modalidad"
+          icon="laptop"
+          color="var(--chart-green)"
           note="Ofertas por modalidad de trabajo."
-          bars={modality.map((m) => ({
-            label: m.modality ? MODALITY_LABELS[m.modality] : 'Sin especificar',
-            value: m.count,
-            detail: String(m.count),
-          }))}
-        />
-        <BarChart
+        >
+          <DonutChart
+            centerLabel="ofertas"
+            parts={modality.map((m) => ({
+              label: m.modality ? MODALITY_LABELS[m.modality] : 'Sin especificar',
+              value: m.count,
+              color: m.modality ? MODALITY_COLORS[m.modality] : UNKNOWN_COLOR,
+            }))}
+          />
+        </ChartCard>
+      </div>
+
+      <div className="trend-grid">
+        <ChartCard
+          title="Seniority"
+          icon="trending"
+          color="var(--chart-orange)"
+          note="Ofertas por nivel, con los años de experiencia que piden en promedio y cuántas piden inglés."
+        >
+          <ColumnChart
+            columns={seniority.map((s) => ({
+              label: SENIORITY_LABELS[s.level] ?? s.level,
+              value: s.count,
+              details: [
+                s.avgExperienceYears === null
+                  ? 'Años: sin datos'
+                  : `${s.avgExperienceYears.toLocaleString('es-AR')} años`,
+                `Inglés: ${s.englishPercent}\u00a0%`,
+              ],
+            }))}
+          />
+        </ChartCard>
+        <ChartCard
           title="Fuentes"
+          icon="globe"
+          color="var(--chart-gray)"
           note="De dónde vienen las ofertas."
-          bars={sources.map((s) => ({
-            label: SOURCE_NAMES[s.source] ?? s.source,
-            value: s.count,
-            detail: String(s.count),
-          }))}
-        />
+        >
+          <StackedBar
+            parts={sources.map((s) => ({
+              label: SOURCE_NAMES[s.source] ?? s.source,
+              value: s.count,
+              color: SOURCE_COLORS[s.source] ?? UNKNOWN_COLOR,
+            }))}
+          />
+        </ChartCard>
       </div>
     </Page>
   );
