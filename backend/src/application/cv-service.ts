@@ -126,6 +126,35 @@ export class CvService {
     this.deps.logger.info({ cvId, userId }, 'Saved CV deleted');
   }
 
+  /**
+   * After a job sync, recalculates the recommendations of every processed CV against the
+   * current active offers (new ones included, closed ones gone, current matching rules).
+   * The offers are loaded once; a CV that fails is logged and the rest go on.
+   */
+  async recalculateAll(): Promise<{ recalculated: number; failed: number }> {
+    const { cvs, profiles, matching, logger } = this.deps;
+    const startedAt = Date.now();
+    const activeJobs = await matching.findActiveJobs();
+    let recalculated = 0;
+    let failed = 0;
+    for (const cvId of await cvs.findProcessedIds()) {
+      try {
+        const profile = await profiles.findByCvId(cvId);
+        if (!profile) continue;
+        await matching.computeForProfile(profile, activeJobs);
+        recalculated += 1;
+      } catch (err) {
+        failed += 1;
+        logger.warn({ cvId, err }, 'Recommendations could not be recalculated');
+      }
+    }
+    logger.info(
+      { recalculated, failed, offers: activeJobs.length, durationMs: Date.now() - startedAt },
+      'Recommendations recalculated',
+    );
+    return { recalculated, failed };
+  }
+
   async process(cvId: string): Promise<void> {
     const { cvs, profiles, storage, processor, matching, clock, ids, logger } = this.deps;
     const cv = await cvs.findById(cvId);

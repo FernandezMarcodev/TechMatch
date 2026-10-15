@@ -51,7 +51,9 @@ const server = app.listen(env.PORT, () => {
 
 // Job sync can also run as its own process (npm run sync-jobs -- --schedule).
 const scheduler = env.JOB_SYNC_ENABLED
-  ? createJobSyncScheduler(createJobSyncService(env, pool, logger), env, logger)
+  ? createJobSyncScheduler(createJobSyncService(env, pool, logger), env, logger, () =>
+      container.cvService.recalculateAll(),
+    )
   : undefined;
 scheduler?.start(env.JOB_SYNC_RUN_ON_START);
 

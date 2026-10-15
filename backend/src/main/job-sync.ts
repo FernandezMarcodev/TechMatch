@@ -9,7 +9,7 @@ import {
 import { GetOnBoardConnector } from '../job-sources/connectors/getonboard.js';
 import { HttpClient, type HttpClientOptions } from '../job-sources/http-client.js';
 import { IntervalScheduler } from '../job-sources/scheduler.js';
-import { JobSyncService } from '../job-sources/sync-service.js';
+import { JobSyncService, type SourceSyncSummary } from '../job-sources/sync-service.js';
 import type { JobSourceConnector } from '../job-sources/types.js';
 import { PgJobOfferRepository } from '../persistence/pg-job-offer-repository.js';
 import { systemClock } from './container.js';
@@ -66,6 +66,28 @@ export function createJobSyncService(env: Env, pool: DbPool, logger: Logger): Jo
   return new JobSyncService(connectors, new PgJobOfferRepository(pool), systemClock, logger);
 }
 
-export function createJobSyncScheduler(service: JobSyncService, env: Env, logger: Logger) {
-  return new IntervalScheduler(() => service.syncAll(), env.JOB_SYNC_INTERVAL_HOURS, logger);
+/**
+ * One sync of every source and, if at least one of them synced, a recalculation of the
+ * recommendations of every processed CV, so they include the new offers.
+ */
+export async function syncAndRecalculate(
+  service: Pick<JobSyncService, 'syncAll'>,
+  recalculate: () => Promise<unknown>,
+): Promise<SourceSyncSummary[]> {
+  const summaries = await service.syncAll();
+  if (summaries.some((s) => s.status === 'ok')) await recalculate();
+  return summaries;
+}
+
+export function createJobSyncScheduler(
+  service: JobSyncService,
+  env: Env,
+  logger: Logger,
+  recalculate: () => Promise<unknown>,
+) {
+  return new IntervalScheduler(
+    () => syncAndRecalculate(service, recalculate),
+    env.JOB_SYNC_INTERVAL_HOURS,
+    logger,
+  );
 }

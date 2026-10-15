@@ -30,7 +30,7 @@ Configuración versionada en el repositorio:
 
 * `render.yaml`: los valores del servicio de Render (como referencia; el servicio se crea a mano).
 * `frontend/.env.example` y `backend/.env.example`: variables de cada parte.
-* `.github/workflows/sync-jobs.yml`: la sincronización programada y, después, el borrado de los CVs con más de `CV_RETENTION_DAYS` días (30 por defecto).
+* `.github/workflows/sync-jobs.yml`: la sincronización programada (que al terminar recalcula las recomendaciones de los CVs analizados) y, después, el borrado de los CVs con más de `CV_RETENTION_DAYS` días (30 por defecto).
 
 ## Qué implica el plan gratuito
 
