@@ -16,6 +16,7 @@ Aplicación web que analiza un CV en PDF y recomienda ofertas de trabajo en tecn
   - **CV adaptado a una oferta**: editor con vista previa en formato Harvard, recálculo de la compatibilidad y descarga en PDF. Solo reordena y destaca lo que el CV ya tiene; lo que falta son sugerencias.
   - **CVs guardados, solo si el usuario lo elige**: historial en "Mi cuenta", con borrado de cada CV y de la cuenta completa.
 - **Cuentas completas**: registro con verificación de email obligatoria, inicio de sesión, recuperación de contraseña por email.
+- **Qué te falta**: junto a las recomendaciones, las tecnologías que más piden las ofertas activas y que no aparecen en tu CV, con el porcentaje de ofertas que exige cada una.
 - **Panel público de tendencias**: tecnologías más pedidas y por área, seniority (con los años de experiencia promedio y cuántas piden inglés), modalidad, fuentes y empresas que más publican, calculados con agregaciones SQL sobre las ofertas activas y mostrados con gráficos propios en CSS (rankings, anillos y columnas, sin librería de gráficos).
 - Interfaz en **Material Design 3**, responsive y en español.
 

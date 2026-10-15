@@ -1,7 +1,7 @@
 import type { JobSource, Modality, Seniority } from '../domain/enums.js';
 import type { SkillArea } from '../domain/normalization/skill-catalog.js';
 import { skillArea } from '../domain/normalization/skills.js';
-import type { Clock } from './ports.js';
+import type { Clock, SkillDemand } from './ports.js';
 
 /** Raw aggregates over the active offers, as the database computes them. */
 export interface OfferAggregates {
@@ -78,8 +78,8 @@ function byArea(skills: OfferAggregates['skills']): OfferStats['skillAreas'] {
  * Market trends over the active offers, for the public dashboard. No user or CV data.
  * Offers change every 12 h, so the result is cached for `cacheMinutes`.
  */
-export class StatsService {
-  private cached: OfferStats | undefined;
+export class StatsService implements SkillDemand {
+  private cached: { stats: OfferStats; demand: { name: string; percent: number }[] } | undefined;
 
   constructor(
     private readonly repository: OfferStatsRepository,
@@ -88,13 +88,25 @@ export class StatsService {
   ) {}
 
   async getOfferStats(): Promise<OfferStats> {
+    return (await this.load()).stats;
+  }
+
+  /**
+   * Catalog technologies only: CV skills are read with the same catalog, so a generic tag
+   * outside it ("Software Architecture") could never be found in a CV.
+   */
+  async requiredSkills(): Promise<readonly { name: string; percent: number }[]> {
+    return (await this.load()).demand;
+  }
+
+  private async load() {
     const now = this.clock.now();
     const maxAgeMs = this.options.cacheMinutes * 60_000;
-    if (this.cached && now.getTime() - this.cached.generatedAt.getTime() < maxAgeMs) {
+    if (this.cached && now.getTime() - this.cached.stats.generatedAt.getTime() < maxAgeMs) {
       return this.cached;
     }
     const a = await this.repository.aggregate({ topCompanies: this.options.topCompanies });
-    this.cached = {
+    const stats: OfferStats = {
       generatedAt: now,
       totals: {
         offers: a.offers,
@@ -114,6 +126,10 @@ export class StatsService {
       sources: a.sources,
       topCompanies: a.topCompanies,
     };
+    const demand = a.skills
+      .filter((s) => skillArea(s.name) !== null)
+      .map((s) => ({ name: s.name, percent: percent(s.count, a.offers) }));
+    this.cached = { stats, demand };
     return this.cached;
   }
 }

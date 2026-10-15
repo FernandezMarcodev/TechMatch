@@ -29,6 +29,7 @@ beforeAll(async () => {
       STATS_CACHE_MINUTES: 60,
       STATS_TOP_SKILLS: 15,
       STATS_TOP_COMPANIES: 10,
+      MISSING_SKILLS_LIMIT: 5,
     },
     frontendUrl: 'http://techmatch.test',
     emailSender: new MemoryEmailSender(),

@@ -113,6 +113,13 @@ export function createRoutes({
     });
   });
 
+  // "Qué te falta": in-demand technologies not found in the CV (same visibility as the CV).
+  router.get('/cvs/:cvId/missing-skills', async (req, res) => {
+    const cvId = idParam(req, 'cvId', cvNotFound());
+    const skills = await queries.getMissingSkills(cvId, await viewerId(req));
+    res.json({ data: { cvId, skills } });
+  });
+
   // Saved CVs (docs/17-CUENTAS-DE-USUARIO.md § Privilegios): saving is the user's choice.
   router.post('/cvs/:cvId/save', authenticated, async (req, res) => {
     const cvId = idParam(req, 'cvId', cvNotFound());
