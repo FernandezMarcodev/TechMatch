@@ -5,17 +5,28 @@ import { CRITERIA } from './labels';
 
 const STATUS_ICON: Record<MatchReason['status'], IconName> = {
   positive: 'check',
+  partial: 'minus',
   negative: 'close',
   neutral: 'minus',
 };
 
 const SUMMARY_SIZE = 3;
 
-/** The technologies reason first, then mismatches, then matches: what matters most to decide. */
+const STATUS_ORDER: Record<MatchReason['status'], number> = {
+  negative: 0,
+  partial: 1,
+  positive: 2,
+  neutral: 3,
+};
+
+/**
+ * The technologies reason first, then mismatches, partial matches and matches: what matters
+ * most to decide.
+ */
 function highlights(reasons: MatchReason[]): MatchReason[] {
   const skills = reasons.filter((r) => r.criterion === 'skills');
   const rest = reasons.filter((r) => r.criterion !== 'skills' && r.status !== 'neutral');
-  rest.sort((a, b) => (a.status === b.status ? 0 : a.status === 'negative' ? -1 : 1));
+  rest.sort((a, b) => STATUS_ORDER[a.status] - STATUS_ORDER[b.status]);
   return [...skills, ...rest].slice(0, SUMMARY_SIZE);
 }
 

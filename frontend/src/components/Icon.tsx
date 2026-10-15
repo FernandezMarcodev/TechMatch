@@ -145,6 +145,60 @@ const PATHS = {
     </>
   ),
   sparkle: <path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z" />,
+  // Trends dashboard sections.
+  cpu: (
+    <>
+      <rect x="5" y="5" width="14" height="14" rx="2" />
+      <rect x="9" y="9" width="6" height="6" rx="1" />
+      <line x1="9" y1="2" x2="9" y2="5" />
+      <line x1="15" y1="2" x2="15" y2="5" />
+      <line x1="9" y1="19" x2="9" y2="22" />
+      <line x1="15" y1="19" x2="15" y2="22" />
+      <line x1="2" y1="9" x2="5" y2="9" />
+      <line x1="2" y1="15" x2="5" y2="15" />
+      <line x1="19" y1="9" x2="22" y2="9" />
+      <line x1="19" y1="15" x2="22" y2="15" />
+    </>
+  ),
+  building: (
+    <>
+      <rect x="4" y="2" width="16" height="20" rx="2" />
+      <line x1="9" y1="6" x2="9" y2="6.01" />
+      <line x1="15" y1="6" x2="15" y2="6.01" />
+      <line x1="9" y1="10" x2="9" y2="10.01" />
+      <line x1="15" y1="10" x2="15" y2="10.01" />
+      <line x1="9" y1="14" x2="9" y2="14.01" />
+      <line x1="15" y1="14" x2="15" y2="14.01" />
+      <path d="M10 22v-4h4v4" />
+    </>
+  ),
+  pieChart: (
+    <>
+      <path d="M21.2 15.9A10 10 0 1 1 8 2.8" />
+      <path d="M22 12A10 10 0 0 0 12 2v10z" />
+    </>
+  ),
+  monitor: (
+    <>
+      <rect x="2" y="3" width="20" height="14" rx="2" />
+      <line x1="8" y1="21" x2="16" y2="21" />
+      <line x1="12" y1="17" x2="12" y2="21" />
+    </>
+  ),
+  barChart: (
+    <>
+      <line x1="6" y1="20" x2="6" y2="15" />
+      <line x1="12" y1="20" x2="12" y2="10" />
+      <line x1="18" y1="20" x2="18" y2="4" />
+    </>
+  ),
+  layers: (
+    <>
+      <polygon points="12 2 2 7 12 12 22 7 12 2" />
+      <polyline points="2 17 12 22 22 17" />
+      <polyline points="2 12 12 17 22 12" />
+    </>
+  ),
 } satisfies Record<string, ReactNode>;
 
 export type IconName = keyof typeof PATHS;

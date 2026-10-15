@@ -252,11 +252,12 @@ El score numérico es interno: se usa para clasificar y ordenar, y se guarda par
 
 ## Razones
 
-El motor genera una razón por criterio, con estado `positive`, `negative` o `neutral`:
+El motor genera una razón por criterio, con estado `positive`, `partial`, `negative` o `neutral`:
 
-* `positive`: score ≥ 75;
-* `negative`: score < 50;
-* `neutral`: valores intermedios, requisitos no exigidos o criterios no evaluables.
+* `positive`: score ≥ 75 (verde en la interfaz);
+* `partial`: valores intermedios, el criterio se cumple en parte (naranja);
+* `negative`: score < 50 (rojo);
+* `neutral`: requisitos no exigidos o criterios no evaluables (gris).
 
 Ejemplo:
 
