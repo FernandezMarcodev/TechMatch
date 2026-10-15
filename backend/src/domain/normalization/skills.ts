@@ -32,6 +32,14 @@ export function skillArea(name: string): SkillArea | null {
 }
 
 /**
+ * True for skills of the catalog. CVs are read only with the catalog, so a skill outside it
+ * (a generic tag such as "Full-stack" or "Prompt Engineering") can never be found in a CV.
+ */
+export function isCatalogSkill(normalizedName: string): boolean {
+  return aliasIndex.has(normalizedName);
+}
+
+/**
  * Normalizes a skill name: resolves aliases (JS -> JavaScript, Postgres -> PostgreSQL)
  * and falls back to the cleaned input for skills outside the catalog.
  */

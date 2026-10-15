@@ -126,9 +126,15 @@ export function explicitExperienceYears(text: string): number | null {
 const INSTITUTION_HINT =
   /\b(universidad|instituto|escuela|colegio|facultad|university|college|school|utn|uba|itba|unlp|uade|unc)\b/i;
 
+// Lines that describe a degree ("Materias relevantes: Ingeniería de Software I y II") rather
+// than name one.
+const DEGREE_DETAIL =
+  /^\s*(?:materias|asignaturas|cursadas|coursework|relevant coursework|promedio|gpa|tesis|thesis)\b/i;
+
 function extractEducation(lines: readonly string[]): Education[] {
   const result: Education[] = [];
   lines.forEach((line, i) => {
+    if (DEGREE_DETAIL.test(line)) return;
     const level = detectEducationLevel(line);
     if (!level) return;
     const range = findDateRanges(line)[0];

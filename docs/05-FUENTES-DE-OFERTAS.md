@@ -129,6 +129,7 @@ Database
   * está bajo un subtítulo deseable ("Conocimientos deseables") hasta el siguiente subtítulo.
 * Además de los tags, se reconocen tecnologías del catálogo de aliases en el título, los requisitos y la descripción.
 * Experiencia, educación e idiomas exigidos se leen de los **requisitos** cuando la fuente los separa. La descripción suele hablar de la empresa ("15 años de experiencia en el mercado") y no debe interpretarse como requisito.
+* Educación: una línea es requisito educativo solo si menciona un nivel **y** habla de estudios (título, carrera, formación, egresado, licenciatura, "ingeniería en…"). Así, "buenas prácticas de ingeniería" o "experiencia como ingeniero de software" no se leen como "exige título universitario". El área de estudio termina en la primera cláusula ("…o carreras afines, con una duración de 4 semestres") y solo se acepta si nombra una disciplina; si no, se conserva el nivel sin área.
 * Seniority: primero el título, luego el declarado y por último las líneas de requisitos.
 * Empresa ausente → "Empresa no especificada" (no se inventa).
 

@@ -182,6 +182,35 @@ describe('normalizeJobOffer', () => {
   });
 
   it.each([
+    'Contribuir a la mejora continua del código con code reviews y buenas prácticas de ingeniería.',
+    '5+ años de experiencia como ingeniero/a de software o datos.',
+    'Works quickly without requiring a high degree of oversight.',
+  ])('does not read "%s" as an education requirement', (line) => {
+    expect(normalizeJobOffer(raw({ requirements: [line] })).educationRequirements).toBeNull();
+  });
+
+  it('keeps the level but not a field that names no discipline', () => {
+    const offer = normalizeJobOffer(
+      raw({ requirements: ['Título profesional universitario de 4 o más años de duración.'] }),
+    );
+    expect(offer.educationRequirements).toEqual({ level: 'UNIVERSITY', fields: [] });
+  });
+
+  it('ends the field of study where a new clause starts', () => {
+    const offer = normalizeJobOffer(
+      raw({
+        requirements: [
+          'Formación Académica: Poseer título profesional o técnico en Ingeniería en Informática, Ciencias de la Computación o carreras afines, con una duración mínima de 4 semestres en instituciones acreditadas.',
+        ],
+      }),
+    );
+    expect(offer.educationRequirements).toEqual({
+      level: 'UNIVERSITY',
+      fields: ['Ingeniería en Informática, Ciencias de la Computación o carreras afines'],
+    });
+  });
+
+  it.each([
     ['2+ años de experiencia', 2],
     ['Experiencia mínima de 4 años', 4],
     ['5 years of experience', 5],
