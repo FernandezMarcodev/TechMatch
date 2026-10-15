@@ -29,6 +29,12 @@ export const matchingConfigSchema = z
      * offers with almost no matching technologies into MEDIUM.
      */
     criterionMinimums: z.partialRecord(z.enum(CRITERIA), score),
+    /**
+     * Minimum score a criterion must reach for a HIGH level; below it the offer is at most
+     * MEDIUM. Generous criteria (experience, education, remote) must not turn an offer where
+     * half the technologies are missing into "high compatibility".
+     */
+    highMinimums: z.partialRecord(z.enum(CRITERIA), score),
     skills: z.object({
       requiredSkillWeight: z.number().positive(),
       optionalSkillWeight: z.number().positive(),
@@ -92,6 +98,8 @@ export const DEFAULT_MATCHING_CONFIG: MatchingConfig = {
   // Skills below 40%, a seniority two or more levels away (score 20, e.g. Senior offer and
   // Junior CV) or an onsite/hybrid offer in another region (modality = 0) exclude the offer.
   criterionMinimums: { skills: 40, seniority: 50, modality: 50 },
+  // HIGH needs most of the technologies (e.g. 1 of 2 required = 50% → at most MEDIUM).
+  highMinimums: { skills: 60 },
   skills: { requiredSkillWeight: 2, optionalSkillWeight: 1 },
   seniority: { scoreByDistance: [100, 60, 20] },
   education: {

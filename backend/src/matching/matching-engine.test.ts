@@ -400,6 +400,27 @@ describe('evaluateMatch — missing information (UNKNOWN is neither match nor mi
     ).toBe('MEDIUM');
   });
 
+  it('is at most MEDIUM when most of the technologies are missing, however strong the rest', () => {
+    // 1 of 2 required skills = 50: above the minimum (40), below the HIGH minimum (60).
+    // Every other criterion is perfect: 50*.35 + 65 = 82.5 → the score alone would be HIGH.
+    const half = job({ skills: jobSkills(['Java', 'Kubernetes']) });
+    const result = evaluateMatch(profile(), half, config);
+    expect(criterion(result, 'skills').score).toBe(50);
+    expect(result.score).toBeGreaterThanOrEqual(config.thresholds.high);
+    expect(result.level).toBe('MEDIUM');
+
+    // 2 of 3 (67) is "most of the technologies": HIGH is allowed.
+    const most = evaluateMatch(
+      profile(),
+      job({ skills: jobSkills(['Java', 'Spring', 'Go']) }),
+      config,
+    );
+    expect(most.level).toBe('HIGH');
+
+    const withoutCap = { ...config, highMinimums: {} };
+    expect(evaluateMatch(profile(), half, withoutCap).level).toBe('HIGH');
+  });
+
   it('is never recommended when the seniority is two or more levels away', () => {
     // Junior CV vs. Senior offer: seniority 20, but perfect skills would still reach MEDIUM.
     const gap = evaluateMatch(

@@ -189,6 +189,20 @@ const CASES: readonly GoldenCase[] = [
     skillsScore: 100,
   },
   {
+    // Real case (Despegar, Lever): an analyst offer that only mentions SQL and Excel used to
+    // reach HIGH for a backend developer with a single matching technology.
+    name: 'backend Java → analyst offer with only SQL and Excel (half the technologies)',
+    cv: CVS.backendJava,
+    job: offer({
+      title: 'Analista de Operational Excellence',
+      location: 'Buenos Aires',
+      modality: 'Híbrido',
+      requirements: ['Manejo de SQL y Excel avanzado', 'Ingeniería en Sistemas o afines'],
+      skills: ['SQL', 'Excel'],
+    }),
+    expected: 'MEDIUM',
+  },
+  {
     name: '.NET senior → Java semi senior offer (different stack)',
     cv: CVS.dotnetSenior,
     job: offer({

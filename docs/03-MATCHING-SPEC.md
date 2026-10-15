@@ -229,6 +229,8 @@ Además, el resultado es `LOW` cuando:
 * **el seniority está a dos niveles o más** (mínimo 50 para seniority, que deja afuera el puntaje 20): una oferta Senior no se recomienda a un CV Junior, aunque las tecnologías coincidan. A un nivel de distancia (Junior y Semi Senior) sí puede recomendarse. Si el seniority de la oferta o del CV es `UNKNOWN`, no aplica;
 * **la modalidad es incompatible** (mínimo 50 para modalidad): una oferta presencial o híbrida en otra región o país no se recomienda, porque el candidato no podría asistir. Las ofertas remotas no se ven afectadas.
 
+**Mínimos para HIGH** (`highMinimums`): una oferta llega a HIGH solo si **coincide al menos el 60 % de las tecnologías**; si no, queda como máximo en MEDIUM aunque el puntaje supere 75. Los criterios generosos (experiencia sin exigencia, educación, trabajo remoto) no deben convertir en "alta compatibilidad" una oferta a la que le falta la mitad del stack. La razón de tecnologías ya informa cuáles faltan. Caso real: una oferta que solo menciona SQL y Excel quedaba en HIGH para un CV que tenía una de las dos.
+
 ## Recomendaciones
 
 Solo:
