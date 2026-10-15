@@ -7,6 +7,7 @@ import { Icon } from '../components/Icon';
 import { Page } from '../components/Layout';
 import { SaveCvButton } from '../components/SaveCvButton';
 import { LevelChip, LevelMeter } from '../components/MatchBadge';
+import { MissingSkills } from '../components/MissingSkills';
 import { ReasonList } from '../components/ReasonList';
 import { StateView } from '../components/StateView';
 import { MODALITY_ICONS, modalityLabel, sourceLabel } from '../components/labels';
@@ -223,6 +224,8 @@ export function RecommendationsPage() {
           {uploadAnother}
         </div>
       </header>
+
+      <MissingSkills cvId={cvId} />
 
       {total === 0 ? (
         <StateView icon="search" title="Todavía no hay ofertas compatibles">

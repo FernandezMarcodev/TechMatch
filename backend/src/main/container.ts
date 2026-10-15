@@ -45,6 +45,7 @@ export interface ContainerOptions {
     | 'STATS_CACHE_MINUTES'
     | 'STATS_TOP_SKILLS'
     | 'STATS_TOP_COMPANIES'
+    | 'MISSING_SKILLS_LIMIT'
   >;
   /** Base of the links in the emails (see `frontendUrl` in config/env.ts). */
   frontendUrl: string;
@@ -82,14 +83,16 @@ export function createContainer(options: ContainerOptions) {
     maxSizeBytes: env.CV_MAX_SIZE_BYTES,
   });
 
+  const stats = new StatsService(new PgOfferStatsRepository(pool), clock, {
+    cacheMinutes: env.STATS_CACHE_MINUTES,
+    topSkills: env.STATS_TOP_SKILLS,
+    topCompanies: env.STATS_TOP_COMPANIES,
+  });
+
   return {
     cvService,
-    queries: new QueryService(cvs, jobs, matches),
-    stats: new StatsService(new PgOfferStatsRepository(pool), clock, {
-      cacheMinutes: env.STATS_CACHE_MINUTES,
-      topSkills: env.STATS_TOP_SKILLS,
-      topCompanies: env.STATS_TOP_COMPANIES,
-    }),
+    queries: new QueryService(cvs, jobs, matches, profiles, stats, env.MISSING_SKILLS_LIMIT),
+    stats,
     adaptation: new AdaptationService(cvs, profiles, jobs, matchingConfig, clock),
     auth: new AuthService({
       users: new PgUserRepository(pool),

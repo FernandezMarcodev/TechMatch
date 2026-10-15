@@ -6,6 +6,7 @@ import { MemoryEmailSender } from '../src/infrastructure/email/memory-email-send
 import { createContainer, type Container } from '../src/main/container.js';
 import { jobSkills, makeOffer } from './fixtures.js';
 import { createTestPool, testLogger, truncateAll } from './helpers.js';
+import { SAMPLE_CV_LINES, makePdf } from './support/make-pdf.js';
 
 const pool = createTestPool();
 const SEEN = new Date('2026-10-01T00:00:00Z');
@@ -28,6 +29,7 @@ beforeAll(() => {
       STATS_CACHE_MINUTES: 0,
       STATS_TOP_SKILLS: 2,
       STATS_TOP_COMPANIES: 10,
+      MISSING_SKILLS_LIMIT: 5,
     },
     frontendUrl: 'http://techmatch.test',
     emailSender: new MemoryEmailSender(),
@@ -52,6 +54,7 @@ beforeEach(async () => {
 });
 
 afterAll(async () => {
+  await container.runner.whenIdle();
   await pool.end();
 });
 
@@ -141,5 +144,41 @@ describe('GET /api/stats/offers (public trends dashboard)', () => {
     });
     expect(res.body.data.topSkills).toEqual([]);
     expect(res.body.data.skillAreas).toEqual([]);
+  });
+});
+
+describe('GET /api/cvs/:cvId/missing-skills ("Qué te falta")', () => {
+  it('lists the most required catalog technologies the CV does not have', async () => {
+    const jobs = container.jobs;
+    // The sample CV has Java; React and Kubernetes are missing; "Full-stack" is a generic tag.
+    await jobs.upsert(
+      makeOffer({ skills: jobSkills(['Java', 'React', 'Kubernetes', 'Full-stack']) }),
+      SEEN,
+    );
+    await jobs.upsert(makeOffer({ skills: jobSkills(['React', 'Kubernetes']) }), SEEN);
+    await jobs.upsert(makeOffer({ skills: jobSkills(['React', 'Java'], ['Terraform']) }), SEEN);
+
+    const upload = await request(app)
+      .post('/api/cvs')
+      .attach('file', makePdf(SAMPLE_CV_LINES), 'cv.pdf');
+    await container.runner.whenIdle();
+    const cvId = upload.body.data.cvId as string;
+
+    const res = await request(app).get(`/api/cvs/${cvId}/missing-skills`);
+    expect(res.status).toBe(200);
+    expect(res.body.data).toEqual({
+      cvId,
+      skills: [
+        { name: 'React', percent: 100 },
+        { name: 'Kubernetes', percent: 67 },
+      ],
+    });
+  });
+
+  it('answers 404 for an unknown CV', async () => {
+    const res = await request(app).get(
+      '/api/cvs/00000000-0000-4000-8000-000000000000/missing-skills',
+    );
+    expect(res.status).toBe(404);
   });
 });

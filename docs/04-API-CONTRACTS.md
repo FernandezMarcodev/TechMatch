@@ -137,7 +137,10 @@ Panel público de tendencias (`18-PANEL-DE-TENDENCIAS.md`): agregaciones sobre l
     "generatedAt": "2026-10-14T12:00:00.000Z",
     "totals": { "offers": 311, "companies": 105, "remotePercent": 47, "englishPercent": 23 },
     "topSkills": [{ "name": "REST", "count": 147, "percent": 47 }],
-    "seniority": [{ "level": "SENIOR", "count": 146, "avgExperienceYears": 4.7 }],
+    "skillAreas": [{ "area": "BACKEND", "count": 588, "percent": 24 }],
+    "seniority": [
+      { "level": "SENIOR", "count": 146, "avgExperienceYears": 4.7, "englishPercent": 30 }
+    ],
     "modality": [{ "modality": "REMOTE", "count": 147 }],
     "sources": [{ "source": "getonboard", "count": 296 }],
     "topCompanies": [{ "name": "Despegar", "count": 10 }]
@@ -146,8 +149,20 @@ Panel público de tendencias (`18-PANEL-DE-TENDENCIAS.md`): agregaciones sobre l
 ```
 
 * `topSkills`: solo tecnologías requeridas (no las deseables); `percent` es sobre el total de ofertas activas.
-* `seniority`: sin `UNKNOWN`, de junior a manager; `avgExperienceYears` es `null` si ninguna oferta del nivel indica años.
+* `skillAreas`: menciones de tecnologías requeridas del catálogo agrupadas por área (`LANGUAGES`, `FRONTEND`, `BACKEND`, `DATA`, `CLOUD_DEVOPS`, `PRACTICES`); `percent` es sobre el total de esas menciones.
+* `seniority`: sin `UNKNOWN`, de junior a manager; `avgExperienceYears` es `null` si ninguna oferta del nivel indica años; `englishPercent` es el % de ofertas del nivel que piden inglés.
 * `modality`: `null` agrupa las ofertas sin modalidad especificada.
+
+## GET /api/cvs/{cvId}/missing-skills
+
+"Qué te falta": las tecnologías del catálogo que más exigen las ofertas activas y que no aparecen en el CV, de la más pedida a la menos pedida (como mucho `MISSING_SKILLS_LIMIT`, 5 por defecto). Mismas reglas de acceso que el CV (un CV guardado responde `404` a quien no es su dueño); no requiere sesión. Lista vacía si el CV todavía no está procesado.
+
+```json
+{ "data": { "cvId": "…", "skills": [{ "name": "AWS", "percent": 28 }] } }
+```
+
+* `percent`: % de ofertas activas que la exigen.
+* Solo tecnologías del catálogo: el CV se lee con el mismo catálogo, así que una etiqueta genérica nunca podría aparecer en él. Es una sugerencia; no modifica el CV ni el matching.
 
 ## GET /api/jobs/{jobId}
 

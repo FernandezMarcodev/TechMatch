@@ -838,6 +838,76 @@ p {
   }
 }
 
+/* "Qué te falta" (recommendations): in-demand technologies not found in the CV. */
+.missing-skills {
+  margin-bottom: 20px;
+  padding: 20px;
+  border-radius: var(--md-shape-lg);
+  border: 1px solid var(--md-outline-variant);
+  background: var(--md-surface-container-lowest);
+}
+
+.missing-skills__header {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.missing-skills__icon {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--md-shape-md);
+  color: var(--chart-orange);
+  background: color-mix(in srgb, var(--chart-orange) 14%, transparent);
+}
+
+.missing-skills__list {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 12px;
+  display: grid;
+  grid-template-columns: minmax(80px, max-content) minmax(40px, 1fr) max-content;
+  gap: 8px 12px;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.missing-skills__item {
+  display: contents;
+}
+
+.missing-skills__name {
+  font-weight: 500;
+}
+
+.missing-skills__track {
+  height: 8px;
+  border-radius: var(--md-shape-full);
+  background: var(--md-surface-container-highest);
+  overflow: hidden;
+}
+
+/* Bar width = % of offers that require it (absolute, not relative to the first). */
+.missing-skills__bar {
+  display: block;
+  height: 100%;
+  border-radius: var(--md-shape-full);
+  background: var(--chart-orange);
+}
+
+.missing-skills__value {
+  color: var(--md-on-surface-variant);
+  white-space: nowrap;
+}
+
+.missing-skills__link {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
 /* Recommendations hidden from visitors (account privilege). */
 .locked-recommendations {
   margin-top: 16px;

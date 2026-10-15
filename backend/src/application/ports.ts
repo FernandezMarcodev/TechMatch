@@ -35,6 +35,12 @@ export interface CvRepository {
   delete(cvId: string): Promise<void>;
 }
 
+/** How often each technology is required by the active offers ("Qué te falta"). */
+export interface SkillDemand {
+  /** Catalog technologies required by the active offers, most required first. */
+  requiredSkills(): Promise<readonly { name: string; percent: number }[]>;
+}
+
 export interface CandidateProfileRepository {
   save(profile: CandidateProfile): Promise<void>;
   findByCvId(cvId: string): Promise<CandidateProfile | null>;

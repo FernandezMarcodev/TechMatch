@@ -69,3 +69,11 @@ Los porcentajes son enteros redondeados; `avgExperienceYears` tiene un decimal o
 * Paleta de gráficos en `styles/tokens.css` (`--chart-*`), con contraste de al menos 3:1 sobre blanco. Cada categoría mantiene su color (remoto siempre verde, presencial siempre naranja); los colores están en `components/labels.ts`.
 * Distribución: números destacados (con un borde de color cada uno); los dos rankings lado a lado; los dos anillos lado a lado; seniority y fuentes a lo ancho. En el celular, una columna.
 * Textos en español; los niveles y modalidades usan las mismas etiquetas que el resto de la app.
+
+## "Qué te falta"
+
+En la página de recomendaciones, una tarjeta muestra las tecnologías que más exigen las ofertas activas y que no encontramos en el CV, con el % de ofertas que piden cada una (`GET /api/cvs/{cvId}/missing-skills`, ver `04-API-CONTRACTS.md`).
+
+* Reusa las agregaciones del panel: `StatsService.requiredSkills()` (misma caché) implementa el puerto `SkillDemand`, y `QueryService.getMissingSkills` resta las tecnologías del perfil.
+* Solo tecnologías del catálogo, por la misma razón que el matching (`03-MATCHING-SPEC.md` § Skills).
+* Es una sugerencia ("Si ya las manejás, sumalas a tu CV"): nunca agrega nada al CV. Si no hay nada que mostrar o falla la consulta, la tarjeta no aparece.

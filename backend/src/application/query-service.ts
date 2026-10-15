@@ -1,11 +1,14 @@
 import type { JobOffer } from '../domain/entities.js';
 import { findVisibleCv } from './cv-access.js';
 import { AppError } from './errors.js';
+import { skillKey } from '../domain/normalization/skills.js';
 import type {
+  CandidateProfileRepository,
   CvRepository,
   JobOfferRepository,
   MatchResultRepository,
   Recommendation,
+  SkillDemand,
 } from './ports.js';
 
 export class QueryService {
@@ -13,7 +16,28 @@ export class QueryService {
     private readonly cvs: CvRepository,
     private readonly jobs: JobOfferRepository,
     private readonly matches: MatchResultRepository,
+    private readonly profiles: CandidateProfileRepository,
+    private readonly demand: SkillDemand,
+    /** How many missing technologies to show (MISSING_SKILLS_LIMIT). */
+    private readonly missingSkillsLimit: number,
   ) {}
+
+  /**
+   * "Qué te falta": the technologies the active offers require most that were not found in
+   * the CV, with the % of offers that require each. Empty until the CV is processed. Only a
+   * suggestion of what to learn or to add if the candidate already knows it.
+   */
+  async getMissingSkills(
+    cvId: string,
+    viewerId: string | null,
+  ): Promise<{ name: string; percent: number }[]> {
+    const cv = await findVisibleCv(this.cvs, cvId, viewerId);
+    if (cv.processingStatus !== 'PROCESSED') return [];
+    const profile = await this.profiles.findByCvId(cvId);
+    const has = new Set(profile?.skills.map((s) => s.normalizedName) ?? []);
+    const required = await this.demand.requiredSkills();
+    return required.filter((s) => !has.has(skillKey(s.name))).slice(0, this.missingSkillsLimit);
+  }
 
   /**
    * MEDIUM/HIGH matches on active offers, best first. Empty until the CV is processed.

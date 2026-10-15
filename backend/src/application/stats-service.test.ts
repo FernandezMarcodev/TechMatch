@@ -62,6 +62,15 @@ describe('StatsService', () => {
     ]);
   });
 
+  it('gives the demand of every catalog technology, for "Qué te falta"', async () => {
+    const { stats } = service(AGGREGATES, { value: new Date() });
+    expect(await stats.requiredSkills()).toEqual([
+      { name: 'Java', percent: 50 },
+      { name: 'Spring Boot', percent: 38 },
+      { name: 'React', percent: 13 },
+    ]);
+  });
+
   it('answers 0% instead of dividing by zero when there are no offers', async () => {
     const empty = { ...AGGREGATES, offers: 0, remote: 0, english: 0, skills: [], seniority: [] };
     const { stats } = service(empty, { value: new Date() });

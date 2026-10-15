@@ -51,6 +51,8 @@ const envSchema = z.object({
   STATS_CACHE_MINUTES: z.coerce.number().min(0).default(60),
   STATS_TOP_SKILLS: z.coerce.number().int().positive().default(12),
   STATS_TOP_COMPANIES: z.coerce.number().int().positive().default(12),
+  // "Qué te falta": how many in-demand technologies missing from the CV to show.
+  MISSING_SKILLS_LIMIT: z.coerce.number().int().positive().default(5),
   /** Days a login session lasts. */
   SESSION_TTL_DAYS: z.coerce.number().positive().default(30),
   /** Register/login attempts allowed per client IP within each window. */

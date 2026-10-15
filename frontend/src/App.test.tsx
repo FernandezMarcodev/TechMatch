@@ -171,6 +171,46 @@ describe('recommendations', () => {
     );
   });
 
+  it('shows "Qué te falta" with the % of offers that require each technology', async () => {
+    mockFetch({
+      '/api/recommendations/cv-1': () =>
+        jsonResponse(200, {
+          data: { cvId: 'cv-1', hiddenCount: 0, saved: false, recommendations: [recommendation] },
+        }),
+      '/api/cvs/cv-1/missing-skills': () =>
+        jsonResponse(200, {
+          data: {
+            cvId: 'cv-1',
+            skills: [
+              { name: 'React', percent: 37 },
+              { name: 'AWS', percent: 28 },
+            ],
+          },
+        }),
+    });
+    renderAt('/cv/cv-1/recomendaciones');
+    const card = await screen.findByRole('region', { name: 'Qué te falta' });
+    expect(within(card).getByText('React')).toBeInTheDocument();
+    expect(within(card).getByText('37 % de las ofertas')).toBeInTheDocument();
+    expect(
+      within(card).getByRole('link', { name: 'Ver las tendencias del mercado' }),
+    ).toHaveAttribute('href', '/tendencias');
+  });
+
+  it('hides "Qué te falta" when nothing is missing', async () => {
+    mockFetch({
+      '/api/recommendations/cv-1': () =>
+        jsonResponse(200, {
+          data: { cvId: 'cv-1', hiddenCount: 0, saved: false, recommendations: [recommendation] },
+        }),
+      '/api/cvs/cv-1/missing-skills': () =>
+        jsonResponse(200, { data: { cvId: 'cv-1', skills: [] } }),
+    });
+    renderAt('/cv/cv-1/recomendaciones');
+    await screen.findByRole('link', { name: 'Backend Developer' });
+    expect(screen.queryByRole('region', { name: 'Qué te falta' })).not.toBeInTheDocument();
+  });
+
   it('filters by level and remote modality without changing the order', async () => {
     const medium = {
       job: { ...recommendation.job, id: 'job-2', title: 'Frontend Developer', modality: 'REMOTE' },

@@ -202,6 +202,12 @@ function postJson<T>(path: string, body: unknown, method: 'POST' | 'DELETE' = 'P
 }
 
 /** Public market trends over the active offers (docs/18-PANEL-DE-TENDENCIAS.md). */
+/** A technology the offers require and the CV does not show, with the % of offers. */
+export interface MissingSkill {
+  name: string;
+  percent: number;
+}
+
 export type SkillArea =
   'LANGUAGES' | 'FRONTEND' | 'BACKEND' | 'DATA' | 'CLOUD_DEVOPS' | 'PRACTICES';
 
@@ -258,6 +264,10 @@ export const api = {
     saved: boolean;
   }> {
     return request(`/recommendations/${encodeURIComponent(cvId)}`);
+  },
+  /** "Qué te falta": in-demand technologies not found in the CV. */
+  getMissingSkills(cvId: string): Promise<{ cvId: string; skills: MissingSkill[] }> {
+    return request(`/cvs/${encodeURIComponent(cvId)}/missing-skills`);
   },
   /** "Guardar en mi cuenta": saving is the user's choice; unsaved CVs expire. */
   saveCv(cvId: string): Promise<{ id: string; saved: boolean }> {
