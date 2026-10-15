@@ -131,8 +131,36 @@ const INSTITUTION_HINT =
 const DEGREE_DETAIL =
   /^\s*(?:materias|asignaturas|cursadas|coursework|relevant coursework|promedio|gpa|tesis|thesis)\b/i;
 
-function extractEducation(lines: readonly string[]): Education[] {
+// A status next to a degree, not part of its name: "Licenciatura en Informática | estimado".
+const DEGREE_STATUS =
+  /^(?:\(?(?:estimad[oa]|en curso|cursando|finalizad[oa]|complet[oa]|incomplet[oa]|egresad[oa]|in progress|expected)\)?)$/i;
+
+/**
+ * One entry per degree. A line can hold more than one, separated by "|":
+ * "Licenciatura en Informática | estimado | Título intermedio: Analista en Informática 2026"
+ * is a university degree and a tertiary one; read as a whole, the first level found
+ * ("Analista", tertiary) would hide the licenciatura. Status words are dropped.
+ */
+function splitDegrees(lines: readonly string[]): string[] {
+  return lines.flatMap((line) => {
+    const segments = line
+      .split(/\s+\|\s+/)
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0 && !DEGREE_STATUS.test(s));
+    if (segments.filter((s) => detectEducationLevel(s)).length < 2) return [segments.join(' | ')];
+    const degrees: string[][] = [];
+    for (const segment of segments) {
+      const last = degrees.at(-1);
+      if (detectEducationLevel(segment) || !last) degrees.push([segment]);
+      else last.push(segment);
+    }
+    return degrees.map((d) => d.join(' | '));
+  });
+}
+
+function extractEducation(sectionLines: readonly string[]): Education[] {
   const result: Education[] = [];
+  const lines = splitDegrees(sectionLines);
   lines.forEach((line, i) => {
     if (DEGREE_DETAIL.test(line)) return;
     const level = detectEducationLevel(line);

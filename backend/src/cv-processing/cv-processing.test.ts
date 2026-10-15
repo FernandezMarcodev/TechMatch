@@ -273,6 +273,22 @@ describe('extractProfile', () => {
     ]);
   });
 
+  it('reads each degree of a line on its own and drops status words', () => {
+    const p = extractProfile(
+      [
+        'Educación',
+        'Licenciatura en Informática | estimado | Título intermedio: Analista en Informática 2026',
+        'Universidad Nacional de Quilmes',
+      ].join('\n'),
+      REFERENCE_DATE,
+    );
+    expect(p.education.map((e) => [e.level, e.degree])).toEqual([
+      ['UNIVERSITY', 'Licenciatura en Informática'],
+      ['TERTIARY', 'Título intermedio: Analista en Informática 2026'],
+    ]);
+    expect(p.education[0]?.field).toBe('Informática');
+  });
+
   it('uses explicitly stated years when there are no dated experiences', () => {
     const p = extractProfile(
       'Perfil\nDesarrollador con 4 años de experiencia en React',
