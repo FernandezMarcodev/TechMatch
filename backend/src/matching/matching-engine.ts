@@ -108,10 +108,20 @@ export function evaluateMatch(
     const s = outcomes[c].score;
     return minimum !== undefined && s !== null && s < minimum;
   });
+  // HIGH also requires some criteria (most of the technologies) to be strong; otherwise the
+  // offer is capped at MEDIUM. The skills reason already lists what is missing.
+  const belowHighMinimum = CRITERIA.some((c) => {
+    const minimum = config.highMinimums[c];
+    const s = outcomes[c].score;
+    return minimum !== undefined && s !== null && s < minimum;
+  });
+  const classified = classify(score, config);
   const level: MatchLevel =
     evaluatedWeight === 0 || missingRequired.length > 0 || belowMinimum.length > 0
       ? 'LOW'
-      : classify(score, config);
+      : classified === 'HIGH' && belowHighMinimum
+        ? 'MEDIUM'
+        : classified;
 
   return { score, level, criteria, reasons };
 }
