@@ -111,12 +111,17 @@ Carga de CV, matching determinístico explicado, ofertas de Get on Board, interf
 | 25 | `feat/fuentes-ats` | Conectores de Lever y Greenhouse (APIs públicas de empleo por empresa), con lista de empresas configurable y filtro de puestos de tecnología en Argentina o remotos |
 | 26 | `feat/panel-tendencias` | Panel público de métricas de las ofertas (`/tendencias`): agregaciones en SQL, sin datos personales |
 
+## v2.2.1 — Mejoras del matching
+
+| # | Rama | Alcance |
+| --- | --- | --- |
+| 27 | `fix/matching-pocas-tecnologias` | HIGH exige que coincida al menos el 60 % de las tecnologías (`highMinimums`); por debajo, la oferta queda como máximo en MEDIUM |
+| 22 | `feat/recalculo-tras-sync` | Después de cada sincronización, recalcular las recomendaciones de todos los CVs procesados contra las ofertas activas |
+
 ## v2.3.0 — Extras
 
 | # | Rama | Alcance |
 | --- | --- | --- |
 | 20 | `feat/guardar-cv-adaptado` | Guardar y reabrir CVs adaptados (usuarios logueados) |
 | 21 | `feat/preferencias-candidato` | "Disponible para mudarme" y modalidad preferida como entradas del matching |
-| 22 | `feat/recalculo-tras-sync` | Después de cada sincronización, recalcular las recomendaciones de todos los CVs procesados contra las ofertas activas |
 | 23 | `feat/que-te-falta` | En las recomendaciones, las tecnologías que más piden las ofertas y que el CV no tiene |
-| 27 | `fix/matching-pocas-tecnologias` | HIGH exige que coincida al menos el 60 % de las tecnologías (`highMinimums`); por debajo, la oferta queda como máximo en MEDIUM |
