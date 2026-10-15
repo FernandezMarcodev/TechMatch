@@ -1,59 +1,38 @@
 # Roadmap futuro
 
-Estas funcionalidades están fuera del MVP (`v1.0.0`). Las que ya tienen versión y rama asignadas están detalladas en `14-PLAN-DE-DESARROLLO.md`.
+Lo ya implementado y lo planificado con versión y rama están en `14-PLAN-DE-DESARROLLO.md`. Este documento reúne ideas sin versión asignada.
 
-## Planificado
+## Implementado después del MVP
 
-### v2.0 — CV adaptado a una oferta
+* **v2.0:** CV adaptado a una oferta (borrador sin inventar, editor, formato Harvard, recálculo, PDF).
+* **v2.1:** cuentas opcionales con privilegios (verificación de email, recuperación de contraseña, CVs guardados, borrado de la cuenta).
+* **v2.2:** fuentes Lever y Greenhouse, panel de tendencias, recálculo de recomendaciones después de cada sincronización.
+* **v2.3:** gráficos propios, tecnologías por área, "Qué te falta", estado parcial en las razones.
 
-Cuando exista un match MEDIUM o HIGH:
+## Planificado (v2.4)
 
-```text
-Match
- ↓
-Adaptar CV
- ↓
-Analizar requisitos
- ↓
-Proponer modificaciones (sin inventar)
- ↓
-Generar CV (formato Harvard)
- ↓
-Editar
- ↓
-Recalcular compatibilidad
- ↓
-Exportar PDF
-```
-
-### v2.1 — Usuarios (opcionales)
-
-* Registro.
-* Verificación de email (obligatoria para entrar).
-* Login.
-* Recuperación de contraseña por email.
-* Autenticación.
-* Historial de CVs.
-* CVs adaptados guardados.
-* Borrado de datos y de la cuenta.
-
-### v2.2 — Extras
-
-* Opción "disponible para mudarme" y modalidad preferida.
-* Recalcular recomendaciones cuando se sincronizan ofertas nuevas.
-* "Qué te falta": las tecnologías que más piden las ofertas y que el CV no tiene.
+* Guardar y reabrir CVs adaptados (usuarios con cuenta).
+* Preferencias del candidato: "disponible para mudarme" y modalidad preferida, como entradas del matching.
 
 ## Próximos pasos posibles
 
 ### Más fuentes y ofertas
 
-* Nuevos conectores a fuentes con API pública o feed autorizado, priorizando ofertas con sede en Argentina (por ejemplo, las páginas de empleo públicas de empresas que usan Greenhouse, Lever o Workable).
+* Más empresas en `LEVER_COMPANIES` y `GREENHOUSE_COMPANIES` (sumar una es cambiar una variable de entorno).
+* Otros ATS con API pública (Ashby, Workable) cuando haya empresas argentinas que los usen.
+* Fuentes remotas globales (Himalayas, RemoteOK, Arbeitnow) con filtro de ubicación, revisando sus términos.
 * Acuerdos de acceso con portales que hoy no habilitan acceso automatizado.
 * OCR para CVs escaneados.
+
+### Tendencias
+
+* Desglose por país (Argentina, Chile, otros): la mayoría de las ofertas híbridas y presenciales son de otros países y no se recomiendan a un CV argentino.
+* Evolución en el tiempo (requiere guardar fotos periódicas de las métricas).
 
 ### Cuentas
 
 * Login con Google.
+* Cookie `httpOnly` con un dominio propio, en lugar del token en `localStorage`.
 
 ### IA asistiva
 

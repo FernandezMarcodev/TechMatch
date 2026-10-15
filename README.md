@@ -8,7 +8,7 @@ Aplicación web que analiza un CV en PDF y recomienda ofertas de trabajo en tecn
 
 ## Funcionalidades
 
-- **Matching determinístico y explicable**: tecnologías, seniority, experiencia, educación, idiomas, ubicación y modalidad. El mismo CV y la misma oferta siempre dan el mismo resultado, y cada recomendación muestra el porqué. Sin IA en el cálculo.
+- **Matching determinístico y explicable**: tecnologías, seniority, experiencia, educación, idiomas, ubicación y modalidad. El mismo CV y la misma oferta siempre dan el mismo resultado, y cada recomendación muestra el porqué de cada criterio (se cumple, en parte, no se cumple o no exigido). Sin IA en el cálculo.
 - **Recomendaciones siempre al día**: después de cada sincronización se recalculan las de todos los CVs analizados, así aparecen las ofertas nuevas y desaparecen las cerradas.
 - **Ofertas reales** de la **API pública de Get on Board** y de las **páginas de empleo de empresas** que publican con Lever o Greenhouse (por ejemplo Despegar, Kavak y Clara), filtradas a puestos de tecnología en Argentina o remotos. Sin scraping; se actualizan cada 12 horas.
 - **Cuenta opcional, con privilegios.** Sin registrarse se puede subir un CV y ver las primeras recomendaciones. Con una cuenta:
@@ -64,7 +64,7 @@ npm install
 npm run db:up                         # PostgreSQL (localhost:5434) y Mailpit (http://localhost:8025)
 cp backend/.env.example backend/.env
 npm run migrate -w backend            # crea las tablas
-npm run sync-jobs -w backend          # descarga ofertas reales de Get on Board
+npm run sync-jobs -w backend          # descarga ofertas reales (Get on Board, Lever y Greenhouse)
 ```
 
 En dos terminales:
@@ -98,6 +98,7 @@ La especificación completa está en [`docs/`](docs/). Puntos de entrada:
 - [`01-SRS-IEEE-29148.md`](docs/01-SRS-IEEE-29148.md): requisitos.
 - [`03-MATCHING-SPEC.md`](docs/03-MATCHING-SPEC.md): cómo se calcula la compatibilidad.
 - [`17-CUENTAS-DE-USUARIO.md`](docs/17-CUENTAS-DE-USUARIO.md): cuentas, privilegios, sesiones y emails.
+- [`18-PANEL-DE-TENDENCIAS.md`](docs/18-PANEL-DE-TENDENCIAS.md): métricas del mercado y "Qué te falta".
 - [`13-DECISIONES-TECNICAS.md`](docs/13-DECISIONES-TECNICAS.md): decisiones de diseño y su porqué.
 - [`14-PLAN-DE-DESARROLLO.md`](docs/14-PLAN-DE-DESARROLLO.md): versiones y próximos pasos.
 - [`16-DESPLIEGUE.md`](docs/16-DESPLIEGUE.md): cómo desplegar gratis (Cloudflare Pages, Render, Neon, Brevo y sincronización en GitHub Actions).

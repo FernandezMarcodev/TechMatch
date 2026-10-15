@@ -209,6 +209,7 @@ Borrador del CV adaptado a una oferta, más sugerencias. Detalle del documento y
       "summary": "Desarrolladora Backend Semi Senior con 7 años de experiencia en Java y Spring Boot.",
       "experiences": [{ "position": "…", "company": "…", "startDate": "2021-03", "endDate": null, "highlights": ["…"], "relevant": true }],
       "education": [{ "degree": "…", "institution": "…", "startDate": "2013", "endDate": "2019" }],
+      "projects": [{ "name": "…", "startDate": "2024", "endDate": null, "highlights": ["…"], "relevant": true }],
       "skills": [{ "name": "Java", "highlighted": true }],
       "languages": [{ "name": "Inglés", "level": "C1" }]
     },

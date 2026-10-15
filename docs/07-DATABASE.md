@@ -1,6 +1,16 @@
 # Base de datos
 
-PostgreSQL 16. Migraciones SQL versionadas en `backend/migrations` (node-pg-migrate).
+PostgreSQL 16. Migraciones SQL versionadas en `backend/migrations` (node-pg-migrate), aplicadas en orden:
+
+| Migración | Cambio |
+| --- | --- |
+| `initial-schema` | Esquema del MVP |
+| `native-language-level` | Nivel de idioma `NATIVE` |
+| `projects` | Proyectos del CV |
+| `users-and-sessions` | Cuentas y sesiones |
+| `email-tokens` | Links de verificación y recuperación |
+| `drop-extracted-text` | El texto extraído del CV ya no se guarda |
+| `saved-cvs` | `cvs.user_id` y `cvs.saved_at` (CVs guardados) |
 
 Fechas con zona horaria (`TIMESTAMPTZ`). Valores enumerados en mayúsculas, restringidos con `CHECK`.
 
@@ -106,7 +116,7 @@ PRIMARY KEY(candidate_profile_id, skill_id)
 ```text
 id UUID PK
 external_id VARCHAR NULL
-source VARCHAR              (getonboard)
+source VARCHAR              (getonboard | lever | greenhouse)
 source_url TEXT
 title VARCHAR
 company VARCHAR
@@ -149,7 +159,9 @@ calculated_at TIMESTAMPTZ
 UNIQUE(cv_id, job_offer_id)
 ```
 
-Se guardan los resultados de todos los niveles. Recalcular un CV reemplaza sus resultados.
+Se guardan los resultados de todos los niveles. Recalcular un CV reemplaza sus resultados; después de cada sincronización se recalculan los de todos los CVs procesados.
+
+`reasons_json`: `[{ criterion, status, message }]`, con `status` en `positive | partial | negative | neutral`. `criteria_json` guarda además el score y el peso efectivo de cada criterio.
 
 ## users
 
@@ -202,6 +214,11 @@ match_results(cv_id, score DESC)
 
 candidate_skills(skill_id)
 job_skills(skill_id)
+
+cvs(user_id, saved_at DESC)          CVs guardados de un usuario
+projects(candidate_profile_id)
+sessions(user_id)
+email_tokens(user_id, purpose)
 ```
 
 ## Integridad
@@ -212,12 +229,12 @@ job_skills(skill_id)
 * Estados y enumeraciones restringidos.
 * No duplicar skills normalizadas.
 * Las ofertas no se borran: se desactivan.
-* Los CVs se borran a los `CV_RETENTION_DAYS` días; la cascada borra su perfil y sus resultados. `storage_path` queda como referencia aunque el PDF ya se haya borrado.
+* Los CVs sin guardar se borran a los `CV_RETENTION_DAYS` días (`npm run purge-cvs`); la cascada borra su perfil y sus resultados. Los guardados viven hasta que su dueño los borre o borre la cuenta. `storage_path` queda como referencia aunque el PDF ya se haya borrado.
 
 ## Bases por entorno
 
 | Base | Uso |
 | --- | --- |
 | `techmatch` | desarrollo |
-| `techmatch_test` | tests de integración (se vacía en cada test) |
+| `techmatch_test` | tests de integración (se vacía en cada test; `TEST_DATABASE_URL`) |
 | `techmatch_e2e` | tests end-to-end |

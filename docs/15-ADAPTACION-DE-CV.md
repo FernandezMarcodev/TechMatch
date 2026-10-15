@@ -94,13 +94,13 @@ Se generan a partir de los criterios del matching, nunca se agregan al CV:
 * Secciones editables, en el orden de la vista previa: datos personales, resumen, educación, experiencia, proyectos (agregar, quitar, editar viñetas), tecnologías e idiomas (de A1 a C2 o nativo).
 * Las sugerencias de tecnologías tienen la acción "La tengo, agregar", que solo se aplica con la confirmación del usuario.
 * Vista previa en formato Harvard actualizada en vivo, como una **hoja A4 real**: mismo ancho, márgenes y tamaños de letra en puntos que el PDF, así los renglones cortan igual. La hoja se escala para entrar en la columna y se divide en **hojas separadas** donde la impresión corta las páginas (mismas reglas: una entrada o un párrafo no se parte y un título no queda solo al final), e indica cuántas páginas ocupa. El espacio entre hojas existe solo en pantalla, y la vista previa vuelve a medirse cuando la hoja cambia de tamaño sin una edición (al mostrar la pestaña en el celular, o si el navegador vuelve a distribuir el texto). Al imprimir, el navegador corta las páginas con esas mismas reglas y repite los márgenes en cada página (`box-decoration-break: clone`): el PDF no depende de lo medido en pantalla, que en un celular real puede diferir (escala de texto del sistema, fuentes, papel que no es A4). "Ampliar" la muestra a tamaño real.
-* El borrador editado se guarda en el **navegador** (`localStorage`, por CV y oferta) para no perderlo al recargar. En v2.0 no se guarda en el servidor; guardar en la cuenta llega en v2.1.
+* El borrador editado se guarda en el **navegador** (`localStorage`, por CV y oferta) para no perderlo al recargar. No se guarda en el servidor; guardarlo en la cuenta está planificado para la v2.4.
 
 ## Recalcular la compatibilidad
 
 * El CV editado se envía al backend **sin datos personales** (nombre, email, teléfono y links no salen del navegador).
 * El backend lo convierte en un `CandidateProfile` con la misma normalización de siempre (aliases, niveles, fechas → años, seniority y nivel educativo por palabras clave) y lo evalúa con **el mismo motor de matching**, sin modificarlo.
-* Respuesta: nivel y razones, igual que una recomendación (sin score numérico).
+* Respuesta: nivel y razones (con su estado: se cumple, en parte, no se cumple, no exigido), igual que una recomendación (sin score numérico).
 * La interfaz compara con el nivel original: "Antes: Compatibilidad media → Ahora: Alta compatibilidad".
 * No se guarda nada en el servidor.
 
@@ -205,7 +205,8 @@ Request: el `document` sin `personal.fullName`, `personal.email`, `personal.phon
 
 | Código | HTTP | Cuándo |
 | --- | --- | --- |
-| `CV_NOT_FOUND` | 404 | CV inexistente |
+| `UNAUTHENTICATED` | 401 | sin sesión válida: adaptar el CV es un privilegio de la cuenta |
+| `CV_NOT_FOUND` | 404 | CV inexistente, o guardado en la cuenta de otra persona |
 | `JOB_NOT_FOUND` | 404 | oferta inexistente |
 | `CV_NOT_PROCESSED` | 409 | el CV todavía no terminó de procesarse o falló |
 | `INVALID_CV_DOCUMENT` | 400 | el documento enviado no cumple el formato o los límites |
@@ -231,8 +232,8 @@ Límites del documento: hasta 30 experiencias, 15 viñetas por experiencia, 100 
 * Validación del documento (formato y límites).
 * E2E: recomendación → adaptar → editar → recalcular → vista de impresión.
 
-## Fuera de alcance (v2.0)
+## Fuera de alcance
 
-* Guardar el CV adaptado en el servidor (v2.1, con cuentas).
+* Guardar el CV adaptado en el servidor (planificado para la v2.4).
 * Uso de IA para redactar.
 * Más de una plantilla o exportación a Word.

@@ -38,13 +38,15 @@ El archivo se guarda en un directorio privado, no servido por HTTP, con el nombr
 
 Tras la carga, el CV queda en `PROCESSING` y se procesa en segundo plano dentro del backend. El cliente consulta `GET /api/cvs/{cvId}` hasta obtener `processed` o `failed`.
 
-Al finalizar, se guarda el perfil y se calculan los resultados de matching contra las ofertas activas en ese momento.
+Al finalizar, se guarda el perfil y se calculan los resultados de matching contra las ofertas activas en ese momento. Después de cada sincronización de ofertas se recalculan (`05-FUENTES-DE-OFERTAS.md` § Recálculo).
+
+Como el texto no se guarda, un CV ya analizado no se puede volver a extraer: una mejora en la extracción se aplica a los CVs que se suban después.
 
 Si el backend se reinicia mientras un CV se procesa, ese trabajo se pierde. Al iniciar, el backend marca como `FAILED` los CVs que quedaron en `UPLOADED` o `PROCESSING`, y el usuario ve el mensaje para cargarlo de nuevo. Esto supone una única instancia del backend; con varias, el procesamiento debería pasar a una cola persistente.
 
 ## Compresión/optimización
 
-Paso previsto en el pipeline sin transformación en el MVP. Los archivos están limitados en tamaño y no se publican, así que recomprimirlos no aporta lo suficiente para justificar una dependencia adicional.
+Paso previsto en el pipeline, sin transformación (no-op). Los archivos están limitados en tamaño y no se publican, así que recomprimirlos no aporta lo suficiente para justificar una dependencia adicional.
 
 ## Extracción
 
@@ -60,7 +62,7 @@ OCR (si está habilitado)
 texto
 ```
 
-El OCR está definido como un puerto (`OcrProvider`) y deshabilitado en el MVP. Un PDF sin texto termina en `failed` con un mensaje claro para el usuario.
+El OCR está definido como un puerto (`OcrProvider`) y deshabilitado. Un PDF sin texto termina en `failed` con un mensaje claro para el usuario.
 
 ## Limpieza
 
@@ -118,7 +120,7 @@ Un proyecto empieza en una línea corta que no es una oración (sin punto final,
 
 ### Skills
 
-Tecnologías del catálogo de aliases mencionadas en cualquier parte del CV.
+Tecnologías del catálogo de aliases mencionadas en cualquier parte del CV. Solo se reconocen tecnologías del catálogo; por eso el matching compara solo esas.
 
 ### Idiomas
 
@@ -183,7 +185,7 @@ Nunca inventar. El seniority no se deduce de los años de experiencia.
 }
 ```
 
-Este perfil es interno y no se muestra directamente al usuario en el MVP.
+Este perfil es interno: no se muestra tal cual al usuario. Lo usan el matching, "Qué te falta" y el borrador del CV adaptado.
 
 ## Privacidad
 

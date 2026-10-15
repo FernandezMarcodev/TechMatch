@@ -42,7 +42,7 @@ Orden de importancia:
 
 Las razones se presentan en este mismo orden.
 
-Todos los valores de este documento están en configuración (`matching-config.ts`) y pueden sobrescribirse con un archivo JSON. La configuración se valida al cargarse (los pesos deben sumar 1).
+Todos los valores de este documento están en configuración (`matching-config.ts`) y pueden sobrescribirse con un archivo JSON (`MATCHING_CONFIG_PATH`). La configuración se valida al cargarse (los pesos deben sumar 1).
 
 ## Fórmula
 

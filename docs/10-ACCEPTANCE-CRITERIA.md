@@ -82,7 +82,7 @@ Upload
 → Oferta original
 ```
 
-sin autenticación.
+sin autenticación (sin cuenta se ven las primeras recomendaciones; ver CA-024).
 
 ## CA-018 — Mínimo técnico
 
@@ -107,3 +107,35 @@ Una oferta presencial o híbrida en otra región o país que la del candidato no
 ## CA-023 — Score interno
 
 Ni la API ni la interfaz muestran el score numérico; el usuario ve el nivel de compatibilidad.
+
+## CA-024 — Privilegios de la cuenta
+
+Sin sesión, la API devuelve solo las primeras `ANONYMOUS_RECOMMENDATIONS_LIMIT` recomendaciones e informa cuántas quedan ocultas; con sesión, todas. Adaptar el CV sin sesión responde `401`.
+
+## CA-025 — Cuentas
+
+Se puede crear una cuenta, verificar el email, iniciar y cerrar sesión, y recuperar la contraseña; sin verificar el email no se puede entrar. Detalle en `17-CUENTAS-DE-USUARIO.md` § Criterios de aceptación.
+
+## CA-026 — CV guardado privado
+
+Un CV guardado responde `404` a cualquiera que no sea su dueño, en todos los endpoints que reciben su id.
+
+## CA-027 — Recálculo
+
+Después de una sincronización exitosa, las recomendaciones de un CV ya analizado incluyen las ofertas nuevas y no las que se cerraron.
+
+## CA-028 — Solo tecnologías del catálogo
+
+Una etiqueta de la oferta fuera del catálogo ("Full-stack") no figura entre las tecnologías faltantes ni baja el puntaje.
+
+## CA-029 — Qué te falta
+
+Junto a las recomendaciones se muestran las tecnologías más pedidas que el CV no tiene, con el % de ofertas; si no falta ninguna, la tarjeta no aparece.
+
+## CA-030 — Panel de tendencias
+
+`/tendencias` es público, muestra solo agregados de ofertas activas y cada valor de los gráficos está escrito como texto.
+
+## CA-031 — Estado de las razones
+
+Cada razón indica si el criterio se cumple, se cumple en parte, no se cumple, o no es exigido / no se puede evaluar.

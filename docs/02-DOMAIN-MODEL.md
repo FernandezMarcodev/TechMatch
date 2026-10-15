@@ -14,9 +14,13 @@ CV
 ├── mimeType
 ├── sizeBytes
 ├── processingStatus
+├── userId      (solo si el usuario lo guardó en su cuenta)
+├── savedAt
 ├── createdAt
 └── updatedAt
 ```
+
+El texto extraído no forma parte del CV: se usa para armar el perfil y se descarta.
 
 ### CandidateProfile
 
@@ -50,6 +54,8 @@ Experience
 ```
 
 ### Education
+
+Una entrada por título (una línea con "Licenciatura … | Título intermedio: Analista …" da dos).
 
 ```text
 Education
@@ -91,6 +97,8 @@ Skill
 ├── name
 └── normalizedName
 ```
+
+Las skills del catálogo (`skill-catalog.ts`) tienen además un área (`LANGUAGES`, `FRONTEND`, `BACKEND`, `DATA`, `CLOUD_DEVOPS`, `PRACTICES`), usada por el panel de tendencias. Solo las del catálogo se comparan en el matching.
 
 ### JobOffer
 
@@ -141,7 +149,7 @@ MatchCriterion
 ├── score            (0–100 o null si es UNKNOWN)
 ├── weight           (peso configurado)
 ├── effectiveWeight  (peso aplicado tras redistribuir UNKNOWN)
-├── status           (positive | negative | neutral | unknown)
+├── status           (positive | partial | negative | neutral | unknown)
 └── evidence
 ```
 
@@ -150,8 +158,40 @@ MatchCriterion
 ```text
 MatchReason
 ├── criterion
-├── status   (positive | negative | neutral)
+├── status   (positive | partial | negative | neutral)
 └── message
+```
+
+`partial`: el criterio se cumple en parte. `neutral`: no exigido por la oferta o no evaluable (un `unknown` del criterio se expone como `neutral`).
+
+### User, Session y EmailToken
+
+Cuentas opcionales (`17-CUENTAS-DE-USUARIO.md`).
+
+```text
+User
+├── id
+├── email            (normalizado)
+├── passwordHash     (scrypt)
+├── emailVerifiedAt
+├── createdAt
+└── updatedAt
+
+Session
+├── id
+├── userId
+├── tokenHash        (SHA-256; el token no se guarda)
+├── expiresAt
+└── createdAt
+
+EmailToken
+├── id
+├── userId
+├── purpose          (VERIFY_EMAIL | RESET_PASSWORD)
+├── tokenHash
+├── expiresAt
+├── usedAt
+└── createdAt
 ```
 
 ## Relaciones
@@ -172,6 +212,10 @@ CV ────────────── 1:N MatchResult
 JobOffer ──────── 1:N MatchResult
 
 JobOffer ──────── N:N Skill (con isRequired)
+
+User ──────────── 1:N CV (solo los guardados)
+User ──────────── 1:N Session
+User ──────────── 1:N EmailToken
 ```
 
 ## Enumeraciones
@@ -232,16 +276,19 @@ SECONDARY < TERTIARY < UNIVERSITY < POSTGRADUATE
 
 ```text
 getonboard
+lever
+greenhouse
 ```
 
 ## Normalización compartida
 
 El dominio contiene la normalización que usan por igual el procesamiento de CV, los conectores de fuentes y el matching:
 
-* catálogo de tecnologías con aliases (`JS → JavaScript`, `Postgres → PostgreSQL`, `Node → Node.js`);
+* catálogo de tecnologías con aliases (`JS → JavaScript`, `Postgres → PostgreSQL`, `Node → Node.js`) y área de cada una;
 * idiomas y niveles (CEFR y descriptores: "intermedio" → B1, "avanzado" → C1, "nativo" o "lengua materna" → NATIVE, "bilingüe" → C2);
 * ubicaciones (provincias argentinas, CABA y otros países como regiones propias);
-* seniority y nivel educativo por palabras clave explícitas.
+* seniority y nivel educativo por palabras clave explícitas (en las ofertas, el nivel educativo cuenta solo en líneas que hablan de estudios);
+* ubicaciones argentinas (`isArgentineLocation`), para filtrar las páginas de empleo de empresas.
 
 ## Principio arquitectónico
 

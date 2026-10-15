@@ -7,29 +7,26 @@ TechMatch is a web application that:
 1. receives a CV as PDF;
 2. extracts its text;
 3. builds a structured candidate profile;
-4. syncs tech job offers from the Get on Board public API;
+4. syncs tech job offers from the Get on Board public API and from the public job board APIs of companies on Lever and Greenhouse;
 5. stores normalized job offers;
-6. calculates deterministic CV/job matching;
+6. calculates deterministic CV/job matching (recalculated after every sync);
 7. shows only MEDIUM and HIGH recommendations;
-8. explains the matching result.
+8. explains the matching result;
+9. adapts the CV to an offer without inventing data (`docs/15-ADAPTACION-DE-CV.md`);
+10. offers optional accounts with privileges (`docs/17-CUENTAS-DE-USUARIO.md`);
+11. shows a public trends dashboard and "Qué te falta" (`docs/18-PANEL-DE-TENDENCIAS.md`).
 
-## MVP constraints
+## Scope constraints
 
-The MVP is anonymous.
+The current scope is the one `docs/14-PLAN-DE-DESARROLLO.md` assigns to each version and branch. Accounts are optional but privileged: anonymous users can upload a CV and see the first recommendations; all recommendations, CV adaptation and saved CVs require a session, enforced in the API.
 
 Do NOT implement:
 
-* user registration;
-* login;
-* authentication;
-* persistent sessions;
-* user profiles;
-* visible CV history;
 * automatic job applications;
-* CV generation;
-* Harvard CV;
-* automatic CV adaptation;
-* web scraping.
+* an LLM or generative AI to score or rank;
+* adding to an adapted CV data the CV does not contain (missing items are suggestions only);
+* web scraping;
+* features not assigned in the plan (login with Google, admin roles, OCR, company features — see `docs/12-FUTURE-ROADMAP.md`).
 
 ## Stack
 
@@ -55,7 +52,7 @@ Always:
 
 1. inspect the repository;
 2. read `CLAUDE.md` and this file;
-3. read `docs/01-SRS-IEEE-29148.md`;
+3. read `docs/01-SRS-IEEE-29148.md` and the version in `docs/14-PLAN-DE-DESARROLLO.md`;
 4. read the relevant specification;
 5. read `docs/13-DECISIONES-TECNICAS.md` before changing matching, schema or job sources;
 6. understand existing code before changing it;
@@ -69,9 +66,10 @@ Keep these concerns separated:
 API
 Application
 Domain
-Infrastructure
+Infrastructure (email, security, storage)
 Job sources
 CV Processing
+CV Adaptation
 Matching
 Persistence
 ```
@@ -98,6 +96,8 @@ and returns:
 MatchEvaluation (score, level, criteria, reasons)
 ```
 
+Reasons have a status: `positive`, `partial` (met in part), `negative` or `neutral` (not required or not comparable). Only catalog skills are compared.
+
 For identical input and configuration, output must be identical.
 
 The engine must be independently unit-testable.
@@ -120,7 +120,9 @@ Implement each source as an independent connector to an interface the source off
 
 ```text
 JobSourceConnector
-└── GetOnBoardConnector
+├── GetOnBoardConnector
+└── AtsConnector         (createLeverConnector / createGreenhouseConnector:
+                          one company board per entry of LEVER_COMPANIES / GREENHOUSE_COMPANIES)
 ```
 
 One source failing must not stop the others.
@@ -141,7 +143,7 @@ Use OCR only when necessary and supported.
 
 Never expose uploaded CVs publicly.
 
-Do not log full CV content.
+Do not log full CV content. Delete the PDF after processing and do not store the extracted text.
 
 ## API
 
@@ -175,7 +177,8 @@ Do not hardcode:
 * thresholds and minimums;
 * sync interval;
 * file limits;
-* source URLs and categories;
+* source URLs, categories and company lists;
+* rate limits, retention days and list sizes;
 * secrets.
 
 Use environment variables or configuration.
@@ -190,8 +193,10 @@ Required:
 * API integration tests;
 * persistence integration tests;
 * CV processing tests where practical;
+* reference CV + offer cases (`golden-cases.test.ts`);
+* account, privilege and saved-CV tests (the API enforces them);
 * frontend component tests;
-* end-to-end test for the primary flow.
+* end-to-end tests for the primary flow, accounts (real emails through Mailpit) and saved CVs.
 
 Important matching cases:
 
@@ -225,7 +230,11 @@ Do not expose storage paths.
 
 Do not put secrets in source code.
 
-Do not log personal CV contents.
+Do not log personal CV contents, passwords or tokens.
+
+Store passwords (scrypt) and tokens (SHA-256) only as hashes.
+
+Resolve every CV through `application/cv-access.ts`: a saved CV answers 404 to anyone but its owner.
 
 ## Code quality
 
