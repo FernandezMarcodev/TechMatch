@@ -1,7 +1,12 @@
 import type { NormalizedJobOffer } from '../application/ports.js';
 import type { EducationRequirement, JobSkill, LanguageRequirement } from '../domain/entities.js';
 import type { Modality, Seniority } from '../domain/enums.js';
-import { detectEducationLevel, extractField } from '../domain/normalization/education.js';
+import {
+  detectEducationLevel,
+  extractField,
+  isFieldOfStudy,
+  mentionsStudies,
+} from '../domain/normalization/education.js';
 import { findLanguageMentions } from '../domain/normalization/languages.js';
 import { detectSeniority } from '../domain/normalization/seniority.js';
 import {
@@ -65,9 +70,10 @@ export function parseExperienceYears(text: string): number | null {
 function parseEducation(lines: readonly string[]): EducationRequirement | null {
   for (const line of lines) {
     const level = detectEducationLevel(line);
-    if (!level) continue;
-    const field = extractField(line.split(/[.;(]/)[0] ?? line);
-    return { level, fields: field ? [field.slice(0, 80)] : [] };
+    if (!level || !mentionsStudies(line)) continue;
+    // The field ends at the first clause: "... o carreras afines, con una duración de 4 semestres".
+    const field = extractField(line.split(/[.;(]|,?\s+con\s+/)[0] ?? line);
+    return { level, fields: field && isFieldOfStudy(field) ? [field.slice(0, 80)] : [] };
   }
   return null;
 }

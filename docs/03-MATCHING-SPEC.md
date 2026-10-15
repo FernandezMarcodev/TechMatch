@@ -79,6 +79,8 @@ Postgres → PostgreSQL
 
 El sistema mantiene un diccionario de aliases (`skill-catalog.ts`), en inglés y en español, para que las etiquetas de las fuentes coincidan con lo que escribe el candidato ("Unit Testing" ↔ "pruebas unitarias"). En texto libre, un término solo se reconoce como palabra completa: "Java" no coincide dentro de "JavaScript" y el ".js" de "Node.js" no se interpreta como JavaScript.
 
+Solo se comparan las tecnologías **del catálogo**. Algunas fuentes publican etiquetas genéricas ("Full-stack", "Prompt Engineering", "Software Architecture"); como el CV se lee con el mismo catálogo, esas etiquetas nunca podrían aparecer en un CV y siempre figurarían como faltantes. Se guardan en la oferta, pero no cuentan para el puntaje ni para las explicaciones. Si una oferta solo tiene etiquetas fuera del catálogo, Skills es `UNKNOWN`.
+
 ### Fórmula
 
 Las tecnologías obligatorias pesan el doble que las deseables:

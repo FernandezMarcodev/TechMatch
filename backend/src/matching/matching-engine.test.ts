@@ -165,6 +165,27 @@ describe('evaluateMatch — skills', () => {
       'Coinciden 1 de 2 tecnologías requeridas (Java); faltan: Spring; 1 de 1 deseables (Docker)',
     );
   });
+
+  it('leaves out tags outside the catalog, which a CV can never show', () => {
+    const result = evaluateMatch(
+      profile({ skills: skills('Java') }),
+      job({ skills: jobSkills(['Java', 'Spring', 'Full-stack', 'Prompt Engineering']) }),
+      config,
+    );
+    expect(criterion(result, 'skills').score).toBe(50);
+    expect(criterion(result, 'skills').evidence).toBe(
+      'Coinciden 1 de 2 tecnologías requeridas (Java); faltan: Spring',
+    );
+  });
+
+  it('is unknown when the offer only has tags outside the catalog', () => {
+    const result = evaluateMatch(
+      profile({ skills: skills('Java') }),
+      job({ skills: jobSkills(['Full-stack']) }),
+      config,
+    );
+    expect(criterion(result, 'skills').status).toBe('unknown');
+  });
 });
 
 describe('evaluateMatch — experience and seniority', () => {

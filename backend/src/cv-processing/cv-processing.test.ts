@@ -255,6 +255,24 @@ describe('extractProfile', () => {
     expect(minimal.skills.map((s) => s.name)).toEqual(['Python']);
   });
 
+  it('does not read a list of subjects as a degree', () => {
+    const p = extractProfile(
+      [
+        'Educación',
+        'Tecnicatura Universitaria en Programación',
+        'Universidad Nacional de Quilmes',
+        'Materias relevantes: Bases de Datos I y II, Ingeniería de Software I y II.',
+      ].join('\n'),
+      REFERENCE_DATE,
+    );
+    expect(p.education).toEqual([
+      expect.objectContaining({
+        level: 'TERTIARY',
+        degree: 'Tecnicatura Universitaria en Programación',
+      }),
+    ]);
+  });
+
   it('uses explicitly stated years when there are no dated experiences', () => {
     const p = extractProfile(
       'Perfil\nDesarrollador con 4 años de experiencia en React',

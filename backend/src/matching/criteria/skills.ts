@@ -1,4 +1,5 @@
 import type { JobSkill, Skill } from '../../domain/entities.js';
+import { isCatalogSkill } from '../../domain/normalization/skills.js';
 import type { MatchingConfig } from '../matching-config.js';
 import { listNames, scored, unknown, type CriterionOutcome } from './outcome.js';
 
@@ -13,7 +14,10 @@ export function evaluateSkills(
   jobSkills: readonly JobSkill[],
   config: MatchingConfig,
 ): CriterionOutcome {
-  if (jobSkills.length === 0) {
+  // Tags outside the catalog are left out: the CV could never show them, so they would
+  // always count as missing (docs/13-DECISIONES-TECNICAS.md).
+  const comparable = jobSkills.filter((s) => isCatalogSkill(s.normalizedName));
+  if (comparable.length === 0) {
     return unknown('No se pudo evaluar: la oferta no especifica tecnologías reconocibles');
   }
   if (candidateSkills.length === 0) {
@@ -23,7 +27,7 @@ export function evaluateSkills(
   const owned = new Set(candidateSkills.map((s) => s.normalizedName));
   const required: Tally = { total: 0, matched: [], missing: [] };
   const optional: Tally = { total: 0, matched: [], missing: [] };
-  for (const skill of jobSkills) {
+  for (const skill of comparable) {
     const tally = skill.isRequired ? required : optional;
     tally.total += 1;
     (owned.has(skill.normalizedName) ? tally.matched : tally.missing).push(skill.name);

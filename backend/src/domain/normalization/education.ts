@@ -24,6 +24,27 @@ export function detectEducationLevel(text: string): EducationLevel | null {
   return null;
 }
 
+// Words that place a line in the context of studies. Without them, "ingeniería" or "degree"
+// usually mean something else: "buenas prácticas de ingeniería", "a high degree of autonomy".
+const STUDIES_CONTEXT =
+  /\b(titulo|titulad[oa]s?|carreras?|egresad[oa]s?|graduad[oa]s?|estudiantes?|estudios|formacion|licenciatura|licenciad[oa]|tecnicatura|universitari[oa]|bachiller|bachelor'?s?|degree in|profesional (?:de|en)|ingenieria (?:en|civil|informatica|de sistemas|de ejecucion)|ingenier[oa](?:\/a)? (?:en|civil|informatic[oa]))\b/;
+
+/** True when a requirement line talks about studies (offers only; CVs have their own section). */
+export function mentionsStudies(text: string): boolean {
+  return STUDIES_CONTEXT.test(foldText(text));
+}
+
+const OTHER_DISCIPLINES =
+  /\b(ingenier\w*|industrial|civil|matematic\w*|fisic\w*|estadistic\w*|actuari\w*|economi\w*|administracion|cuantitativ\w*|ejecucion)\b/;
+
+/**
+ * True when an extracted field of study names a discipline ("Sistemas", "Ingeniería Civil")
+ * instead of leftover text ("4 o más años de duración").
+ */
+export function isFieldOfStudy(text: string): boolean {
+  return isComputingField(text) || OTHER_DISCIPLINES.test(foldText(text));
+}
+
 // Fields of study related to computing/IT ("carreras afines a informática").
 const COMPUTING_FIELD =
   /\b(sistemas|informatica|computacion|computer|computing|software|programacion|programador|desarrollo de software|desarrollo web|ciencias? de datos|data science|inteligencia artificial|ciberseguridad|seguridad informatica|tecnologias? de la informacion|telecomunicaciones|telematica|bioinformatica)\b/;
