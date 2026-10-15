@@ -106,6 +106,8 @@ Cada línea con un rango de fechas ("Marzo 2021 - Actualidad", "01/2018 a 06/201
 * nivel (secundario, terciario, universitario, posgrado);
 * fechas.
 
+Cada título es una entrada. Si una línea tiene varios separados por "|" ("Licenciatura en Informática | estimado | Título intermedio: Analista en Informática 2026"), se leen por separado: una licenciatura y un título terciario. Leída entera, la línea tomaría el primer nivel que aparece en la lista de palabras clave (terciario) y perdería la licenciatura. Las palabras de estado ("estimado", "en curso", "finalizado") no forman parte del título. El nivel es el del título que nombra el CV, terminado o en curso: el CV no siempre lo aclara y no se infiere. Las líneas que describen la carrera ("Materias relevantes: …", "Promedio: …") no son títulos.
+
 ### Proyectos
 
 * nombre;

@@ -133,6 +133,12 @@ Carga de CV, matching determinístico explicado, ofertas de Get on Board, interf
 | 23 | `feat/que-te-falta` | En las recomendaciones, las tecnologías del catálogo que más piden las ofertas activas y que el CV no tiene, con el % de ofertas (`GET /api/cvs/{cvId}/missing-skills`) |
 | — | `feat/recomendaciones-visual` | Estado `partial` en las razones (se cumple en parte, naranja), separado de `neutral` (no exigido o no evaluable, gris); el resumen muestra primero lo que no se cumple. Tendencias con una paleta clásica y lisa (azul, verde, rojo, amarillo, naranja, violeta) y un ícono propio por sección |
 
+## v2.3.1 — Educación del CV
+
+| # | Rama | Alcance |
+| --- | --- | --- |
+| — | `fix/educacion-varios-titulos` | Una línea con varios títulos separados por "\|" (licenciatura y título intermedio) da una entrada por título, sin palabras de estado ("estimado"); antes la licenciatura se leía como terciaria |
+
 ## v2.4.0 — Extras
 
 | # | Rama | Alcance |
