@@ -150,6 +150,10 @@ Si la oferta ya existe:
 * actualizar `lastSeenAt`;
 * marcar `isActive = true`.
 
+## Recálculo de recomendaciones
+
+Después de cada sincronización en la que al menos una fuente terminó bien, se recalculan las recomendaciones de **todos los CVs procesados** (guardados o no) contra las ofertas activas (`CvService.recalculateAll`): aparecen las ofertas nuevas, desaparecen las cerradas y se aplican las reglas de matching vigentes. Las ofertas se cargan una sola vez para todos los CVs; si un CV falla, se registra y se sigue con el resto. Lo hacen `npm run sync-jobs` (también en el workflow de producción) y el scheduler interno.
+
 ## Inactividad
 
 Las ofertas que no aparecen en una sincronización exitosa pasan a:

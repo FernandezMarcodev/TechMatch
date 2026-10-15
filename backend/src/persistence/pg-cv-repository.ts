@@ -84,6 +84,13 @@ export class PgCvRepository implements CvRepository {
     return result.rowCount ?? 0;
   }
 
+  async findProcessedIds(): Promise<string[]> {
+    const { rows } = await this.db.query<{ id: string }>(
+      "SELECT id FROM cvs WHERE processing_status = 'PROCESSED' ORDER BY created_at",
+    );
+    return rows.map((r) => r.id);
+  }
+
   async saveForUser(cvId: string, userId: string, now: Date): Promise<void> {
     await this.db.query(
       `UPDATE cvs SET user_id = $2, saved_at = COALESCE(saved_at, $3), updated_at = $3

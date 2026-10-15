@@ -117,6 +117,6 @@ Carga de CV, matching determinístico explicado, ofertas de Get on Board, interf
 | --- | --- | --- |
 | 20 | `feat/guardar-cv-adaptado` | Guardar y reabrir CVs adaptados (usuarios logueados) |
 | 21 | `feat/preferencias-candidato` | "Disponible para mudarme" y modalidad preferida como entradas del matching |
-| 22 | `feat/recalculo-tras-sync` | Recalcular recomendaciones de usuarios cuando entran ofertas nuevas |
+| 22 | `feat/recalculo-tras-sync` | Después de cada sincronización, recalcular las recomendaciones de todos los CVs procesados contra las ofertas activas |
 | 23 | `feat/que-te-falta` | En las recomendaciones, las tecnologías que más piden las ofertas y que el CV no tiene |
 | 27 | `fix/matching-pocas-tecnologias` | HIGH exige que coincida al menos el 60 % de las tecnologías (`highMinimums`); por debajo, la oferta queda como máximo en MEDIUM |

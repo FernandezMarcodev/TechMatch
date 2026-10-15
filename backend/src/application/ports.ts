@@ -25,6 +25,8 @@ export interface CvRepository {
    * saved in an account are kept. Returns how many.
    */
   deleteCreatedBefore(cutoff: Date): Promise<number>;
+  /** Ids of the CVs whose processing finished, to recalculate their recommendations. */
+  findProcessedIds(): Promise<string[]>;
   /** Links the CV to the user's account. */
   saveForUser(cvId: string, userId: string, now: Date): Promise<void>;
   /** The user's saved CVs, most recently saved first. */

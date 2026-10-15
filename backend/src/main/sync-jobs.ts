@@ -3,18 +3,29 @@
  *   npm run sync-jobs               -> one sync of every enabled source, then exit
  *   npm run sync-jobs -- --schedule -> sync every JOB_SYNC_INTERVAL_HOURS (default 12)
  */
-import { getEnv } from '../config/env.js';
+import { frontendUrl, getEnv } from '../config/env.js';
 import { createPool } from '../infrastructure/db/pool.js';
+import { createEmailSender } from '../infrastructure/email/create-email-sender.js';
 import { createLogger } from '../infrastructure/logging/logger.js';
-import { createJobSyncScheduler, createJobSyncService } from './job-sync.js';
+import { createContainer } from './container.js';
+import { createJobSyncScheduler, createJobSyncService, syncAndRecalculate } from './job-sync.js';
 
 const env = getEnv();
 const logger = createLogger(env.LOG_LEVEL);
 const pool = createPool(env.DATABASE_URL);
 const service = createJobSyncService(env, pool, logger);
+// After each sync, the analyzed CVs are matched again against the current offers.
+const { cvService } = createContainer({
+  pool,
+  logger,
+  env,
+  frontendUrl: frontendUrl(env),
+  emailSender: createEmailSender(env),
+});
+const recalculate = () => cvService.recalculateAll();
 
 if (process.argv.includes('--schedule')) {
-  const scheduler = createJobSyncScheduler(service, env, logger);
+  const scheduler = createJobSyncScheduler(service, env, logger, recalculate);
   scheduler.start(true);
   const keepAlive = setInterval(() => undefined, 1 << 30);
   const stop = () => {
@@ -24,7 +35,7 @@ if (process.argv.includes('--schedule')) {
   process.on('SIGINT', stop);
   process.on('SIGTERM', stop);
 } else {
-  const summaries = await service.syncAll();
+  const summaries = await syncAndRecalculate(service, recalculate);
   await pool.end();
   process.exitCode = summaries.every((s) => s.status === 'ok') ? 0 : 1;
 }
