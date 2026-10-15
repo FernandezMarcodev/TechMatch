@@ -1,10 +1,10 @@
 # Cuentas de usuario
 
-**Versión:** v2.1 (ver `14-PLAN-DE-DESARROLLO.md`, tickets 9 a 16).
+**Versión:** v2.1 (ver `14-PLAN-DE-DESARROLLO.md`, tickets 9 a 19).
 
 ## Objetivo
 
-Permitir que una persona cree una cuenta con email y contraseña para, más adelante, guardar sus CVs, ver su historial y reabrir sus CVs adaptados.
+Permitir que una persona cree una cuenta con email y contraseña para ver todas sus recomendaciones, adaptar su CV a una oferta y guardar sus CVs con su historial. Reabrir CVs adaptados está planificado para la v2.4.
 
 **La cuenta es opcional, pero tiene privilegios.** Sin registrarse se puede subir un CV y ver las primeras recomendaciones.
 
@@ -31,6 +31,8 @@ Cada etapa es una rama y deja el sistema funcionando:
 | 2. Email | `feat/email` | El sistema puede mandar mails (Mailpit en desarrollo, Brevo en producción). |
 | 3. Verificación | `feat/verificar-email` | Al registrarse llega un link; **sin verificar el email no se puede iniciar sesión**. |
 | 4. Recuperación | `feat/recuperar-contrasena` | "Olvidé mi contraseña" con un link por email. |
+| 5. Privilegios | `feat/portada-login`, `feat/adaptar-cv-con-cuenta`, `feat/recomendaciones-con-cuenta` | Portada con inicio de sesión; adaptar el CV y ver todas las recomendaciones requieren sesión. |
+| 6. CVs guardados | `feat/mis-cvs` | "Guardar en mi cuenta", "Mi cuenta" con historial, borrado de CVs y de la cuenta. |
 
 ## Reglas
 
@@ -143,6 +145,9 @@ Todas bajo `/api/auth`, con las convenciones de `04-API-CONTRACTS.md`. Los endpo
 | `POST /api/auth/verify-email/resend` | 3 | `{ email }` | `202`, siempre |
 | `POST /api/auth/password-reset` | 4 | `{ email }` | `202`, siempre |
 | `POST /api/auth/password-reset/confirm` | 4 | `{ token, password }` | `204` |
+| `DELETE /api/auth/account` | 6 | sesión + `{ password }` | `204`; borra la cuenta y sus CVs guardados |
+
+CVs guardados (etapa 6), fuera de `/api/auth`: `POST /api/cvs/{cvId}/save`, `GET /api/me/cvs` y `DELETE /api/cvs/{cvId}`, todos con sesión (contrato en `04-API-CONTRACTS.md` § CVs guardados).
 
 `user` se expone como `{ id, email, emailVerified, createdAt }`; nunca el hash ni las sesiones.
 
@@ -162,13 +167,13 @@ En la etapa 3, `register` deja de considerar la cuenta lista: manda el email de 
 
 ## Frontend
 
-* Páginas: **Crear cuenta** (`/crear-cuenta`), **Iniciar sesión** (`/ingresar`) y **Mi cuenta** (`/cuenta`, con el email, la fecha de alta y "Cerrar sesión"); en la etapa 3, **Verificar email** (`/verificar-email?token=…`); en la etapa 4, **Olvidé mi contraseña** y **Nueva contraseña** (`/restablecer?token=…`).
+* Páginas: **Crear cuenta** (`/crear-cuenta`), **Iniciar sesión** (`/ingresar`, y también la portada `/`) y **Mi cuenta** (`/cuenta`, con el email, la fecha de alta, los CVs guardados, "Cerrar sesión" y "Borrar mi cuenta"); en la etapa 3, **Verificar email** (`/verificar-email?token=…`); en la etapa 4, **Olvidé mi contraseña** (`/olvide-contrasena`) y **Nueva contraseña** (`/restablecer?token=…`).
 * Desde la etapa 3, crear la cuenta muestra "Revisá tu email" (con "Reenviar email de verificación") y no inicia sesión. Si alguien sin verificar intenta entrar, el error ofrece el mismo botón de reenvío. `/verificar-email` llama una sola vez a la API (el link sirve una vez) y, si sale bien, invita a iniciar sesión.
 * Recuperación: "¿Olvidaste tu contraseña?" en el login lleva a `/olvide-contrasena` (pide el email y responde siempre "Si existe una cuenta…"). El link abre `/restablecer`, que pide la nueva contraseña dos veces; al guardarla se cierra también la sesión del navegador y se invita a iniciar sesión. Si el link venció, ofrece pedir uno nuevo.
 * En la barra superior: "Iniciar sesión" para visitantes; el email (enlace a "Mi cuenta") para usuarios logueados. En el celular se muestra solo el ícono.
 * `AuthProvider` (contexto de React) guarda el usuario actual; al abrir la app, si hay token, se llama a `/api/auth/me` (si responde 401, se borra el token). El token vive en `localStorage` (`techmatch.session`); si el navegador no permite guardarlo, dura hasta cerrar la pestaña.
 * `RequireAuth` protege las páginas que requieren cuenta: redirige a "Iniciar sesión" y vuelve a la página pedida después de entrar.
-* Subir un CV, ver recomendaciones y adaptar un CV siguen funcionando sin cuenta.
+* Sin cuenta se puede subir un CV y ver las primeras recomendaciones; ver todas, adaptar el CV y guardar CVs piden iniciar sesión (con un candado en la interfaz).
 
 ## Configuración nueva
 
@@ -184,6 +189,8 @@ En la etapa 3, `register` deja de considerar la cuenta lista: manda el email de 
 | `FRONTEND_URL` | primer origen de `CORS_ORIGIN` | Base de los links de los mails |
 | `EMAIL_VERIFICATION_TTL_HOURS` | `24` | Vencimiento del link de verificación |
 | `PASSWORD_RESET_TTL_MINUTES` | `30` | Vencimiento del link de recuperación |
+| `ANONYMOUS_RECOMMENDATIONS_LIMIT` | `3` | Recomendaciones que se ven sin cuenta |
+| `CV_RETENTION_DAYS` | `30` | Días hasta que se borra un CV no guardado |
 
 ## Producción
 
@@ -198,4 +205,5 @@ Los pasos para configurar Brevo están en `16-DESPLIEGUE.md` (§ Emails con Brev
 * Pasado el límite de intentos, la API responde 429.
 * (Etapa 3) Sin verificar el email no se puede iniciar sesión; el link de verificación funciona una sola vez y vence a las 24 horas.
 * (Etapa 4) El link de recuperación funciona una sola vez, vence a los 30 minutos y, al usarse, cierra las sesiones abiertas.
-* El flujo anónimo sigue funcionando sin cuenta.
+* Sin cuenta se puede subir un CV y ver las primeras recomendaciones; el resto, la adaptación y guardar CVs responden según los privilegios (la API los controla).
+* Un CV guardado responde `404` a cualquiera que no sea su dueño.

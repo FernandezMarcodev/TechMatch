@@ -1,6 +1,6 @@
 # Decisiones técnicas
 
-Decisiones de diseño del MVP y su fundamento. Los documentos `01`–`12` definen el qué; este documento explica el cómo y el porqué de las elecciones que no son evidentes.
+Decisiones de diseño del sistema y su fundamento. Los documentos `01`–`12` y `15`–`18` definen el qué; este documento explica el cómo y el porqué de las elecciones que no son evidentes.
 
 ## Stack
 
@@ -43,6 +43,8 @@ Limitación conocida: la mayoría de las ofertas son remotas o de otros países 
 
 **v2.2: Lever y Greenhouse.** Sus APIs públicas por empresa están pensadas para mostrar ofertas en otros sitios, no requieren clave y traen búsquedas con sede en Argentina (por ejemplo, Despegar). Como incluyen todas las áreas y países de cada empresa, se filtran a tecnología en Argentina o remoto antes de guardar. Remotive se descartó porque sus términos prohíben usar sus ofertas para conseguir registros, algo incompatible con los privilegios de la cuenta. La investigación completa está en `05-FUENTES-DE-OFERTAS.md`.
 
+**Requisito educativo de una oferta con contexto de estudios.** Detectar el nivel por palabras ("ingeniería", "degree") marcaba como requisito frases como "buenas prácticas de ingeniería" (unas 25 de 86 líneas en datos reales). Se exige además una palabra de estudios en la misma línea, y un área que nombre una disciplina. Ver también § Procesamiento de CV.
+
 **Métricas en SQL, no en Python.** El panel de tendencias (`18-PANEL-DE-TENDENCIAS.md`) son agregaciones sobre datos que ya están en PostgreSQL. Resolverlas con SQL evita sumar otro lenguaje, otro servicio en el despliegue gratuito y otra comunicación entre procesos. Pandas tendría sentido para análisis exploratorio fuera de producción o estadística pesada.
 
 ## Despliegue gratuito
@@ -83,39 +85,43 @@ Los valores concretos están en `03-MATCHING-SPEC.md` y en `matching-config.ts`.
 * **Score interno:** el usuario ve el nivel (alta/media) con un indicador de barras y las razones. Un número exacto invita a sobreinterpretar diferencias pequeñas; se usa solo para clasificar y ordenar.
 * **Ubicación por regiones:** CABA y provincia de Buenos Aires forman una región. Cada país es una región propia: una oferta presencial en Santiago de Chile es incompatible con un CV de Buenos Aires.
 * **Razones = cálculo:** cada evaluador de criterio devuelve score, estado y mensaje juntos, de modo que la explicación no puede divergir del puntaje.
+* **Estado `partial` separado de `neutral`:** antes, un criterio que se cumplía en parte (5 de 7 tecnologías, un nivel de seniority de diferencia) y uno que la oferta no exigía se mostraban igual, en gris. Ahora "en parte" es naranja y "no exigido o no evaluable" sigue gris; el resumen muestra primero lo que no se cumple, después lo parcial.
+* **Solo se comparan tecnologías del catálogo:** las etiquetas de las fuentes incluyen conceptos genéricos ("Full-stack", "Prompt Engineering"). El CV solo se lee con el catálogo, así que esas etiquetas serían siempre "faltantes" y bajarían el puntaje de todos por igual. Se dejan fuera del criterio en lugar de borrarlas de la oferta (el detalle las sigue mostrando). Lo mismo aplica a "Qué te falta".
+* **Recálculo después de cada sincronización, de todos los CVs procesados:** las recomendaciones se guardaban una sola vez, al analizar el CV, así que no veían las ofertas nuevas ni las reglas nuevas del matching. Se recalculan dentro del mismo proceso de sincronización (sin un servicio ni una cola adicional): el motor es puro y en memoria, y con las ofertas cargadas una vez el costo es bajo (29 CVs contra 311 ofertas en unos 3 segundos). Si alguna vez hubiera miles de CVs, convendría recalcular solo los guardados o en lotes.
 
 ## Procesamiento de CV
 
 * Validación por contenido (firma `%PDF-` y apertura real), nunca por el MIME declarado.
 * Archivo guardado como `<uuid>.pdf` en un directorio privado; la ruta se valida al leer para impedir path traversal.
 * Extracción heurística y conservadora: secciones por títulos conocidos, rangos de fechas para experiencias, palabras explícitas para seniority, educación e idiomas. El seniority no se deduce de los años.
+* **Un registro por título y sin detalles de la carrera:** el nivel educativo se detecta por palabras clave, y una línea como "Licenciatura en Informática | estimado | Título intermedio: Analista en Informática" tomaba el primer nivel de la lista (terciario, por "Analista") y perdía la licenciatura. Se separa en un registro por título y se descartan las palabras de estado ("estimado", "en curso"). Las líneas "Materias relevantes: Ingeniería de Software…" no se leen como un título. El nivel es el del título que nombra el CV, terminado o en curso: no se infiere.
 * Compresión: paso no-op (archivos chicos y privados).
-* **Datos personales con vencimiento.** El PDF se borra apenas termina el procesamiento: después no se vuelve a leer, y no guardarlo es más simple y más privado. Por la misma razón, el texto extraído del CV tampoco se guarda: solo sirve para armar el perfil, que es lo que usan el matching y la adaptación. El CV con su texto, perfil y resultados se borra a los `CV_RETENTION_DAYS` días (30 por defecto): en un flujo anónimo nadie puede pedir el borrado, así que el sistema no guarda los datos para siempre (principio de minimización, Ley 25.326). Lo ejecuta `npm run purge-cvs`, que en producción corre en el workflow de sincronización cada 12 h; no hace falta un scheduler más. La limpieza no toca los CVs que un usuario eligió guardar en su cuenta.
+* **Datos personales con vencimiento.** El PDF se borra apenas termina el procesamiento: después no se vuelve a leer, y no guardarlo es más simple y más privado. Por la misma razón, el texto extraído del CV tampoco se guarda: solo sirve para armar el perfil, que es lo que usan el matching y la adaptación. El CV con su perfil y resultados se borra a los `CV_RETENTION_DAYS` días (30 por defecto): quien lo subió sin cuenta no tiene forma de pedir el borrado, así que el sistema no guarda los datos para siempre (principio de minimización, Ley 25.326). Lo ejecuta `npm run purge-cvs`, que en producción corre en el workflow de sincronización cada 12 h; no hace falta un scheduler más. La limpieza no toca los CVs que un usuario eligió guardar en su cuenta.
 * OCR: puerto `OcrProvider` deshabilitado. Requiere renderizar páginas con canvas nativo y un motor OCR. Un PDF sin texto termina en `failed` con un mensaje claro.
 * Procesamiento asíncrono en el proceso del backend (`TaskRunner`); el cliente consulta el estado. Al iniciar, los CVs interrumpidos por un reinicio pasan a `FAILED` para no quedar "procesando" indefinidamente. Es suficiente para una instancia; escalar a varias requiere una cola persistente.
-* Las recomendaciones se calculan al procesar el CV, contra las ofertas activas en ese momento.
+* Las recomendaciones se calculan al procesar el CV, contra las ofertas activas en ese momento, y se recalculan después de cada sincronización (§ Matching).
+* Como el texto no se guarda, mejorar la extracción no cambia los CVs ya analizados: hay que volver a subirlos. Es el costo aceptado de la minimización de datos.
 
 ## Frontend
 
 * **Material Design 3:** roles de color, forma, elevación y escala tipográfica como variables CSS (`styles/tokens.css`), con un único esquema claro: el tema oscuro se descartó porque la interfaz se veía y se leía mejor en claro, y mantener un solo esquema simplifica el diseño y las pruebas (`color-scheme: light` evita que el navegador oscurezca controles nativos).
 * **Íconos SVG propios** (`components/Icon.tsx`) en lugar de una fuente de íconos o una librería.
-* **Color:** la paleta principal es azul; el verde (con acentos cian y ámbar) comunica lo positivo y da vida a la portada, los pasos de "Cómo funciona" y los criterios. Los criterios prioritarios (tecnologías, seniority, experiencia) se destacan en azul pleno.
+* **Color:** la paleta principal es azul; el verde (con acentos cian y ámbar) comunica lo positivo y da vida a la portada, los pasos de "Cómo funciona" y los criterios. Los criterios prioritarios (tecnologías, seniority, experiencia) se destacan en azul pleno. En las razones: verde se cumple, naranja en parte, rojo no se cumple, gris no exigido.
+* **Gráficos con colores clásicos y lisos** (azul, verde, rojo, amarillo, naranja, violeta, sin degradés): se probaron tonos menos comunes y degradés, y se volvió a una paleta simple que se lee al instante. Cada categoría mantiene su color (remoto verde, híbrido amarillo, presencial azul) y cada sección del panel tiene un ícono propio.
 * **Tipografía Roboto** desde Google Fonts, con fuentes del sistema como respaldo.
 * **Recomendaciones:**
   * indicador de nivel de tres barras (sin número) y chip de nivel;
-  * resumen de hasta tres razones (tecnologías primero, luego incompatibilidades y coincidencias) con opción de ver el análisis completo;
+  * resumen de hasta tres razones (tecnologías primero, luego lo que no se cumple, lo parcial y las coincidencias) con opción de ver el análisis completo;
+  * tarjeta "Qué te falta" arriba de la lista: es una sugerencia y se oculta si no falta nada o si falla la consulta;
   * filtros por nivel y modalidad remota en el cliente, sin alterar el orden;
   * paginación incremental de 15 en 15.
-* **Accesibilidad:** inputs reales con etiqueta (también en la zona de arrastre), foco visible, `aria-pressed` y `aria-expanded` en controles, y respeto de `prefers-reduced-motion`.
+* **Gráficos con CSS, sin librería:** el panel de tendencias usa barras, anillos (`conic-gradient`) y columnas hechos con CSS en `components/Charts.tsx`. Son pocos gráficos y simples; una librería (Recharts, Chart.js) sumaría peso y una dependencia para algo que se resuelve en unas 150 líneas que se pueden leer completas. El área de cada tecnología vive en el catálogo de skills, junto a sus alias: una sola fuente de verdad.
+* **Accesibilidad:** inputs reales con etiqueta (también en la zona de arrastre), foco visible, `aria-pressed` y `aria-expanded` en controles, y respeto de `prefers-reduced-motion`. En los gráficos, las formas son decorativas y cada valor está escrito como texto.
 
 ## Cuentas de usuario
 
 * **Sesión con token en el encabezado y no con cookie:** frontend y API están en dominios distintos y Safari bloquea las cookies de terceros. El token es aleatorio, la base guarda solo su hash y logout lo invalida. Riesgo asumido y mitigaciones en `17-CUENTAS-DE-USUARIO.md`.
 * **`scrypt` de Node para las contraseñas:** algoritmo pensado para contraseñas y sin dependencias nativas (bcrypt y argon2 requieren compilar módulos).
-* **Recálculo después de cada sincronización, de todos los CVs procesados:** las recomendaciones se guardaban una sola vez, al analizar el CV, así que no veían las ofertas nuevas ni las reglas nuevas del matching. Se recalculan dentro del mismo proceso de sincronización (sin un servicio ni una cola adicional): el motor es puro y en memoria, y con las ofertas cargadas una vez el costo es bajo (29 CVs contra 311 ofertas en unos 3 segundos). Si alguna vez hubiera miles de CVs, convendría recalcular solo los guardados o en lotes.
-* **Gráficos con CSS, sin librería:** el panel de tendencias usa barras, anillos (`conic-gradient`) y columnas hechos con CSS en `components/Charts.tsx`. Son pocos gráficos y simples; una librería (Recharts, Chart.js) sumaría peso y una dependencia para algo que se resuelve en unas 150 líneas que se pueden leer completas. El área de cada tecnología vive en el catálogo de skills, junto a sus alias: una sola fuente de verdad.
-* **Solo se comparan tecnologías del catálogo:** las etiquetas de las fuentes incluyen conceptos genéricos ("Full-stack", "Prompt Engineering"). El CV solo se lee con el catálogo, así que esas etiquetas serían siempre "faltantes" y bajarían el puntaje de todos por igual. Se dejan fuera del criterio en lugar de borrarlas de la oferta (el detalle las sigue mostrando). Lo mismo aplica a "Qué te falta".
-* **Requisito educativo con contexto de estudios:** detectar el nivel por palabras ("ingeniería", "degree") marcaba como requisito frases como "buenas prácticas de ingeniería" (unas 25 de 86 líneas en datos reales). Se exige además una palabra de estudios en la misma línea, y un área que nombre una disciplina. En el CV, las líneas de detalle de la carrera ("Materias relevantes: Ingeniería de Software…") no se leen como un título.
 * **Guardar un CV es opt-in:** en lugar de quedarnos con todos los CVs de quien tiene cuenta, el usuario elige cuáles guardar ("Guardar en mi cuenta") después de ver sus recomendaciones. Es consentimiento explícito y minimiza los datos: lo no guardado vence como cualquier CV. Un CV guardado responde 404 a cualquiera que no sea su dueño, con una sola función de acceso para todos los casos de uso.
 * **Email por API HTTP (Brevo) en producción:** Render free bloquea los puertos SMTP; en desarrollo, Nodemailer contra Mailpit para ver los mails sin mandarlos.
 
@@ -125,4 +131,4 @@ Los valores concretos están en `03-MATCHING-SPEC.md` y en `matching-config.ts`.
 * **Casos de referencia del matching** (`backend/src/matching/golden-cases.test.ts`): pares realistas CV + oferta con el nivel que esperaría una persona (por ejemplo, un junior frente a una oferta senior da LOW). Cada caso recorre el pipeline real (extracción del CV → normalización de la oferta → motor de matching con la configuración por defecto), así que si un cambio de pesos, umbrales, catálogo o extractores rompe un resultado obvio, el test falla y muestra las razones. Es la forma de medir la calidad del algoritmo y no ajustarlo a ojo.
 * **Catálogo de skills guiado por datos:** las etiquetas en inglés que publica Get on Board ("Entity Framework Core", "Unit Testing", "RESTful API") se comparan con CVs escritos en español ("EF Core", "pruebas unitarias", "APIs RESTful"). Los alias se agregan revisando qué tecnologías concretas aparecen en las ofertas sincronizadas y no están en el catálogo; las etiquetas genéricas ("Software Development", "Testing") no se agregan porque no se pueden verificar en un CV.
 * **Integración:** persistencia, API y sincronización contra una base `techmatch_test` que se vacía en cada test.
-* **E2E:** Playwright levanta backend y frontend sobre `techmatch_e2e` y recorre carga → procesamiento → recomendaciones → detalle.
+* **E2E:** Playwright levanta backend y frontend sobre `techmatch_e2e` y recorre carga → procesamiento → recomendaciones → detalle → adaptación, más las cuentas (con los emails reales, leídos desde Mailpit), los CVs guardados y el panel de tendencias.

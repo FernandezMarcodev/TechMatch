@@ -14,7 +14,7 @@ Motivos:
 * una API entrega datos estructurados (tecnologías, seniority, modalidad declarados por quien publica) que no hay que inferir de un texto;
 * una API no se rompe con un rediseño visual del sitio.
 
-## Fuente del MVP: Get on Board
+## Get on Board (fuente del MVP)
 
 * Bolsa de empleo tecnológico de Latinoamérica: <https://www.getonbrd.com>.
 * API pública v0, sin clave de acceso.
@@ -27,7 +27,7 @@ GET /api/v0/categories/{categoria}/jobs
 ```
 
 * Categorías por defecto: `programming`, `data-science-analytics`, `sysadmin-devops-qa`, `mobile-developer`, `machine-learning-ai`, `cybersecurity`.
-* La interfaz indica "Ofertas provistas por Get on Board" y enlaza cada oferta original. Antes de producción deben revisarse los términos de uso de su API.
+* La interfaz indica "Ofertas provistas por Get on Board" (y por las páginas de empleo de empresas en Lever y Greenhouse) y enlaza cada oferta original. Queda pendiente una revisión formal de los términos de uso de su API.
 
 ### Datos que aporta
 
@@ -90,8 +90,13 @@ interface JobSourceConnector {
 
 ```text
 JobSourceConnector
-└── GetOnBoardConnector
+├── GetOnBoardConnector           (connectors/getonboard.ts)
+└── AtsConnector                  (connectors/ats.ts)
+    ├── createLeverConnector      una página por empresa de LEVER_COMPANIES
+    └── createGreenhouseConnector una página por empresa de GREENHOUSE_COMPANIES
 ```
+
+Lever y Greenhouse comparten el conector: cambian el endpoint y la función pura que traduce cada oferta (`mapLeverPosting`, `mapGreenhouseJob`).
 
 Agregar una fuente implica un conector nuevo y su identificador en `JobSource`. El motor de matching, el procesamiento de CV, la API y el frontend no cambian.
 
@@ -128,6 +133,7 @@ Database
   * contiene un marcador ("deseable", "valorable", "plus", "nice to have"...);
   * está bajo un subtítulo deseable ("Conocimientos deseables") hasta el siguiente subtítulo.
 * Además de los tags, se reconocen tecnologías del catálogo de aliases en el título, los requisitos y la descripción.
+* Los tags fuera del catálogo ("Full-stack", "Prompt Engineering") se guardan y se muestran en el detalle, pero el matching no los compara (`03-MATCHING-SPEC.md` § Skills).
 * Experiencia, educación e idiomas exigidos se leen de los **requisitos** cuando la fuente los separa. La descripción suele hablar de la empresa ("15 años de experiencia en el mercado") y no debe interpretarse como requisito.
 * Educación: una línea es requisito educativo solo si menciona un nivel **y** habla de estudios (título, carrera, formación, egresado, licenciatura, "ingeniería en…"). Así, "buenas prácticas de ingeniería" o "experiencia como ingeniero de software" no se leen como "exige título universitario". El área de estudio termina en la primera cláusula ("…o carreras afines, con una duración de 4 semestres") y solo se acepta si nombra una disciplina; si no, se conserva el nivel sin área.
 * Seniority: primero el título, luego el declarado y por último las líneas de requisitos.
@@ -174,6 +180,23 @@ Nunca se eliminan. Si vuelven a aparecer, se reactivan.
 
 * Cada 12 horas (`JOB_SYNC_INTERVAL_HOURS`), dentro del backend (`JOB_SYNC_ENABLED`) o como proceso independiente (`npm run sync-jobs`).
 * Máximo de ofertas por fuente configurable (`JOB_SYNC_MAX_OFFERS_PER_SOURCE`, 300 por defecto).
+
+## Configuración
+
+| Variable | Por defecto | Uso |
+| --- | --- | --- |
+| `JOB_SYNC_ENABLED` | `false` | Scheduler interno del backend (en producción, `false`: sincroniza GitHub Actions) |
+| `JOB_SYNC_RUN_ON_START` | `false` | Sincronizar al arrancar el backend |
+| `JOB_SYNC_INTERVAL_HOURS` | `12` | Intervalo del scheduler interno |
+| `JOB_SYNC_MAX_OFFERS_PER_SOURCE` | `300` | Máximo de ofertas por fuente |
+| `HTTP_USER_AGENT` | `TechMatchBot/0.1` | Identificación ante las fuentes |
+| `HTTP_TIMEOUT_MS` | `20000` | Timeout por request |
+| `HTTP_MAX_RETRIES` / `HTTP_BACKOFF_BASE_MS` | `2` / `2000` | Reintentos ante 5xx o errores de red, con backoff exponencial |
+| `HTTP_REQUEST_DELAY_MS` | `1000` | Espaciado mínimo entre requests |
+| `GETONBOARD_ENABLED` / `GETONBOARD_API_URL` | `true` / `https://www.getonbrd.com/api/v0` | Fuente Get on Board |
+| `GETONBOARD_CATEGORIES` / `GETONBOARD_PER_PAGE` | las 6 categorías de arriba / `50` | Categorías y tamaño de página |
+| `LEVER_ENABLED` / `LEVER_API_URL` / `LEVER_COMPANIES` | `true` / `https://api.lever.co/v0` / `despegar:Despegar,kavak:Kavak` | Fuente Lever |
+| `GREENHOUSE_ENABLED` / `GREENHOUSE_API_URL` / `GREENHOUSE_COMPANIES` | `true` / `https://boards-api.greenhouse.io/v1` / `clara:Clara` | Fuente Greenhouse |
 
 ## Logs
 

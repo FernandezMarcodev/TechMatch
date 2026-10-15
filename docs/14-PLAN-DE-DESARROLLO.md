@@ -26,7 +26,7 @@ Evolución de TechMatch después del MVP (`v1.0.0`), organizada por versiones y 
 * **Adaptar no es inventar:** el CV adaptado reordena, destaca y redacta lo que el CV ya contiene. Lo que la oferta pide y el CV no tiene se muestra como sugerencia y nunca se agrega automáticamente.
 * **Fuentes de ofertas:** solo APIs públicas o feeds pensados para acceso automatizado (nunca scraping), cuyos términos permitan mostrar las ofertas con link al original. Se suman como conectores, tocando lo mínimo del resto del sistema.
 * **Análisis de datos en SQL:** las métricas son agregaciones (conteos, promedios, agrupaciones) que PostgreSQL resuelve donde están los datos; no se suma otro lenguaje ni servicio (por ejemplo, Python/pandas) para eso.
-* **Fuera del plan:** login con Google, roles de administrador, nuevas fuentes de ofertas, OCR, IA y funcionalidades para empresas (ver `12-FUTURE-ROADMAP.md`).
+* **Fuera del plan:** login con Google, roles de administrador, fuentes de ofertas adicionales a Get on Board, Lever y Greenhouse, OCR, IA y funcionalidades para empresas (ver `12-FUTURE-ROADMAP.md`).
 
 ## v1.0.0 — MVP
 
@@ -37,7 +37,7 @@ Carga de CV, matching determinístico explicado, ofertas de Get on Board, interf
 | # | Rama | Alcance |
 | --- | --- | --- |
 | 1 | `docs/plan-de-desarrollo` | Este plan y el alcance de las próximas versiones en la documentación |
-| 2 | `chore/ci-github-actions` | GitHub Actions con lint, typecheck y tests (con PostgreSQL) en cada PR |
+| 2 | `chore/ci-github-actions` | GitHub Actions con lint, typecheck y tests (con PostgreSQL) en cada push a `main` (y en los PR, si se abren) |
 | 3 | `fix/cv-en-proceso-tras-reinicio` | Al iniciar el backend, los CVs que quedaron en `PROCESSING` pasan a `FAILED` |
 
 ## v2.0.0 — CV adaptado a una oferta
@@ -138,6 +138,12 @@ Carga de CV, matching determinístico explicado, ofertas de Get on Board, interf
 | # | Rama | Alcance |
 | --- | --- | --- |
 | — | `fix/educacion-varios-titulos` | Una línea con varios títulos separados por "\|" (licenciatura y título intermedio) da una entrada por título, sin palabras de estado ("estimado"); antes la licenciatura se leía como terciaria |
+
+## v2.3.2 — Documentación al día
+
+| # | Rama | Alcance |
+| --- | --- | --- |
+| — | `docs/documentacion-al-dia` | Toda la documentación revisada contra el sistema actual: SRS con cuentas, fuentes, tendencias y "Qué te falta"; modelo de dominio y base de datos; reglas del agente; backlog, criterios de aceptación, glosario y roadmap; decisiones técnicas reordenadas por tema |
 
 ## v2.4.0 — Extras
 

@@ -153,7 +153,7 @@ En GitHub: **Actions → Sync jobs → Run workflow**. A partir de ahí se repit
 ### Paso 7 — Verificar
 
 * `https://techmatch-api.onrender.com/api/health` responde `{"data":{"status":"ok"}}`.
-* Abrir `https://techmatch.pages.dev`, subir un CV y recorrer: recomendaciones → detalle → adaptar CV → descargar PDF. Entrar directo a una ruta interna (por ejemplo, recargar la página de recomendaciones) también debe funcionar.
+* Abrir `https://techmatch.pages.dev`, "Continuar sin cuenta", subir un CV y recorrer: recomendaciones → detalle. Después, crear una cuenta (con Brevo configurado), iniciar sesión y recorrer: todas las recomendaciones → adaptar CV → descargar PDF → guardar el CV y verlo en "Mi cuenta". Entrar directo a una ruta interna (por ejemplo, recargar la página de recomendaciones o `/tendencias`) también debe funcionar.
 * Si la consola muestra llamadas a otra URL (por ejemplo, otro proyecto de Render): `VITE_API_URL` de **Production** está mal. Pages usa variables distintas para Production (`main`) y Preview (otras ramas). Corregirla y volver a desplegar un deploy de `main`. Los espacios o la `/` final se ignoran.
 * Si el navegador muestra un error de CORS en la consola: revisar que `CORS_ORIGIN` sea exactamente la URL de Pages (con `https://` y sin `/` final).
 
@@ -173,7 +173,8 @@ La API manda mails (verificación de email y recuperación de contraseña, `17-C
 * **Desplegar:** automático en los dos servicios con cada push a `main`. Render espera a que pase el CI; Cloudflare Pages compila el frontend en cada push (si el CI falla, el frontend igual se publica: conviene no mergear a `main` sin `npm run ci` en verde, como indica el flujo de trabajo).
 * **Migraciones:** se aplican solas al arrancar el backend (son idempotentes).
 * **Ver errores:** backend en Render → servicio → **Logs**; frontend en Cloudflare → proyecto → **Deployments**.
-* **Forzar una sincronización:** Actions → Sync jobs → Run workflow.
+* **Forzar una sincronización:** Actions → Sync jobs → Run workflow (también recalcula las recomendaciones de todos los CVs analizados).
+* **Cambiar las empresas de Lever o Greenhouse:** la sincronización corre en el workflow, no en Render, y hoy usa las empresas por defecto de `backend/src/config/env.ts`. Para cambiarlas sin tocar el código, agregar `LEVER_COMPANIES` / `GREENHOUSE_COMPANIES` (formato `identificador:Nombre`, separados por coma) en el `env` del paso de sincronización de `.github/workflows/sync-jobs.yml`.
 
 ## La sincronización de ofertas falla con HTTP 403
 

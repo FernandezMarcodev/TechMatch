@@ -26,7 +26,7 @@ Mostrar qué está pidiendo el mercado tech, a partir de las ofertas activas que
 | Tecnologías más pedidas | Las 12 skills requeridas que más aparecen (cantidad y % de ofertas) |
 | Tecnologías por área | Menciones de skills requeridas agrupadas por área del catálogo (Lenguajes, Frontend, Backend, Datos, Cloud y DevOps, Metodologías y herramientas), con % sobre el total de menciones reconocidas. Las skills fuera del catálogo (etiquetas genéricas como "Software Architecture") no tienen área y no se cuentan |
 | Seniority | Ofertas por nivel (sin `UNKNOWN`), años de experiencia mínimos promedio y % de ofertas del nivel que piden inglés |
-| Modalidad | Ofertas por modalidad |
+| Modalidad | Ofertas por modalidad. Incluye ofertas de otros países: la mayoría de las híbridas y presenciales son de Chile (Get on Board es una bolsa chilena) y el matching no las recomienda a un CV argentino |
 | Fuentes | Ofertas por fuente |
 | Empresas que más publican | Las 12 con más ofertas activas |
 
