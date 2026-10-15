@@ -49,7 +49,7 @@ export const CRITERIA: Record<string, { label: string; icon: IconName; descripti
   skills: {
     label: 'Tecnologías',
     icon: 'code',
-    description: 'Lo más importante: lenguajes, frameworks y herramientas que pide la oferta.',
+    description: 'Lenguajes, frameworks y herramientas que pide la oferta.',
   },
   seniority: {
     label: 'Seniority',

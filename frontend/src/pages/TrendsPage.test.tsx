@@ -69,8 +69,8 @@ describe('trends dashboard', () => {
 
     const seniority = screen.getByRole('region', { name: 'Seniority' });
     expect(within(seniority).getByText('Senior')).toBeInTheDocument();
-    expect(within(seniority).getByText('166 ofertas (4,8 años)')).toBeInTheDocument();
-    expect(within(seniority).getByText('11 ofertas')).toBeInTheDocument();
+    expect(within(seniority).getByText('166 · 4,8 años')).toBeInTheDocument();
+    expect(within(seniority).getByText('11')).toBeInTheDocument();
 
     const modality = screen.getByRole('region', { name: 'Modalidad' });
     expect(within(modality).getByText('Sin especificar')).toBeInTheDocument();

@@ -41,8 +41,6 @@ function BarChart({ title, bars, note }: { title: string; bars: Bar[]; note?: st
   );
 }
 
-const offers = (n: number) => (n === 1 ? '1 oferta' : `${n} ofertas`);
-
 type State =
   { kind: 'loading' } | { kind: 'error'; message: string } | { kind: 'ready'; stats: OfferStats };
 
@@ -128,48 +126,51 @@ export function TrendsPage() {
         ))}
       </ul>
 
-      <div className="trend-grid">
+      <div className="trend-grid trend-grid--2">
         <BarChart
           title="Tecnologías más pedidas"
           note="Porcentaje de ofertas que la exigen (sin contar las deseables)."
           bars={topSkills.map((s) => ({ label: s.name, value: s.count, detail: `${s.percent} %` }))}
         />
-        <div className="trend-column">
-          <BarChart
-            title="Seniority"
-            note="Entre paréntesis, los años de experiencia que piden en promedio."
-            bars={seniority.map((s) => ({
-              label: SENIORITY_LABELS[s.level] ?? s.level,
-              value: s.count,
-              detail:
-                s.avgExperienceYears === null
-                  ? offers(s.count)
-                  : `${offers(s.count)} (${s.avgExperienceYears.toLocaleString('es-AR')} años)`,
-            }))}
-          />
-          <BarChart
-            title="Modalidad"
-            bars={modality.map((m) => ({
-              label: m.modality ? MODALITY_LABELS[m.modality] : 'Sin especificar',
-              value: m.count,
-              detail: offers(m.count),
-            }))}
-          />
-          <BarChart
-            title="Fuentes"
-            bars={sources.map((s) => ({
-              label: SOURCE_NAMES[s.source] ?? s.source,
-              value: s.count,
-              detail: offers(s.count),
-            }))}
-          />
-        </div>
         <BarChart
           title="Empresas que más publican"
+          note="Cantidad de ofertas activas de cada empresa."
           bars={topCompanies.map((c) => ({
             label: c.name,
             value: c.count,
-            detail: offers(c.count),
+            detail: String(c.count),
+          }))}
+        />
+      </div>
+      <div className="trend-grid trend-grid--3">
+        <BarChart
+          title="Seniority"
+          note="Ofertas por nivel y años de experiencia que piden en promedio."
+          bars={seniority.map((s) => ({
+            label: SENIORITY_LABELS[s.level] ?? s.level,
+            value: s.count,
+            detail:
+              s.avgExperienceYears === null
+                ? String(s.count)
+                : `${s.count} · ${s.avgExperienceYears.toLocaleString('es-AR')} años`,
+          }))}
+        />
+        <BarChart
+          title="Modalidad"
+          note="Ofertas por modalidad de trabajo."
+          bars={modality.map((m) => ({
+            label: m.modality ? MODALITY_LABELS[m.modality] : 'Sin especificar',
+            value: m.count,
+            detail: String(m.count),
+          }))}
+        />
+        <BarChart
+          title="Fuentes"
+          note="De dónde vienen las ofertas."
+          bars={sources.map((s) => ({
+            label: SOURCE_NAMES[s.source] ?? s.source,
+            value: s.count,
+            detail: String(s.count),
           }))}
         />
       </div>

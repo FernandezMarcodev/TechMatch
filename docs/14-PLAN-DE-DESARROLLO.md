@@ -118,6 +118,12 @@ Carga de CV, matching determinístico explicado, ofertas de Get on Board, interf
 | 27 | `fix/matching-pocas-tecnologias` | HIGH exige que coincida al menos el 60 % de las tecnologías (`highMinimums`); por debajo, la oferta queda como máximo en MEDIUM |
 | 22 | `feat/recalculo-tras-sync` | Después de cada sincronización, recalcular las recomendaciones de todos los CVs procesados contra las ofertas activas |
 
+## v2.2.2 — Mejoras visuales
+
+| # | Rama | Alcance |
+| --- | --- | --- |
+| — | `feat/mejoras-visuales` | Tendencias en dos filas simétricas (rankings de igual altura; seniority, modalidad y fuentes en tres columnas); "Qué evaluamos" agrupado por prioridad (3 + 4); píldoras del inicio en una fila |
+
 ## v2.3.0 — Extras
 
 | # | Rama | Alcance |
