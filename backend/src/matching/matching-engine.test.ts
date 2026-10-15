@@ -159,8 +159,9 @@ describe('evaluateMatch — skills', () => {
       job({ skills: jobSkills(['Java', 'Spring'], ['Docker']) }),
       config,
     );
-    // (2 + 1) / (2 + 2 + 1) = 60
+    // (2 + 1) / (2 + 2 + 1) = 60: met in part.
     expect(criterion(result, 'skills').score).toBe(60);
+    expect(criterion(result, 'skills').status).toBe('partial');
     expect(criterion(result, 'skills').evidence).toBe(
       'Coinciden 1 de 2 tecnologías requeridas (Java); faltan: Spring; 1 de 1 deseables (Docker)',
     );

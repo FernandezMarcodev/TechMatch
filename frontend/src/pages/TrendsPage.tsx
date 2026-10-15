@@ -71,8 +71,8 @@ export function TrendsPage() {
       label: 'ofertas activas',
     },
     {
-      icon: 'home',
-      color: 'var(--chart-violet)',
+      icon: 'building',
+      color: 'var(--chart-purple)',
       value: String(totals.companies),
       label: 'empresas',
     },
@@ -118,7 +118,7 @@ export function TrendsPage() {
       <div className="trend-grid trend-grid--2">
         <ChartCard
           title="Tecnologías más pedidas"
-          icon="code"
+          icon="cpu"
           color="var(--chart-blue)"
           note="Porcentaje de ofertas que la exigen (sin contar las deseables)."
         >
@@ -132,8 +132,8 @@ export function TrendsPage() {
         </ChartCard>
         <ChartCard
           title="Empresas que más publican"
-          icon="briefcase"
-          color="var(--chart-violet)"
+          icon="building"
+          color="var(--chart-purple)"
           note="Cantidad de ofertas activas de cada empresa."
         >
           <RankingChart
@@ -149,8 +149,8 @@ export function TrendsPage() {
       <div className="trend-grid trend-grid--2">
         <ChartCard
           title="Tecnologías por área"
-          icon="target"
-          color="var(--chart-teal)"
+          icon="pieChart"
+          color="var(--chart-orange)"
           note="De todas las tecnologías exigidas que reconocemos, cuántas son de cada área."
         >
           <DonutChart
@@ -164,8 +164,8 @@ export function TrendsPage() {
         </ChartCard>
         <ChartCard
           title="Modalidad"
-          icon="laptop"
-          color="var(--chart-green)"
+          icon="monitor"
+          color="var(--chart-blue)"
           note="Ofertas por modalidad de trabajo."
         >
           <DonutChart
@@ -182,8 +182,8 @@ export function TrendsPage() {
       <div className="trend-grid">
         <ChartCard
           title="Seniority"
-          icon="trending"
-          color="var(--chart-orange)"
+          icon="barChart"
+          color="var(--chart-green)"
           note="Ofertas por nivel, con los años de experiencia que piden en promedio y cuántas piden inglés."
         >
           <ColumnChart
@@ -201,8 +201,8 @@ export function TrendsPage() {
         </ChartCard>
         <ChartCard
           title="Fuentes"
-          icon="globe"
-          color="var(--chart-gray)"
+          icon="layers"
+          color="var(--chart-red)"
           note="De dónde vienen las ofertas."
         >
           <StackedBar

@@ -16,7 +16,7 @@ export function ChartCard({
 }: {
   title: string;
   icon: IconName;
-  /** CSS color of the title icon, e.g. "var(--chart-blue)". */
+  /** Background of the title icon (white on color), e.g. "var(--chart-blue)". */
   color: string;
   note?: string;
   children: ReactNode;
@@ -25,8 +25,8 @@ export function ChartCard({
   return (
     <section className="trend-card" aria-labelledby={titleId}>
       <div className="trend-card__header">
-        <span className="trend-card__icon" style={{ color, background: soft(color) }}>
-          <Icon name={icon} size={20} />
+        <span className="trend-card__icon" style={{ background: color }}>
+          <Icon name={icon} size={22} />
         </span>
         <div>
           <h2 id={titleId} className="trend-card__title">
@@ -39,9 +39,6 @@ export function ChartCard({
     </section>
   );
 }
-
-/** Light version of a color, for icon backgrounds. */
-const soft = (color: string) => `color-mix(in srgb, ${color} 14%, transparent)`;
 
 const NoData = () => <p className="body-muted chart-empty">Todavía no hay datos.</p>;
 

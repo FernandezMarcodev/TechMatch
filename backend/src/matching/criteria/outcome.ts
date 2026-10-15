@@ -16,7 +16,7 @@ export function scored(score: number, message: string, config: MatchingConfig): 
       ? 'positive'
       : clamped < config.reasons.negativeBelow
         ? 'negative'
-        : 'neutral';
+        : 'partial';
   return { score: clamped, status, message };
 }
 

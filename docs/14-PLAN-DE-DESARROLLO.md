@@ -124,12 +124,18 @@ Carga de CV, matching determinístico explicado, ofertas de Get on Board, interf
 | --- | --- | --- |
 | — | `feat/mejoras-visuales` | Tendencias en dos filas simétricas (rankings de igual altura; seniority, modalidad y fuentes en tres columnas); "Qué evaluamos" agrupado por prioridad (3 + 4); píldoras del inicio en una fila |
 
-## v2.3.0 — Extras
+## v2.3.0 — Gráficos, métricas y "Qué te falta"
+
+| # | Rama | Alcance |
+| --- | --- | --- |
+| 28 | `feat/graficos-tendencias` | Tendencias con un gráfico según el dato (rankings numerados, anillos para modalidad y áreas, columnas para seniority, barra apilada para fuentes), paleta de colores con significado, tecnologías por área e inglés por seniority |
+| — | `fix/explicaciones-matching` | Solo se comparan tecnologías del catálogo (las etiquetas genéricas de las fuentes ya no figuran como "faltan"); requisitos educativos solo en líneas que hablan de estudios y áreas que nombran una disciplina; las materias del CV no se leen como un título |
+| 23 | `feat/que-te-falta` | En las recomendaciones, las tecnologías del catálogo que más piden las ofertas activas y que el CV no tiene, con el % de ofertas (`GET /api/cvs/{cvId}/missing-skills`) |
+| — | `feat/recomendaciones-visual` | Estado `partial` en las razones (se cumple en parte, naranja), separado de `neutral` (no exigido o no evaluable, gris); el resumen muestra primero lo que no se cumple. Tendencias con una paleta clásica y lisa (azul, verde, rojo, amarillo, naranja, violeta) y un ícono propio por sección |
+
+## v2.4.0 — Extras
 
 | # | Rama | Alcance |
 | --- | --- | --- |
 | 20 | `feat/guardar-cv-adaptado` | Guardar y reabrir CVs adaptados (usuarios logueados) |
 | 21 | `feat/preferencias-candidato` | "Disponible para mudarme" y modalidad preferida como entradas del matching |
-| 28 | `feat/graficos-tendencias` | Tendencias con un gráfico según el dato (rankings numerados, anillos para modalidad y áreas, columnas para seniority, barra apilada para fuentes), paleta de colores con significado, tecnologías por área e inglés por seniority |
-| — | `fix/explicaciones-matching` | Solo se comparan tecnologías del catálogo (las etiquetas genéricas de las fuentes ya no figuran como "faltan"); requisitos educativos solo en líneas que hablan de estudios y áreas que nombran una disciplina; las materias del CV no se leen como un título |
-| 23 | `feat/que-te-falta` | En las recomendaciones, las tecnologías del catálogo que más piden las ofertas activas y que el CV no tiene, con el % de ofertas (`GET /api/cvs/{cvId}/missing-skills`) |

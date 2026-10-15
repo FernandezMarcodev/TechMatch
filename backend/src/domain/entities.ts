@@ -140,7 +140,8 @@ export const CRITERIA = [
 ] as const;
 export type CriterionName = (typeof CRITERIA)[number];
 
-export type ReasonStatus = 'positive' | 'negative' | 'neutral';
+/** `partial`: the criterion is met in part; `neutral`: not required or not comparable. */
+export type ReasonStatus = 'positive' | 'partial' | 'negative' | 'neutral';
 
 export interface MatchReason {
   readonly criterion: CriterionName;

@@ -577,13 +577,16 @@ p {
   align-items: flex-start;
 }
 
+/* White icon on a solid color square, like an app icon. */
 .trend-card__icon {
   flex-shrink: 0;
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
+  width: 42px;
+  height: 42px;
   border-radius: var(--md-shape-md);
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.15);
 }
 
 .trend-card__title {
@@ -650,7 +653,7 @@ p {
   display: block;
   height: 100%;
   border-radius: var(--md-shape-full);
-  background: linear-gradient(90deg, var(--chart-blue), var(--chart-teal));
+  background: var(--chart-blue);
 }
 
 .ranking__value {
@@ -795,11 +798,7 @@ p {
   width: 100%;
   min-height: 2px;
   border-radius: var(--md-shape-sm) var(--md-shape-sm) 0 0;
-  background: linear-gradient(
-    180deg,
-    var(--chart-orange),
-    color-mix(in srgb, var(--chart-orange) 60%, white)
-  );
+  background: var(--chart-green);
 }
 
 .columns__label {
@@ -1764,6 +1763,12 @@ p {
 .reason--positive .reason__icon {
   background: var(--md-tertiary);
   color: var(--md-surface-container-lowest);
+}
+
+/* Met in part: the same orange as the charts. */
+.reason--partial .reason__icon {
+  background: color-mix(in srgb, var(--chart-orange) 18%, transparent);
+  color: var(--chart-orange);
 }
 
 .reason--negative .reason__icon {

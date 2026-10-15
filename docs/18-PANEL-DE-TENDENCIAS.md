@@ -60,13 +60,14 @@ Los porcentajes son enteros redondeados; `avgExperienceYears` tiene un decimal o
 
   | Dato | Gráfico | Por qué |
   | --- | --- | --- |
-  | Tecnologías y empresas | Ranking: barras horizontales numeradas (los tres primeros destacados) | Mejor lectura para listas ordenadas con nombres largos |
+  | Tecnologías y empresas | Ranking: barras horizontales azules, numeradas (los tres primeros destacados) | Mejor lectura para listas ordenadas con nombres largos |
   | Tecnologías por área y modalidad | Anillo (`conic-gradient`) con el total en el centro | Son partes de un total |
   | Seniority | Columnas verticales de Trainee a Manager, con años promedio e inglés debajo | Es una escala ordenada |
   | Fuentes | Una barra apilada al 100 % | Pocas partes; ocupa poco |
 
 * Las formas son decorativas (`aria-hidden`): cada valor también está escrito como texto en la leyenda o junto a su etiqueta.
-* Paleta de gráficos en `styles/tokens.css` (`--chart-*`), con contraste de al menos 3:1 sobre blanco. Cada categoría mantiene su color (remoto siempre verde, presencial siempre naranja); los colores están en `components/labels.ts`.
+* Paleta clásica y lisa (sin degradés) en `styles/tokens.css` (`--chart-*`): azul, verde, rojo, amarillo, naranja y violeta. Cada categoría mantiene su color (remoto verde, híbrido amarillo, presencial azul); los colores están en `components/labels.ts`. Como cada valor también está escrito, ninguna información depende solo del color.
+* Cada sección tiene un ícono propio (procesador, edificio, gráfico de torta, monitor, barras, capas) en blanco sobre un cuadrado de color liso, dibujado en `components/Icon.tsx` (sin librería de íconos).
 * Distribución: números destacados (con un borde de color cada uno); los dos rankings lado a lado; los dos anillos lado a lado; seniority y fuentes a lo ancho. En el celular, una columna.
 * Textos en español; los niveles y modalidades usan las mismas etiquetas que el resto de la app.
 

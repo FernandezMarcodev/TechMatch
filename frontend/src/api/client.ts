@@ -4,7 +4,7 @@ export type Modality = 'REMOTE' | 'HYBRID' | 'ONSITE' | null;
 
 export interface MatchReason {
   criterion: string;
-  status: 'positive' | 'negative' | 'neutral';
+  status: 'positive' | 'partial' | 'negative' | 'neutral';
   message: string;
 }
 

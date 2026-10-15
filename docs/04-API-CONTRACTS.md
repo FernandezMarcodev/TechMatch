@@ -123,7 +123,7 @@ Devuelve las recomendaciones: solo `MEDIUM` y `HIGH`, de ofertas activas, ordena
 * `hiddenCount`: recomendaciones que existen pero no se devuelven por falta de sesión (`0` con sesión).
 * `saved`: `true` si el CV está guardado en la cuenta de quien pregunta.
 * `modality`: `REMOTE`, `HYBRID`, `ONSITE` o `null` si se desconoce.
-* `reasons`: una por criterio (`skills`, `experience`, `seniority`, `education`, `languages`, `location`, `modality`), con estado `positive`, `negative` o `neutral`.
+* `reasons`: una por criterio (`skills`, `experience`, `seniority`, `education`, `languages`, `location`, `modality`), con estado `positive`, `partial` (se cumple en parte), `negative` o `neutral` (no exigido o no evaluable).
 
 El endpoint no devuelve ofertas `LOW` ni el score numérico: el score es interno (clasificación y orden) y el usuario solo ve el nivel.
 
