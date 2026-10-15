@@ -12,7 +12,7 @@ Mostrar qué está pidiendo el mercado tech, a partir de las ofertas activas que
 * **Solo ofertas activas**, de todas las fuentes.
 * **Determinístico y explicable:** cada número es un conteo o un promedio directo sobre la base, sin estimaciones.
 * **Agregaciones en SQL** (decisión en `13-DECISIONES-TECNICAS.md`): `COUNT`, `AVG` y `GROUP BY` sobre `job_offers` y `job_skills`. Sin servicios ni lenguajes adicionales.
-* **Caché en memoria** de `STATS_CACHE_MINUTES` (60 por defecto): las ofertas cambian cada 12 h, así que no hace falta recalcular en cada visita. Los tamaños de las listas son configurables: `STATS_TOP_SKILLS` (15) y `STATS_TOP_COMPANIES` (10).
+* **Caché en memoria** de `STATS_CACHE_MINUTES` (60 por defecto): las ofertas cambian cada 12 h, así que no hace falta recalcular en cada visita. Los tamaños de las listas son configurables: `STATS_TOP_SKILLS` y `STATS_TOP_COMPANIES` (12 cada una, así las dos tarjetas quedan de la misma altura).
 * **Capas:** `StatsService` (aplicación: porcentajes y caché) usa el puerto `OfferStatsRepository`, implementado en `persistence/pg-offer-stats-repository.ts` con seis consultas de agregación que corren en paralelo.
 
 ## Métricas
@@ -23,11 +23,11 @@ Mostrar qué está pidiendo el mercado tech, a partir de las ofertas activas que
 | Empresas | Empresas distintas con ofertas activas |
 | % remotas | Ofertas `REMOTE` sobre el total |
 | % piden inglés | Ofertas con algún requisito de inglés sobre el total |
-| Tecnologías más pedidas | Las 15 skills requeridas que más aparecen (cantidad y % de ofertas) |
+| Tecnologías más pedidas | Las 12 skills requeridas que más aparecen (cantidad y % de ofertas) |
 | Seniority | Ofertas por nivel (sin `UNKNOWN`) y años de experiencia mínimos promedio de cada nivel |
 | Modalidad | Ofertas por modalidad |
 | Fuentes | Ofertas por fuente |
-| Empresas que más publican | Las 10 con más ofertas activas |
+| Empresas que más publican | Las 12 con más ofertas activas |
 
 ## API
 
@@ -53,4 +53,5 @@ Los porcentajes son enteros redondeados; `avgExperienceYears` tiene un decimal o
 
 * Página `/tendencias`, enlazada desde la barra superior ("Tendencias"; en el celular, solo el ícono).
 * Números destacados (ofertas, empresas, % remotas, % piden inglés) y barras horizontales hechas con CSS: sin librería de gráficos.
+* Distribución simétrica: una fila con los dos rankings de la misma altura (tecnologías y empresas) y otra con las tres distribuciones (seniority, modalidad y fuentes) en columnas iguales. En el celular, una columna.
 * Textos en español; los niveles y modalidades usan las mismas etiquetas que el resto de la app.

@@ -36,6 +36,15 @@ const STEPS: { icon: IconName; title: string; text: string }[] = [
   },
 ];
 
+const CRITERIA_GROUPS = [
+  { title: 'Lo más importante', kind: 'primary', keys: ['skills', 'seniority', 'experience'] },
+  {
+    title: 'También cuenta',
+    kind: 'secondary',
+    keys: ['education', 'languages', 'location', 'modality'],
+  },
+] as const;
+
 export function HomePage() {
   const navigate = useNavigate();
   const [file, setFile] = useState<File | null>(null);
@@ -84,13 +93,13 @@ export function HomePage() {
             </p>
             <ul className="hero__facts">
               <li>
-                <Icon name="lock" size={18} /> Sin registro obligatorio
+                <Icon name="lock" size={18} /> Registro opcional
               </li>
               <li>
-                <Icon name="bolt" size={18} /> Resultados en segundos
+                <Icon name="bolt" size={18} /> En segundos
               </li>
               <li>
-                <Icon name="check" size={18} /> Resultados explicados
+                <Icon name="check" size={18} /> Con explicaciones
               </li>
             </ul>
           </div>
@@ -159,19 +168,30 @@ export function HomePage() {
             cálculo es determinístico: el mismo CV y la misma oferta siempre dan el mismo resultado.
             Si un dato no aparece en tu CV, no cuenta ni a favor ni en contra.
           </p>
-          <ul className="criteria-grid">
-            {Object.entries(CRITERIA).map(([key, c]) => (
-              <li key={key} className="criterion-tile">
-                <span className="criterion-tile__icon">
-                  <Icon name={c.icon} size={22} />
-                </span>
-                <div>
-                  <h3 className="title-small">{c.label}</h3>
-                  <p className="body-muted">{c.description}</p>
-                </div>
-              </li>
-            ))}
-          </ul>
+          {/* Two rows that mirror the matching priority: the three criteria that weigh most,
+              then the rest. */}
+          {CRITERIA_GROUPS.map((group) => (
+            <div key={group.title} className="criteria-group">
+              <h3 className="criteria-group__title">{group.title}</h3>
+              <ul className={`criteria-grid criteria-grid--${group.kind}`}>
+                {group.keys.map((key) => {
+                  const c = CRITERIA[key];
+                  if (!c) return null;
+                  return (
+                    <li key={key} className={`criterion-tile criterion-tile--${key}`}>
+                      <span className="criterion-tile__icon">
+                        <Icon name={c.icon} size={22} />
+                      </span>
+                      <div>
+                        <h4 className="title-small">{c.label}</h4>
+                        <p className="body-muted">{c.description}</p>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))}
         </section>
       </Page>
     </>

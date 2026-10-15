@@ -34,6 +34,7 @@ a {
 h1,
 h2,
 h3,
+h4,
 p {
   margin: 0;
 }
@@ -547,16 +548,23 @@ p {
   font-size: 0.875rem;
 }
 
+/* Two rows of equal-height cards: rankings side by side, then three distributions. */
 .trend-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
-  align-items: start;
+  align-items: stretch;
 }
 
-.trend-column {
-  display: grid;
-  gap: 16px;
+.trend-grid + .trend-grid {
+  margin-top: 16px;
+}
+
+.trend-grid--2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.trend-grid--3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .trend-card {
@@ -617,7 +625,8 @@ p {
 }
 
 @media (max-width: 900px) {
-  .trend-grid {
+  .trend-grid--2,
+  .trend-grid--3 {
     grid-template-columns: minmax(0, 1fr);
   }
 }
@@ -993,13 +1002,34 @@ p {
   margin-bottom: 4px;
 }
 
+.criteria-group + .criteria-group {
+  margin-top: 20px;
+}
+
+.criteria-group__title {
+  margin-bottom: 10px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--md-on-surface-variant);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
 .criteria-grid {
   list-style: none;
   padding: 0;
   margin: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 12px;
+}
+
+/* Equal columns per row (3 + 4): no orphan tile. */
+.criteria-grid--primary {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.criteria-grid--secondary {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .criterion-tile {
@@ -1012,35 +1042,49 @@ p {
 }
 
 .criterion-tile__icon {
+  flex-shrink: 0;
   margin: 0;
   background: var(--accent-blue-soft);
   color: var(--md-primary);
 }
 
-/* The three priority criteria stand out; the rest cycle through the palette accents. */
-.criterion-tile:nth-child(-n + 3) {
+/* The three priority criteria stand out; the rest use the palette accents. */
+.criteria-grid--primary .criterion-tile {
   border-color: color-mix(in srgb, var(--md-primary) 35%, var(--md-outline-variant));
 }
 
-.criterion-tile:nth-child(-n + 3) .criterion-tile__icon {
+.criteria-grid--primary .criterion-tile__icon {
   background: var(--md-primary);
   color: var(--md-on-primary);
 }
 
-.criterion-tile:nth-child(4) .criterion-tile__icon,
-.criterion-tile:nth-child(7) .criterion-tile__icon {
+.criterion-tile--education .criterion-tile__icon,
+.criterion-tile--modality .criterion-tile__icon {
   background: var(--accent-green-soft);
   color: var(--accent-green);
 }
 
-.criterion-tile:nth-child(5) .criterion-tile__icon {
+.criterion-tile--languages .criterion-tile__icon {
   background: var(--accent-cyan-soft);
   color: var(--accent-cyan);
 }
 
-.criterion-tile:nth-child(6) .criterion-tile__icon {
+.criterion-tile--location .criterion-tile__icon {
   background: var(--accent-amber-soft);
   color: var(--accent-amber);
+}
+
+@media (max-width: 1000px) {
+  .criteria-grid--secondary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .criteria-grid--primary,
+  .criteria-grid--secondary {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 /* ---------- Progress & loading ---------- */
