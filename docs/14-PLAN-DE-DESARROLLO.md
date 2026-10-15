@@ -130,4 +130,5 @@ Carga de CV, matching determinístico explicado, ofertas de Get on Board, interf
 | --- | --- | --- |
 | 20 | `feat/guardar-cv-adaptado` | Guardar y reabrir CVs adaptados (usuarios logueados) |
 | 21 | `feat/preferencias-candidato` | "Disponible para mudarme" y modalidad preferida como entradas del matching |
+| 28 | `feat/graficos-tendencias` | Tendencias con un gráfico según el dato (rankings numerados, anillos para modalidad y áreas, columnas para seniority, barra apilada para fuentes), paleta de colores con significado, tecnologías por área e inglés por seniority |
 | 23 | `feat/que-te-falta` | En las recomendaciones, las tecnologías que más piden las ofertas y que el CV no tiene |

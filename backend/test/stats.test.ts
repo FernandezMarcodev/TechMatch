@@ -108,9 +108,15 @@ describe('GET /api/stats/offers (public trends dashboard)', () => {
       { name: 'Java', count: 3, percent: 100 },
       { name: 'React', count: 1, percent: 33 },
     ]);
+    // Java (languages) x3, Spring (backend) x1, React (frontend) x1.
+    expect(data.skillAreas).toEqual([
+      { area: 'LANGUAGES', count: 3, percent: 60 },
+      { area: 'BACKEND', count: 1, percent: 20 },
+      { area: 'FRONTEND', count: 1, percent: 20 },
+    ]);
     expect(data.seniority).toEqual([
-      { level: 'JUNIOR', count: 1, avgExperienceYears: null },
-      { level: 'SENIOR', count: 2, avgExperienceYears: 4 },
+      { level: 'JUNIOR', count: 1, avgExperienceYears: null, englishPercent: 0 },
+      { level: 'SENIOR', count: 2, avgExperienceYears: 4, englishPercent: 50 },
     ]);
     expect(data.modality).toEqual(
       expect.arrayContaining([
@@ -134,5 +140,6 @@ describe('GET /api/stats/offers (public trends dashboard)', () => {
       englishPercent: 0,
     });
     expect(res.body.data.topSkills).toEqual([]);
+    expect(res.body.data.skillAreas).toEqual([]);
   });
 });

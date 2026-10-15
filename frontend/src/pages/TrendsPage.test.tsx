@@ -11,9 +11,13 @@ const STATS = {
     { name: 'REST', count: 149, percent: 48 },
     { name: 'React', count: 122, percent: 39 },
   ],
+  skillAreas: [
+    { area: 'BACKEND', count: 300, percent: 60 },
+    { area: 'FRONTEND', count: 200, percent: 40 },
+  ],
   seniority: [
-    { level: 'JUNIOR', count: 11, avgExperienceYears: null },
-    { level: 'SENIOR', count: 166, avgExperienceYears: 4.8 },
+    { level: 'JUNIOR', count: 11, avgExperienceYears: null, englishPercent: 0 },
+    { level: 'SENIOR', count: 166, avgExperienceYears: 4.8, englishPercent: 45 },
   ],
   modality: [
     { modality: 'REMOTE', count: 160 },
@@ -67,15 +71,25 @@ describe('trends dashboard', () => {
     expect(within(skills).getByText('REST')).toBeInTheDocument();
     expect(within(skills).getByText('48 %')).toBeInTheDocument();
 
+    // Rings and stacked bars write every value next to its label.
+    const areas = screen.getByRole('region', { name: 'Tecnologías por área' });
+    expect(within(areas).getByText('Backend')).toBeInTheDocument();
+    expect(within(areas).getByText('300 · 60 %')).toBeInTheDocument();
+    expect(within(areas).getByText('500')).toBeInTheDocument();
+
     const seniority = screen.getByRole('region', { name: 'Seniority' });
     expect(within(seniority).getByText('Senior')).toBeInTheDocument();
-    expect(within(seniority).getByText('166 · 4,8 años')).toBeInTheDocument();
-    expect(within(seniority).getByText('11')).toBeInTheDocument();
+    expect(within(seniority).getByText('166')).toBeInTheDocument();
+    expect(within(seniority).getByText('4,8 años')).toBeInTheDocument();
+    expect(within(seniority).getByText(/Inglés: 45\s%/)).toBeInTheDocument();
+    expect(within(seniority).getByText('Años: sin datos')).toBeInTheDocument();
 
     const modality = screen.getByRole('region', { name: 'Modalidad' });
     expect(within(modality).getByText('Sin especificar')).toBeInTheDocument();
+    expect(within(modality).getByText('160 · 97 %')).toBeInTheDocument();
     const sources = screen.getByRole('region', { name: 'Fuentes' });
     expect(within(sources).getByText('Empresas en Lever')).toBeInTheDocument();
+    expect(within(sources).getByText('12 · 4 %')).toBeInTheDocument();
   });
 
   it('is linked from the top bar', async () => {

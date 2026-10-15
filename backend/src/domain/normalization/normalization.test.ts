@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { normalizeLanguageName, parseLanguageLevel } from './languages.js';
 import { compareLocations, normalizeLocation } from './location.js';
-import { extractSkillsFromText, normalizeSkill, skillKey, uniqueSkills } from './skills.js';
+import {
+  extractSkillsFromText,
+  normalizeSkill,
+  skillArea,
+  skillKey,
+  uniqueSkills,
+} from './skills.js';
 
 const names = (skills: { name: string }[]) => skills.map((s) => s.name);
 
@@ -17,6 +23,14 @@ describe('skill normalization', () => {
     ['asp.net core', '.NET'],
   ])('resolves alias %s -> %s', (raw, expected) => {
     expect(normalizeSkill(raw)?.name).toBe(expected);
+  });
+
+  it('knows the area of catalog skills, also by alias, and none for other skills', () => {
+    expect(skillArea('React')).toBe('FRONTEND');
+    expect(skillArea('Postgres')).toBe('DATA');
+    expect(skillArea('k8s')).toBe('CLOUD_DEVOPS');
+    expect(skillArea('Express')).toBe('BACKEND');
+    expect(skillArea('Software Architecture')).toBeNull();
   });
 
   it('ignores case, whitespace and edge punctuation', () => {

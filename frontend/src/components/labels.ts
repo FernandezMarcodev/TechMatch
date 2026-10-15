@@ -1,4 +1,4 @@
-import type { MatchLevel, Modality } from '../api/client';
+import type { MatchLevel, Modality, SkillArea } from '../api/client';
 import type { IconName } from './Icon';
 
 export const MODALITY_LABELS: Record<Exclude<Modality, null>, string> = {
@@ -20,6 +20,33 @@ export const SENIORITY_LABELS: Record<string, string> = {
   SENIOR: 'Senior',
   LEAD: 'Lead',
   MANAGER: 'Manager',
+};
+
+/**
+ * Chart colors (tokens in styles/tokens.css). A category keeps its color everywhere:
+ * remote is always green, onsite always orange.
+ */
+export const MODALITY_COLORS: Record<Exclude<Modality, null>, string> = {
+  REMOTE: 'var(--chart-green)',
+  HYBRID: 'var(--chart-blue)',
+  ONSITE: 'var(--chart-orange)',
+};
+
+export const UNKNOWN_COLOR = 'var(--chart-gray)';
+
+export const SOURCE_COLORS: Record<string, string> = {
+  getonboard: 'var(--chart-violet)',
+  lever: 'var(--chart-teal)',
+  greenhouse: 'var(--chart-blue)',
+};
+
+export const SKILL_AREAS: Record<SkillArea, { label: string; color: string }> = {
+  LANGUAGES: { label: 'Lenguajes', color: 'var(--chart-blue)' },
+  BACKEND: { label: 'Backend', color: 'var(--chart-violet)' },
+  CLOUD_DEVOPS: { label: 'Cloud y DevOps', color: 'var(--chart-teal)' },
+  DATA: { label: 'Datos', color: 'var(--chart-orange)' },
+  FRONTEND: { label: 'Frontend', color: 'var(--chart-green)' },
+  PRACTICES: { label: 'Metodologías y herramientas', color: 'var(--chart-red)' },
 };
 
 /** Short source names for charts ("Publicada en …" uses SOURCES[…].label). */

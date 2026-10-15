@@ -6,11 +6,13 @@ const AGGREGATES: OfferAggregates = {
   companies: 3,
   remote: 3,
   english: 2,
-  topSkills: [
+  skills: [
     { name: 'Java', count: 4 },
+    { name: 'Spring Boot', count: 3 },
     { name: 'React', count: 1 },
+    { name: 'Software Architecture', count: 1 },
   ],
-  seniority: [{ level: 'SENIOR', count: 5, avgExperienceYears: 4.5 }],
+  seniority: [{ level: 'SENIOR', count: 5, avgExperienceYears: 4.5, english: 2 }],
   modality: [{ modality: 'REMOTE', count: 3 }],
   sources: [{ source: 'getonboard', count: 8 }],
   topCompanies: [{ name: 'Empresa X', count: 5 }],
@@ -23,7 +25,7 @@ function service(aggregates: OfferAggregates, now: { value: Date }) {
     { now: () => now.value },
     {
       cacheMinutes: 60,
-      topSkills: 15,
+      topSkills: 2,
       topCompanies: 10,
     },
   );
@@ -40,15 +42,28 @@ describe('StatsService', () => {
       remotePercent: 38,
       englishPercent: 25,
     });
+    // STATS_TOP_SKILLS limits the ranking.
     expect(result.topSkills).toEqual([
       { name: 'Java', count: 4, percent: 50 },
-      { name: 'React', count: 1, percent: 13 },
+      { name: 'Spring Boot', count: 3, percent: 38 },
     ]);
-    expect(aggregate).toHaveBeenCalledWith({ topSkills: 15, topCompanies: 10 });
+    expect(result.seniority).toEqual([
+      { level: 'SENIOR', count: 5, avgExperienceYears: 4.5, englishPercent: 40 },
+    ]);
+    expect(aggregate).toHaveBeenCalledWith({ topCompanies: 10 });
+  });
+
+  it('groups the required technologies by area, leaving out skills outside the catalog', async () => {
+    const { stats } = service(AGGREGATES, { value: new Date() });
+    expect((await stats.getOfferStats()).skillAreas).toEqual([
+      { area: 'LANGUAGES', count: 4, percent: 50 },
+      { area: 'BACKEND', count: 3, percent: 38 },
+      { area: 'FRONTEND', count: 1, percent: 13 },
+    ]);
   });
 
   it('answers 0% instead of dividing by zero when there are no offers', async () => {
-    const empty = { ...AGGREGATES, offers: 0, remote: 0, english: 0, topSkills: [] };
+    const empty = { ...AGGREGATES, offers: 0, remote: 0, english: 0, skills: [], seniority: [] };
     const { stats } = service(empty, { value: new Date() });
     expect((await stats.getOfferStats()).totals).toMatchObject({
       remotePercent: 0,

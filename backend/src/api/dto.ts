@@ -163,6 +163,7 @@ export function toOfferStatsDto(stats: OfferStats) {
     generatedAt: stats.generatedAt.toISOString(),
     totals: stats.totals,
     topSkills: stats.topSkills,
+    skillAreas: stats.skillAreas,
     seniority: stats.seniority,
     // Merges "UNKNOWN" and missing modalities, as null like everywhere in the API.
     modality: Object.entries(

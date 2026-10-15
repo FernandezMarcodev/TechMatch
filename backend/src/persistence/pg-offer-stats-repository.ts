@@ -14,7 +14,7 @@ const SENIORITY_ORDER = `CASE seniority WHEN 'INTERN' THEN 1 WHEN 'JUNIOR' THEN 
 export class PgOfferStatsRepository implements OfferStatsRepository {
   constructor(private readonly db: Queryable) {}
 
-  async aggregate(limits: { topSkills: number; topCompanies: number }): Promise<OfferAggregates> {
+  async aggregate(limits: { topCompanies: number }): Promise<OfferAggregates> {
     const [totals, skills, seniority, modality, sources, companies] = await Promise.all([
       this.db.query<{ offers: string; companies: string; remote: string; english: string }>(
         `SELECT COUNT(*) AS offers,
@@ -30,13 +30,17 @@ export class PgOfferStatsRepository implements OfferStatsRepository {
          JOIN job_offers jo ON jo.id = js.job_offer_id
          WHERE jo.is_active AND js.is_required
          GROUP BY s.name
-         ORDER BY count DESC, s.name
-         LIMIT $1`,
-        [limits.topSkills],
+         ORDER BY count DESC, s.name`,
       ),
-      this.db.query<{ level: Seniority; count: string; avg_years: string | null }>(
+      this.db.query<{
+        level: Seniority;
+        count: string;
+        avg_years: string | null;
+        english: string;
+      }>(
         `SELECT seniority AS level, COUNT(*) AS count,
-                ROUND(AVG(experience_years_min), 1) AS avg_years
+                ROUND(AVG(experience_years_min), 1) AS avg_years,
+                COUNT(*) FILTER (WHERE language_requirements @> '[{"name": "English"}]') AS english
          FROM job_offers
          WHERE is_active AND seniority IS NOT NULL AND seniority <> 'UNKNOWN'
          GROUP BY seniority
@@ -63,11 +67,12 @@ export class PgOfferStatsRepository implements OfferStatsRepository {
       companies: Number(t?.companies ?? 0),
       remote: Number(t?.remote ?? 0),
       english: Number(t?.english ?? 0),
-      topSkills: skills.rows.map((r) => ({ name: r.name, count: Number(r.count) })),
+      skills: skills.rows.map((r) => ({ name: r.name, count: Number(r.count) })),
       seniority: seniority.rows.map((r) => ({
         level: r.level,
         count: Number(r.count),
         avgExperienceYears: r.avg_years === null ? null : Number(r.avg_years),
+        english: Number(r.english),
       })),
       modality: modality.rows.map((r) => ({
         modality: r.modality ?? 'UNKNOWN',

@@ -516,7 +516,7 @@ p {
   color: var(--md-on-error);
 }
 
-/* Public trends dashboard (/tendencias): tiles and CSS bar charts, no chart library. */
+/* Public trends dashboard (/tendencias): tiles and CSS charts (components/Charts.tsx), no chart library. */
 .trend-tiles {
   list-style: none;
   padding: 0;
@@ -533,7 +533,8 @@ p {
   border-radius: var(--md-shape-md);
   background: var(--md-surface-container-low);
   border: 1px solid var(--md-outline-variant);
-  color: var(--md-primary);
+  /* The icon takes the tile's color (inline style); a colored top edge repeats it. */
+  border-top: 4px solid currentColor;
 }
 
 .trend-tile__value {
@@ -548,7 +549,7 @@ p {
   font-size: 0.875rem;
 }
 
-/* Two rows of equal-height cards: rankings side by side, then three distributions. */
+/* Rows of equal-height cards: rankings side by side, then the two rings, then full-width cards. */
 .trend-grid {
   display: grid;
   gap: 16px;
@@ -563,15 +564,26 @@ p {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.trend-grid--3 {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
 .trend-card {
   padding: 20px;
   border-radius: var(--md-shape-lg);
   border: 1px solid var(--md-outline-variant);
   background: var(--md-surface-container-lowest);
+}
+
+.trend-card__header {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.trend-card__icon {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--md-shape-md);
 }
 
 .trend-card__title {
@@ -584,50 +596,245 @@ p {
   font-size: 0.8125rem;
 }
 
-.bar-chart {
+.chart-empty {
+  margin-top: 12px;
+}
+
+/* Ranking: one grid for all rows, so every bar starts and ends at the same place. */
+.ranking {
   list-style: none;
   padding: 0;
-  margin: 12px 0 0;
-  /* One grid for all rows, so every bar starts and ends at the same place. */
+  margin: 16px 0 0;
   display: grid;
-  grid-template-columns: minmax(80px, max-content) minmax(40px, 1fr) max-content;
+  grid-template-columns: 24px minmax(80px, max-content) minmax(40px, 1fr) max-content;
   gap: 8px 10px;
   align-items: center;
   font-size: 0.875rem;
 }
 
-.bar-chart__row {
+.ranking__row {
   display: contents;
 }
 
-.bar-chart__label {
+.ranking__position {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--md-shape-full);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--md-on-surface-variant);
+  background: var(--md-surface-container-high);
+}
+
+/* The first three stand out. */
+.ranking__position--top {
+  color: var(--md-on-primary);
+  background: var(--md-primary);
+}
+
+.ranking__label {
   max-width: 14em;
   overflow-wrap: anywhere;
 }
 
-.bar-chart__track {
+.ranking__track {
   height: 10px;
   border-radius: var(--md-shape-full);
   background: var(--md-surface-container-highest);
   overflow: hidden;
 }
 
-.bar-chart__bar {
+.ranking__bar {
   display: block;
   height: 100%;
   border-radius: var(--md-shape-full);
-  background: var(--md-primary);
+  background: linear-gradient(90deg, var(--chart-blue), var(--chart-teal));
 }
 
-.bar-chart__value {
+.ranking__value {
   color: var(--md-on-surface-variant);
   white-space: nowrap;
 }
 
+/* Legend shared by the ring and the stacked bar: the values are always written. */
+.chart-legend {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 8px;
+  font-size: 0.875rem;
+}
+
+.chart-legend__item {
+  display: grid;
+  grid-template-columns: 12px minmax(0, 1fr) max-content;
+  gap: 10px;
+  align-items: center;
+}
+
+.chart-legend__dot {
+  width: 12px;
+  height: 12px;
+  border-radius: var(--md-shape-full);
+}
+
+.chart-legend__value {
+  color: var(--md-on-surface-variant);
+  white-space: nowrap;
+}
+
+.donut {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr);
+  gap: 24px;
+  align-items: center;
+}
+
+.donut__ring {
+  width: 160px;
+  height: 160px;
+  border-radius: var(--md-shape-full);
+  display: grid;
+  place-items: center;
+}
+
+.donut__hole {
+  width: 100px;
+  height: 100px;
+  border-radius: var(--md-shape-full);
+  background: var(--md-surface-container-lowest);
+  display: grid;
+  place-content: center;
+  text-align: center;
+}
+
+.donut__total {
+  font-size: 1.5rem;
+  font-weight: 500;
+  line-height: 1.1;
+}
+
+.donut__caption {
+  font-size: 0.75rem;
+  color: var(--md-on-surface-variant);
+}
+
+.stacked {
+  margin-top: 16px;
+  display: grid;
+  gap: 14px;
+}
+
+.stacked__bar {
+  display: flex;
+  height: 16px;
+  border-radius: var(--md-shape-full);
+  overflow: hidden;
+  background: var(--md-surface-container-highest);
+}
+
+/* Small parts stay visible. */
+.stacked__segment {
+  min-width: 4px;
+}
+
+/* A thin white gap between segments. */
+.stacked__segment + .stacked__segment {
+  border-left: 2px solid var(--md-surface-container-lowest);
+}
+
+.stacked .chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 32px;
+}
+
+.stacked .chart-legend__item {
+  grid-template-columns: 12px auto auto;
+}
+
+/* Vertical columns: count on top, bar, level and details below. */
+.columns {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 0;
+  display: grid;
+  gap: 12px;
+}
+
+.columns__item {
+  display: grid;
+  grid-template-rows: auto 140px auto;
+  justify-items: center;
+  gap: 4px;
+  text-align: center;
+  font-size: 0.8125rem;
+  min-width: 0;
+}
+
+.columns__value {
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.columns__track {
+  width: min(56px, 100%);
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  border-radius: var(--md-shape-sm) var(--md-shape-sm) 0 0;
+  background: var(--md-surface-container-high);
+}
+
+.columns__bar {
+  display: block;
+  width: 100%;
+  min-height: 2px;
+  border-radius: var(--md-shape-sm) var(--md-shape-sm) 0 0;
+  background: linear-gradient(
+    180deg,
+    var(--chart-orange),
+    color-mix(in srgb, var(--chart-orange) 60%, white)
+  );
+}
+
+.columns__label {
+  margin-top: 4px;
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.columns__detail {
+  color: var(--md-on-surface-variant);
+}
+
 @media (max-width: 900px) {
-  .trend-grid--2,
-  .trend-grid--3 {
+  .trend-grid--2 {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .donut {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+  }
+
+  .donut .chart-legend {
+    width: 100%;
+  }
+
+  .columns {
+    gap: 4px;
+  }
+
+  .columns__item {
+    grid-template-rows: auto 110px auto;
+    font-size: 0.75rem;
   }
 }
 

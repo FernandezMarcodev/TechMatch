@@ -202,11 +202,20 @@ function postJson<T>(path: string, body: unknown, method: 'POST' | 'DELETE' = 'P
 }
 
 /** Public market trends over the active offers (docs/18-PANEL-DE-TENDENCIAS.md). */
+export type SkillArea =
+  'LANGUAGES' | 'FRONTEND' | 'BACKEND' | 'DATA' | 'CLOUD_DEVOPS' | 'PRACTICES';
+
 export interface OfferStats {
   generatedAt: string;
   totals: { offers: number; companies: number; remotePercent: number; englishPercent: number };
   topSkills: { name: string; count: number; percent: number }[];
-  seniority: { level: string; count: number; avgExperienceYears: number | null }[];
+  skillAreas: { area: SkillArea; count: number; percent: number }[];
+  seniority: {
+    level: string;
+    count: number;
+    avgExperienceYears: number | null;
+    englishPercent: number;
+  }[];
   modality: { modality: Modality; count: number }[];
   sources: { source: string; count: number }[];
   topCompanies: { name: string; count: number }[];
